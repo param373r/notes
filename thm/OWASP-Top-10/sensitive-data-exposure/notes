@@ -1,0 +1,49 @@
+Sensitive Data Exposure
+=========================
+
+Well, I never guessed the thing in the first place, but this seems like a topic that you can be vulnerable to be even these exposures...
+
+
+Supporting Material 1
+-----------------------
+
+- There are 2 types of databases dbms or rdbms... SQL -> MySQL are relational databases, whereas NoSQL -> MongoDB are non relational databases...
+	- The database in non rdbms systems are stored in form of documents (likely to be called bson (binary json)).
+
+Note: Sensitive Data Exposure are indeed mistakes, and hence becomes vulnerability
+
+- Flat file databases
+	Flat file databases are those like NoSQL i.e. non relational, where data is stored in documents... Those documents are also called as flat files
+
+How the vulnerability arise?
+
+Well, it's again simple... With the room what explain is if a user is visiting a website... The website will try to GET requests its root directory contents right? Now, what if some sensitive data is present in this root directory of website (for eg taken in this room, a .db file, which we can read its content with sqlite3 and may be get access to information like id and password). That's where the vulnerability exists... We can examine those GET requests in our burp's capture. 
+
+SQLite Databases
+-----------------
+
+The most common (and simplest) format of flat-file database is an sqlite database. These can be interacted with in most programming languages, and have a dedicated client (sqlite3) for querying them on the command line.
+
+
+Supporting Material 2
+
+This material is nothing just about cracking the hashes... (The room used crackstation site). If not that... someone could also use... john,hashcat... or anything like that to crack that password.
+
+The Challenge
+---------------
+
+What is the name of the mentioned directory?
+	/assets
+
+Navigate to that directory and see what sensitive file can you find over there?
+	webapp.db
+
+Access the sensitive data and find the password hash of admin user?
+	6eea9b7ef19179a06954edd0f6c05ceb
+
+Crack the hash and find admin's password
+	qwertyuiop
+
+Login as admin and find the flag?
+	THM{Yzc2YjdkMjE5N2VjMzNhOTE3NjdiMjdl}
+

@@ -1,0 +1,101 @@
+
+
+prefix + $ = rename session
+
+tmux new -s hello -d = will create a session but by default will detach
+
+Note: To kill all sessions in tmux except for a single one...
+
+	tmux kill-session -t <session-to-be-saved> -a
+
+Note: To use nested tmux it's not a problem, you just have to change the no of times the prefix is pressed...
+	prefix, prefix, command will run the command in inner tmux session
+	prefix, command will run the command in first tmux session
+
+
+Check out the room... it's awesome on learning these commands in tmux. If you do things correctly, you can map your brain to handle processes like these.
+
+Note: You have to unset TMUX everytime you create a nested tmux session.
+
+Panes
+
+This wasn't in the room... But if you want you can hold prefix key(mainly the ctrl key) and press o... this will MOVE THE PANE AND CYCLE THROUGH AREAS... 
+	- if just pressed and released the prefix key and then pressed o... this can cycle between panes without moving them.
+
+You can also use prefix key and shift } to move the panes anti clockwise (to the up or to the left (if only vertical/horizontal tabs are opened)) 
+	- Or the prefix key and shift } to rotate the panes clockwise (to the down or to the right)
+
+Note: the copy/paste mode is prefix key + [ and prefix key + ]
+
+
+Tmux has default layouts in it... access them with the following command:
+	(prefix key) esc [1-5]
+
+	Here 1-5 are the layout options.
+
+To cycle through built in panes you can also press and release the prefix key and then press the spacebar
+
+Note: To list the pane numbers use prefix + q
+
+Windows
+
+To change the name of current window prefix + ,
+
+To detach pane into it's own window...
+	ctrl b shift !
+To convert the window into pane 
+	tmux prompt > join-pane -s <window to join into currently opened window>
+
+	OR 
+
+	tmux prompt > join-pane -t <window(currently opened) to join on another window as pane>
+
+Note: You can use -v flag after the upper commands to HORIZONTALLY JOIN THE PANES or -h to VERTICALLY JOIN THE PANES.
+
+To cycle throught the windows...
+	prefix n (next)
+	prefix p (prev)
+
+To list all the tmux windows use
+	prefix w
+
+To close a window 
+	prefix shift & y
+
+Copy mode
+
+to search up the term ctrl r
+
+to search down the term ctrl s
+
+	when found the term press enter to exit the search prompt
+
+To start copying PRESS ((((""""CTRL + SPACEBAR"""")))) NOT JUST SPACEBAR.
+	then, to copy the text to tmux clipboard press ALT+w
+
+To check what you actually copied... prefix + shift + #
+	( The text might look broken but it will paste nicely)
+
+	to paste... prefix + ]
+
+
+
+From here on... We will focus on customization for tmux's look and feel... I created my personal too.
+
+set -g is a parameter to set something in tmux as per global settings... which means whenever I boot up tmux these settings follow...
+
+set -g status-style bg='#44475a',fg='#8be9fd'
+	This line is to modify the color of the status bar.
+
+setw -g window-status-current-style fg=black,bg=white
+	This line adds highlight in the color of white for the currently selected window.
+
+set -g prefix C-a
+	Allow changing the prefix from ctrl b to ctrl a. If there is any need to use the alt key instead of ctrl. Then set prefix as M-b or another second character, such as M-a. Changing the prefix from ctrl b to alt a.
+
+Note: bind and bind-key options allow to add an extra key (or may be a new one if the key hasn't been alloted to the function yet), whereas set option overwrites the tmux's hotkeys for the updated ones.
+
+Note: You have to load the tmux file conf file after making changes, either by restarting as a new session or by the following command in tmux prompt:
+	source-file ~/.tmux.conf
+
+Note: There are custom commands given in the room... I didn't wrote all of em... If you want to reconfigure tmux... Then check it out, it's a free room, plus I did almost on my own...

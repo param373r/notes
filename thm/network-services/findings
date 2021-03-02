@@ -1,0 +1,31 @@
+SMB
+
+- SMB is for windows since win95
+	- 139 client port
+	- 445 server port
+
+- Samba, a SMB service made for unix systems to act as server for windows hosts.
+
+enum4linux - Whenever SMB comes in play, do not forget this program. This enumerates smb for us... 
+
+Some common flags of enum4linux:
+-U             get userlist
+-M             get machine list
+-N             get namelist dump (different from -U and-M)
+-S             get sharelist
+-P             get password policy information
+-G             get group and member list
+
+-A             all of the above (full basic enumeration)
+
+smbclient is the way we can login with any credentials found by enum4linux.
+
+- Telnet is just ssh, just less secure and the mode of transmission is over an unencrypted channel and the data can easily be captured.
+
+
+- FTP has 2 modes... Active and Passive
+- FTP has 2 channels... Control and Data 
+
+2 channels so that user don't have to wait for the data to completely transfer before executing further commands.
+
+There are many ftp services like vsftpd, proftpd, in.ftp etc. Every service has it's own vulnerability.

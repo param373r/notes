@@ -1,0 +1,16 @@
+
+
+- XSS and it's types
+	- Stored
+	- Reflected
+	- DOM - I finally understood it.
+
+- IP and Port scanning with XSS
+- XSS keylogging
+- Filter evasion
+
+- Protection methods and exploiting XSS further
+
+- Resources for XSS:
+	- www.xss-payloads.com
+		Note: the www, seems like their are no A records set for this domain... (Only CNAME) so make sure to visit www.xss-payloads.com

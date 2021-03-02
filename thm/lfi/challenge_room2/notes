@@ -1,0 +1,14 @@
+
+
+Inclusion Practical
+====================
+
+IP: 10.10.8.93
+
+Found User: falconfeast
+
+Password: rootpassword in the /etc/passwd but am gonna stick to my old ways #id_rsa
+
+LMAO, I didn't even need to log into via ssh, I used the local file inclusion for user.txt and root.txt as well.
+
+Noob room.

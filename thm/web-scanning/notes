@@ -1,0 +1,30 @@
+
+Room Title: DVWA
+
+IP: 10.10.229.30
+
+Nikto commands list:
+
+	- -h to specify the host
+	- -nossl to specify non secure transport 
+	- -ssl to select the mode as (force) ssl for data transport.
+	- -p to specify port.
+	- -dbcheck checks the database for errors, and see if everything's working fine.4
+	- `-mutate +` argument enumerates usernames in Apache
+		(Note: This feature of nikto is less used, because, there are plugins that can be installed and do this more efficiently in nikto)	
+	- -id Checks the host for authentication (provided the id and password as parameters (-id admin:PrettyAwesomePassword1234))
+
+	=> Machine is running Apache/2.4.7
+	=> Machine has config directory indexed
+
+	- -until argument we use to specify the time after which nikto has to terminate the scan.
+	- -list-plugins lists all available plugins and not run them.
+	- -Plugins <plugin name> can be used to specify what plugins to use in nikto
+
+
+OWASP ZAP
+-----------
+
+	- Installing the package version of ZAP
+
+Rest of the room was pretty amazingly done by me, #TooEasy

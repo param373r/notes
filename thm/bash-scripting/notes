@@ -1,0 +1,144 @@
+
+
+Bash Scripting
+================
+
+Alright, I guess this is it. This is how am gonna start my journey into bash scripting. Let's get moving.
+
+Scope of this room:
+	- Bash syntax
+	- Variables
+	- Using parameters
+	- Arrays
+	- Conditions
+
+Note: single quotes and double quotes are interpreted as different things in bash.
+
+	Eg. NAME="John"
+		echo "Hi $NAME"  #=> Hi John
+		echo 'Hi $NAME'  #=> Hi $NAME
+
+`pwd` == $pwd
+- The strings inside `` will be treated as a command
+
+Following can be treated as a cheatsheet to bash:
+	https://devhints.io/bash
+
+- You cannot leave a space between the variable name, the ”=” and the value
+	- We can use variables by using prepending $ to the variable's name.
+
+- To debug a bash script... You can use -x flag:
+	bash -x ./script.sh
+
+- If you want to debug a particular part of the script... Mark the start of the part with set -x and end the part with set +x
+
+
+set -x
+
+whoami
+id
+
+set +x
+
+	- So when you normally run the script. It will debug the following part.
+
+Working with parameters
+------------------------
+
+- Bash intelligently assigns the parameters passed via positional arguments as $1,$2....$n. 
+
+- To input something from user... We can use read function.
+
+	echo "Input your name"
+
+	read name
+
+We can get the total number of arguments provided in a script by using `$#` command.
+
+Arrays 
+--------
+
+Syntax: var[index_position]
+
+Same as lists in python
+
+Note: To create an array in bash, syntax is like this:
+	
+	transport = ('car' 'truck' 'bus') # Separated by spaces (same as arguments)
+
+	And to display the items:
+		echo ${transport[@]} # @ signifies all arguments.
+
+	To display only 1 item:
+		echo ${transport[1]} # index of the element
+
+- We can use unset to delete an element (means unassigning the value of that element)
+
+- To put replace a value in the array, use:
+	
+	transport[1]='train'
+
+Conditionals in bash
+----------------------
+
+Basic syntax:
+	
+	if [ id -eq root ]
+
+	then
+
+		apt update
+
+	else
+		sudo apt update
+
+	fi
+
+Note the indentation... It does matter.
+
+- If statements always use a pair of brackets and in the case of the [] we need to leave a space on both sides of the text(the bash syntax). We also always need to end the if statement with fi.
+
+
+- Also -eq is a way of using == operator in python.
+
+Operator 							Description
+
+	-eq									equal to
+
+	-ne 								not equal to
+
+	-gt 								greater than
+
+	-lt 								less than
+
+	-ge 								greater than or equal to
+
+	-le 								less than or equal to
+
+
+Example script:
+	
+	To check if the file exists and has write permissions then write hello world to it. If the file doesn't exists create a new file and append hello world to it.
+
+	msg="hello world"
+
+	if [ -f "filename" && -w "filename" ]
+
+	then 
+
+		echo $msg > filename
+
+	else
+
+		touch filename
+		echo $msg > filename
+
+	fi
+
+-f checked if the file existed... and -w checked if the file had writable permissions. 
+
+	Note: These flags are unique in their working and to know these flags isn't by instinct( Though I was able to solve the task questions just by my instinct; -r checks for read permissions, and -d checks if the file is a directory ).
+
+	TODO: Find a list of these flags and learn them.
+
+

@@ -1,0 +1,39 @@
+
+
+Sudo Part 1
+=============
+
+This is part 1 of the series on sudo exploitation. This thing is absolute theory... Except for the practical involved in using the exploit.
+
+Sudo Security Bypass (CVE-2019-14287)
+======================================
+
+- Vulnerability was found by person named Joe Vinnix(Apple Employee), who coincidentally found the vulnerability of Buffer Overflow in sudo few years later. Double shot.
+
+- Vulnerability is in < v1.8.28 sudo versions
+
+- sudo does not only allow us to run commands as root, if we want we can use it to run the command as any user, which is where our exploit comes in.
+
+	sudo <command> # will run as root by default
+
+	sudo -u#<id> <command>
+
+- We all know about the /etc/sudoers file, the file which contains permissions for users who can run commands as super users (super-user... do-ers).
+
+This particular vulnerability arises in a very specific condition i.e. when the sudoers file contains this particular misconfiguration:
+
+	<user> ALL=(ALL:!root) NOPASSWD: <ALL>
+
+	which in total means, that <user> can run <ALL> commands with NOPASSWD as any user, other than the root user. 
+
+	Therefore, if a user tries to run sudo -u#0 <command> it will not run because of not using the root user.
+
+- To which Joe Vinnix found an exploit, as specifying the user as -1 (or its unsigned equivalent: 4294967295).
+
+- Therefore, exploit is...
+
+	sudo -u#-1 whoami
+
+	will print root.
+
+This was it for the vulnerability. Peace.	

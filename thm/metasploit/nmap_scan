@@ -1,0 +1,21 @@
+# Nmap 7.91 scan initiated Sun Nov 29 19:11:56 2020 as: nmap -sV -oN nmap_scan -v -oX /home/pjrox/.msf4/local/msf-db-nmap-20201129-2290-ugaq9b.xml 10.10.147.145
+Nmap scan report for 10.10.147.145
+Host is up (0.51s latency).
+Not shown: 989 closed ports
+PORT      STATE SERVICE      VERSION
+135/tcp   open  msrpc        Microsoft Windows RPC
+139/tcp   open  netbios-ssn  Microsoft Windows netbios-ssn
+445/tcp   open  microsoft-ds Microsoft Windows 7 - 10 microsoft-ds (workgroup: WORKGROUP)
+5357/tcp  open  http         Microsoft HTTPAPI httpd 2.0 (SSDP/UPnP)
+8000/tcp  open  http         Icecast streaming media server
+49152/tcp open  msrpc        Microsoft Windows RPC
+49153/tcp open  msrpc        Microsoft Windows RPC
+49154/tcp open  msrpc        Microsoft Windows RPC
+49158/tcp open  msrpc        Microsoft Windows RPC
+49159/tcp open  msrpc        Microsoft Windows RPC
+49160/tcp open  msrpc        Microsoft Windows RPC
+Service Info: Host: DARK-PC; OS: Windows; CPE: cpe:/o:microsoft:windows
+
+Read data files from: /usr/bin/../share/nmap
+Service detection performed. Please report any incorrect results at https://nmap.org/submit/ .
+# Nmap done at Sun Nov 29 19:13:55 2020 -- 1 IP address (1 host up) scanned in 119.03 seconds

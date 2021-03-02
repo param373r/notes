@@ -1,0 +1,61 @@
+
+
+
+Broken Authentication
+=======================
+
+Introduction
+--------------
+
+- Authentication and session management is the core component of web-apps
+
+- Authentication allows the users to access services with their identities. Normally, authentication is in form of username and password.
+	- If the user sends the correct username and password, and the server is able to verify the authenticity... The user is logged in with a session cookie sent by the server.
+
+Why do browsers and servers use cookies and session tokens?
+
+This is because HTTPS is stateless, which means there is no continuous connection of the server with the client. 
+
+So the cookies are made and allocated to the user's session. In this way a server can verify which user is sending the data, and also can keep track of user's actions.
+
+Severity
+---------
+
+If an attacker is able to find flaws in the authentication mechanism, he/she can log into the server as someone else, which can leak sensitive information(depends on the server) to the attacker, and he might to the rest of the world.
+
+
+Common reasons to vulnerable
+------------------------------
+
+	- Bruteforce attacks: If there is no limit to authentication attempts, an attacker can launch bruteforce attack.
+
+	- Weak password policies/credentials: If a user has very easy password, it is pretty easy to guess and get us an authentication into his account with just a little smartness.
+
+	- Weak Session Cookies: Session cookies help servers keep track of users... If session cookies contain predictable values an attacker can set their own session cookies to authenticate as another person's identity.
+
+Defensive Practices
+--------------------
+
+	- To avoid password guessing, implementing strong password policy.
+
+	- To avoid bruteforce, implement lockout condition for a particular amount of time after 'n' many failed attempts.
+
+	- Implement multi-factor authentication... When a user logs in with correct username and password and is asked for another type of authentication, like enter the code sent to your mobile. This type of authentication is known as multi-factor and this way it gets hard for an attacker to get access to user's account.
+
+Practical
+----------
+
+This practical is kinda, imaginary... and is purely developer's mistake. First of all it says that, many a times a developer forgets to sanitize the client's input and can result in vulnerabilities like SQL injection. 
+
+The way, the room's owner asked us to exploit the box is in case there's a user named "admin" and if we try to register as the user " admin" with a space in starting (developer's mistake couldn't strip the space in starting and thus it is a unique username, for the attacker to register). The fact here is that, even with the space, the user will have the same priviliges as the normal user admin... In our case if the admin is the root of web-app we just successfully rooted the web app.
+
+
+IP: http://10.10.45.28:8888
+
+What is the flag you found in darren's account?
+	Flag: fe86079416a21a3c99937fea8874b667
+
+What is the flag that you found in arthur's account?
+	Flag: d9ac0f7db4fda460ac3edeb75d75e16e
+
+Here, I am done with my broken authentication vulnerability... It is not realistic here in this room... But I guess it's enough to understand overview of broken authentication.

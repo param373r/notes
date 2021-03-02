@@ -1,0 +1,45 @@
+
+
+Broken Access Control
+======================
+
+- This is type of vulnerability which occurs when a normal website visitor is able to access pages that are only meant to be viewed by site admin...
+	- Therefore, a user got a broken access control to that site.
+
+Scope:
+-------
+
+	- Expose sensitive data to attacker
+	- Accessing unauthorized functionality i.e. root privs(sort of)
+
+Following are scenarios
+
+Scenario 1: The application tries to send data via parameters, and see if he is able to view the data as another user... 
+	- If that is the case... Then, application is vulnerable to BAC.
+
+Scenario 2: The user tries to forcefully browse to a page, that is not in allowed to view by a normal user... 
+	- If the user is however able to view that page... Then, it is a case of BAC.
+
+IDOR Challenge
+================
+
+- IDOR = Insecure Direct Object Reference
+	- It is the act of exploiting misconfigurations in the way user input is handled, to access resources not available to view by normal user.
+
+- It is a type of control vulnerability.
+
+Practical
+===========
+
+IP: 10.10.121.25
+
+Challenge Description: In a banking site, if an authenticated hacker is allowed to view their bank details, then what if they change the parameter and get access to other user's account... That must be IDOR vulnerability.
+
+Credentials : noot:test1234
+
+Look at other user's flag:
+	- So when I moved the value of ?note parameter in URL from 1 to 0... I found my flag.
+
+	Flag: flag{fivefourthree}
+
+This is it for Broken Access Control

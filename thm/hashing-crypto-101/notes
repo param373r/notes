@@ -1,0 +1,106 @@
+
+
+Hashing - Crypto 101
+======================
+
+So there are some key terms which I will mostly skip... 
+
+Hash - A hash is the output of a hash function.
+
+Cryptanalysis - Attacking cryptography by finding a weakness in the underlying maths.
+
+
+What's a hash function
+========================
+
+- Hash functions are what meant to be secure enough that make it impossible to go from output to input.
+
+- Hash functions are meant to be fast while computing and slow while in reverse (i.e. not able to easily decrypt the while).
+
+- Hash functions are normally raw bytes, which are then encoded to normal base64 or hexadecimal encoding, so when you decode these base64 encoding it won't give you anything useful.
+
+Hash Collision
+----------------
+
+- It is same as it sounds like, when 2 different inputs give the same output. Hashes are designed in such a case to avoid these collisions.
+
+- Due to pigeonhole effect, collisions are not avoidable, and if you think correctly... There might be a collision in almost every hash.
+	- Pigeonhole effect, is basically nothing but a way of saying that hashes are of fixed length generally, so for different sized inputs there might not be enough containers to give an individual value to all input strings. (This is thinking on a large scale) Hashes end up colliding. It's just like, most of the time finding collisions isn't easy. It might take you days of work or may be fraction of seconds to find one. You can say that finding collisions is directly proportional to the strength of a hash function. Contrary to pigeonhole effect, that many pigeons for limited no of pigeon holes, so the rest have to share.
+
+- MD5 and SHA1 have been attacked and made technically insecure due to collisions. However, no attacked has been yet given a collision in both algo at the same time, which means that MD5 hash wouldn't collide with a SHA1 hash (may be, or yet to be found)
+
+Note: MD5 is a 128 bit hash.
+
+Uses for hashes
+----------------
+
+Note: LMAO, the rockyou.txt is a wordlist from dumped database of a company. The database contained 14 million passwords, and were stored in plaintext, when the company faced this data breach.
+
+- Similarly, there was once a data breach on adobe also, the database contained encrypted password, not hashed... So, it didn't take long to crack those.
+
+- Then linkein faced a data breach... with encryption used sha1, which is quick to compute using GPU power.
+
+Note: You can't encrypt the passwords with a key, because if someone gets access to that key, it will be easier as a laymans job to decrypt.
+
+- Password collisions in a database, may result in hacking of other user accounts, which may lead to creation of rainbow tables locally by attacker to get faster access next time rather than cracking the password.
+
+- The way to defend against collisions is by adding salt either to the beginning of the password or the end(or may be both, but not necessary) before hashing it... 
+	- If you generate the same salt for all the other users then again there might be a chance of collision, so randomly generated salts are a preferrence.
+	- With a randomly generated salt, the password hash will be completely different. Plus the salts aren't something that need to be kept private...
+
+Note: The only use of salts is to prevent password collisions... Do not rely on them for increasing password strength... Which I would say is a plus side of it.
+
+- Also, there are hashes like sha512crypt and bcrypt which do not need to specify salt... They do the salting for you.
+
+
+Recognizing Hashes
+--------------------
+
+- To identify hashes you really need to have a little more understanding of reading them.
+
+- Unix style hashes are eazy to recognize... They have this hash format:
+
+	$format$rounds$salt$hash
+
+- Windows hashes(NTLM) are visually identical to md4 and md5, so very impotant to use your common sense.
+
+- Windows password hashes are stored in SAM file... Windows tries to prevent normal users to dump them... But after all, we have tools like mimikatz. 
+	- The hashes in SAM file are split into NT hashes and LM hashes.
+
+
+Unix style password prefixes
+-----------------------------
+
+$1$ - md5crypt; used in Cisco stuff and older Linux/Unix systems.
+$2$, $2a$, $2b$, $2x$, $2y$ - Bcrypt; Popular for web applications
+$6$ - sha512crypt;(Default for most Linux/Unix systems)
+
+Note: sha512crypt passwords are use 5000 rounds, by default.
+
+Password cracking
+-------------------
+
+- Cracking on GPUs is significantly faster, due to great handling of the hash functions.
+
+- Cracking on VMs, can be tough as VMs are generally not given access to graphic, it can be arranged for graphic card to connect to the VM, but it's gonna be a long process.
+
+- Using --force for hashcat might lead to false positives and that is something you don't want to use, plus, the recent update(hashcat 6.0) allowed the hashcat to use cracking with the CPU power without stating --force flag.
+
+Hashing for integrity checking
+-------------------------------
+
+Integrity checking
+--------------------
+
+- Hashes can be used to verify that the bytes inside the file aren't changed, to ensure the interity... If even a single byte is changed then, the hash will change a lot.
+	- This means you can use to verify that the 2 files are same or not... Like comparing the sha sum of 2 same pictures will be same.
+
+HMACs
+------
+Similarly, HMAC is a hashing method where a user can verify the authenticity and integrity.
+
+- Tryhackme's openvpn uses this hash format to verify that it is us who is making connection(authenticity) and any message sent through the TCP Streams isn't corrupted(integrity).
+	- HMAC is produced using a secret key and a hashing algorithm.
+
+
+This is it for the room

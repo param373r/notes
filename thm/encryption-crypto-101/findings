@@ -1,0 +1,16 @@
+
+
+RSA - Rivest Shamir Adleman
+
+Great tools for solving RSA:
+	- https://github.com/Ganapati/RSaCtfTool
+	- https://github.com/ius/rsatool
+
+Good source to study rsa in brief:
+	- https://muirlandoracle.co.uk/2020/01/29/rsa-encryption/
+
+SSH keys important notes (might wanna read this)
+
+DH key exchange
+
+PGP/GPG/AES encryption.

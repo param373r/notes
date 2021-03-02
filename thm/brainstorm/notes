@@ -1,0 +1,18 @@
+
+
+Brainstorm
+============
+
+IP: 10.10.157.143
+
+FTP 
+	- Anonymous login allowed got the application locally.
+
+RDP
+
+	- I don't know what to do with this one lol
+CHATSERVER (9999)
+
+	- And I crashed it by directly running the buffer attack on it so I guess gotta reset the machine...
+
+So, let's go to the windows machine... And then analyze the binary found for buffer overflow... Then, will start the machine again, and then run the exploit on a new instance brainstorm machine. Alright, let's get into hack.

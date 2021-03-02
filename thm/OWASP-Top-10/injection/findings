@@ -1,0 +1,19 @@
+
+
+SQL and OS Injection are different... but the concept is same... i.e. both lead to data exposure... 
+
+
+SQL - Database Data
+Command/OS - System's/User's Data
+
+Prevention:
+	- Use of the allow list (filter)
+	- Stripping the Input
+
+Active OS Injection - Every response is send to the attcker...
+
+Blind OS Injection - No response is send to the attacker...
+
+passthru() (in PHP) is the major reason behind OS Injection.
+
+lsb_release tells what distribution of linux you're currently using. LSB = Linux Standard Base

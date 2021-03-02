@@ -1,0 +1,92 @@
+Peak Hill
+----------
+
+
+I didn't knew, medium boxes, are like this... I found the user's flag... with a little help of writeups
+
+I am not gonna lie, this room was intended, and made smartly, which made the user think that he/she is stuck... 
+
+
+Starting with the nmap scan... The nmap scan didn't show any response, got stuck for 5 mins then saw that it was blocking my pings...
+
+This could be either resolved by using -Pn flag, or using -T4,5 flag... This is because the ports, were taking longer than usual... 
+
+Again... The room was smart, than being hard... I did learn that if you stuck, you really need to calm yourself, and you can pass your way through it.
+
+After the scan it showed to 2 ports opened... ftp and ssh
+
+anonymous login was enable in ftp, so I logged in, and found a hidden file, .creds... Downloaded it via ftp and when I opened that file it was all binary... on decoding the file on cyberchef I found some strings like ssh_user and ssh_pass. I didn't knew what to do and got stuck...
+
+Here, for the first time I took help of a writeup... It said that it is some sort of PICKLE DUMPED file... Pickle is a module in python used in python object serialization and deserialization... Ok I took a rough meaning of it and moved on, and played with it's installation, threw me an error when try to run it in virtualenv... when exited, I was able to install pickle5 (I don't know why the heck I installed pickle4, but nvm let's move forward). 
+
+Now I know why the name is PEAK-HILL... PICK-LE... Ironic, John(Hammond)... Well done... you're a true 117. 
+
+So I downloaded the raw decryption of the binary code I did on cyberchef as a file... When I got the file, I wrote a simple python script that could extract the username and password from the creds file. 
+
+I got the username and password
+
+Username: gherkin
+Password: p1ckl3s_@11_@r0und_th3_w0rld
+
+I logged in, tried sudo -l, no gherkin was not allowed to run sudo.
+
+Later found that user.txt was not found here, it was in dill's home directory...
+
+Ohh btw then I checked the /etc/passwd, found there were these dill(1003), gherkin(1002), vagrant(1000) (I think the user vagrant is deleted, I couldn't find his home directory).
+
+So after this, I got LinEnum via copy/pasting raw.github... I ran that file found that, there was no vector suitable to privilege escalate... Now I see, why it was stated that there will be extra 50 points for submitting the root flag on peak hill's room. 
+
+Nvm, so, I later noticed there was a .pyc file in gherkin's home directory... Didn't knew that this was python's compiled bytecode file. So I searched the net how to convert .pyc file... Stackoverflow helped me in how to decompile .pyc to .py...
+
+
+There is this application called, decompyle3 on github... I downloaded and install the application on my kali, and then ran the command, decompyle3 cmd_service.pyc and it decompiled the application into python code, and I redirected the output into a file named backdoor.py... (I FUCKING DON'T KNOW WHAT I WAS THINKING... I WATCHED THE WRITEUP JUST BEFORE READING IT MYSELF)
+
+So, I did read the file later, I found the username and password of the dill user, but we can only login to dill via that backdoor, no su dill or ssh will work... 
+
+Username: dill
+Password: n3v3r_@_d1ll_m0m3nt
+
+I read in the file that we can connect the port 7312 via nc. So when I connected everything seems like "IT A'INT WORKING", but that's because user.txt wasn't in the directory so can't cat it out, and there was only 1 file in the directory, .cmd_service.py. So yeaaa simple ls didn't gave me anyting either. Later I found out we were in /var/cmd dir and I am logged in as dill. So I cat out the user flag with...
+cat /home/dill/user.txt
+
+User Flag: f1e13335c47306e193212c98fc07b6a0
+
+Now, just while noting this all down... I went to my terminal to check some things and ran sudo -l on the backdoor I was connected to, it showed that I can run something in the opt directory with sudo priv and without any password... Will figure that out in the morning...
+
+So by tomorrow morning I will continue with the privilege escalation of peak hill. I have my python exam at 12 pm... and right now, it's around 4:09 am. Yeaps... I stayed all night... But I feel good that I reached this far...
+
+
+Don't forget you have to complete a room from learning path's as well, and also, complete day 1 of OWASP TOP 10 (as I forgot to do it yesterday) in addition to peak hill privilege escalation. 
+
+I think for now I should go to bed. Nite.
+
+
+I am back, tonight... (1:01 am) I am gonna root the room... So let's see what do we have here...
+
+
+Username to ssh:
+
+Username: gherkin
+Password: p1ckl3s_@11_@r0und_th3_w0rld
+
+Info to backdoor:
+
+Login command: nc 10.10.33.166 7321
+Username: dill
+Password: n3v3r_@_d1ll_m0m3nt
+
+Ok so I finished the room... The thing is I didn't solved the root challenge... because it had me researching pickle RCE... I don't want to research it so I saw a writeup... I will talk about that later... For now, let me start with the beginning...
+
+Starting with the backdoor, I logged in via dill's given credential... Then I tried various methods to gain a permanent shell... 
+	- .ssh id_rsa found in dill's home directory (That was a legit method but I was keep on failing so I moved on)
+	- nc <localIP> 1234
+	- Pentest Monkey's reverse shell cheatsheet
+
+Tbh, none of that worked... so then I moved onto something called writeups... with a little hint... I created my own ssh key pair... with the command `ssh-keygen` and then I copied and pasted my public key in the .ssh/authorized_keys of dill's directory...
+
+After that I logged into dill's account via ssh using my own created private key i.e. ssh dill@<ip> -i pickle. When I logged in I try to enumerate the peak_hill_farm executable in the opt directory with even strace and ltrace... but nothing worked... Tried other bunch of things but that didn't worked either... Again I thought of taking help of the writeups. I saw the way ahead is through pickle module stuff i.e. we need to convert system command into pickle object and then encode it with base64, and send it to the server...
+
+Now here's the thing... That writeup even showed me the link to pickle RCE... where it was easy to reproduce the same here with hardly 10 lines of code... What I chose? I chose to manually type the base64 encoded string and paste it in the program... which gave me root... 
+
+
+I AM FUCKING TIRED OF CHEATING... I wanted to just take a hint from the writeup... (which is more sad, that I can't think things more critically, to understand what to do...) It's not like that I am out of experiment options... It was I was lazy to try all of them out... That's my weak spot... I need to fuckin' improve myself X(

@@ -1,0 +1,7 @@
+
+
+Things learnt:
+	- There are plugins in nikto, and we can list them using -list-plugins command.
+	(Check notes for details on rest of the options)
+
+	- There can be different results from different tools of scanning, so don't stick to only one... Do test out all in your arsenal... and someday, this might reveal something that you never imagined... Plus it's a good thing to do, when you're stuck in a pentest and couldn't figure what to do now, this can be your way out.

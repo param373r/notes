@@ -1,0 +1,66 @@
+
+
+Cross Site Scripting
+======================
+
+- XSS - Cross Site Scripting
+	- This is a type vulnerability that allows an attacker to run malicious scripts that can in turn harm other user's vising that site.
+	- This is typically found in web applications.
+
+- A web application is vulnerable to cross site scripting if it uses unsanitized user input.
+	- It is possible in Javascript, VBScript, Flash and CSS.
+
+This is not a small vulnerability, so don't underestimate it by just a small task. It goes deep. 
+
+Types of XSS
+-------------
+
+- Stored XSS 
+	- This type of XSS occurs when a web application inserts the unsanitized malicious input of the user to the database/stores it as a setting.
+	- This is the most dangerous type of XSS, as this will run the malicious code everytime a user visits the site.
+
+- Reflected XSS
+	- This type of XSS occurs due to victim's request from the server, like an attacker will send a link of the site (which is vulnerable to XSS) with a malicious payload attached to it... As soon as the user, visits that link... The arbitary payload will get executed on the victim's machine. 
+	- This may not harm the site, but this will harm the victim instead... 
+	- A hacker can use that site as a means to hack other users.
+
+- DOM-Based XSS
+	- This type of XSS is purely client side...
+	- This occurs when the site loads into the malicious DOM environment. The javascript runs with a malicious script on the client side... And because the site is vulnerable to XSS it gets executed via that site...
+	- I am not sure about this, actually this information I took from watching various videos and understanding the concept.
+	- No worries, there is a separate room for javascript. Check out DOM-based XSS there.
+
+
+XSS Payloads
+-------------
+
+	- Popup's (alert("Hello World")) - Creates a Hello World message popup on a user's browser.
+	- Writing HTML (document.write) - Override the website's HTML. This can lead to defacing the entire page.
+	- XSS keylogger - Helps capture user's keystroke and may reveal his/her password.
+	- Port Scanning - For this and the second last, check out the XSS room on tryhackme.
+
+Note: https://xss-payloads.com/ is a site, that has related XSS payloads, tools, documentation and more. 
+	- You can download payloads from the site.
+
+Practical
+----------
+
+IP: 10.10.57.230
+
+	Reflected XSS Payload1: <script>alert('Hello')</script>
+		- This displayd 'Hello' as a popup
+	Reflected XSS Flag1: ThereIsMoreToXSSThanYouThink
+
+	Reflected XSS Payload2: <script>alert(window.location.hostname)</script>
+		- This displayed my IP address i.e. tun0
+	Reflected XSS Flag2: ReflectiveXss4TheWin
+
+	Stored XSS Payload1: <h1>PJROX</h1>
+	Stored XSS Flag1: HTML_T4gs
+	Stored XSS Payload2: <script>alert(document.cookies)</script>
+	Stored XSS Flag2: W3LL_D0N3_LVL2s
+
+	DOM Based XSS Payload: <script>document.querySelector("#thm-title").textContent = "I am a hacker"</script>
+	DOM Basd XSS Flag: websites_can_be_easily_defaced_with_xss
+
+This was it with the task.

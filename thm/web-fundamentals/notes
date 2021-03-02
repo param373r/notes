@@ -1,0 +1,117 @@
+Web Fundamentals
+==================
+
+Alright red team, it's time work for the living.
+
+Ok so in this room we are going to get our hands dirty on the following topics:
+
+=> HTTP Requests and Responses
+=> Web Servers
+=> Cookies
+=> CTF challenge
+
+
+How do we load websites?
+--------------------------
+
+- DNS is like a very large phone book that takes a URL and turns it into an IP address, which helps us a lot so that we do not need to remember ip address for our favourite websites.
+
+- A GET requests is made to the server to retrieve the web page and view it's contents.
+	||
+	 ==> If a websites has multiple page content like, CSS, JS or php content. They will be retrieved in a another separate GET requests.
+
+- For most websites, these requests will use HTTPS. This prevents data tampering and reading by some other parties.
+
+Popular Servers - Apache, Nginx and IIS. HTTP:80/HTTPS:443
+
+
+More HTTP-Verbs and request formats
+------------------------------------
+
+- There are 9 verbs(also known as methods) used in HTTP
+	||
+	 ==> Including: GET and POST
+
+- In a GET request first line is a verb and a path for the server like "GET /index.html"
+
+- The next section is headers, which give info to server about the requests made by the user, and later the body of the request.
+NOTE: Cookies are sent through these requests headers.
+
+- In a GET request body will be allowed but mostly ignored by the web server.
+
+- In case of POST request, the body is what sent to the server i.e. login credentials, code, options, captcha etc.
+
+- From headers, we can find from where I made the requests. (Chrome v80, Windows)
+
+Response
+--------
+
+- Response headers are pretty much the same, instead they give the status code inspite of verb or a path.
+
+Following is what those codes mean:
+
+	- 100-199 - Information (If find this code, it can be an information disclosure)
+	- 200-299 - Successes (Normal)
+	- 300-399 - Redirects(info sent somewhere else)
+	- 400-499 - Client Errors
+	- 500-599 - Server Errors
+
+Here's a very good resource for widely used status codes: https://developer.mozilla.org/en-US/docs/Web/HTTP/Status
+
+
+Cookies, Tasty
+----------------
+
+- Cookies are not shared between browsers
+- Cookies are generally used for session management or advertising.
+- HTTP is stateless, and cookies are used to keep track of this, like what items you have selected with browsing pages... 
+
+- Format of a cookie
+	- Name
+	- Value
+	- Date
+	- Path
+
+- Server is normally what sets cookie, which come in response headers like "Set-Coookie:<string>"
+							OR
+- Cookies can be set via javascript in a browser.
+
+- Simple theory: When you login, session token is given to you that differs you from the others... If you can get someone's session token, you can impersonate them.
+
+
+More on cookies: https://developer.mozilla.org/en-US/docs/Web/HTTP/Cookies
+
+
+Time for a MINI CTF
+=====================
+
+Intro to cURL:
+	- curl <site> will call a get requests on the web server
+	- To make a POST requests use -X POST and --data to specify data to send data with POST to the server.
+	- 
+
+
+So the web server wasn't default to port 80 a nmap scan gives the port 8081 port is open.
+
+What's the GET flag?
+Command: curl http://10.10.238.234:8081/ctf/get
+
+Flag: thm{162520bec925bd7979e9ae65a725f99f}
+
+
+What's the POST flag?
+Command: curl http://10.10.238.234:8081/ctf/post -X POST --data "flag_please"
+
+Flag: thm{3517c902e22def9c6e09b99a9040ba09}
+
+
+What's the "Get a Cookie" flag?
+Command: curl -c - http://10.10.238.234:8081/ctf/getcookie
+
+Flag: thm{91b1ac2606f36b935f465558213d7ebd}
+
+
+What's the "Set a cookie" flag?
+Command: curl http://10.10.238.234:8081/ctf/sendcookie -b 'flagpls=flagpls'
+
+Flag: thm{c10b5cb7546f359d19c747db2d0f47b3}

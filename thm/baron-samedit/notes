@@ -1,0 +1,21 @@
+
+
+Sudo Part 3
+============
+
+This vulnerability was found in 2021, before the last patch, which means... SUDO WAS A WAY TO PRIVILEGE ESCALATE FOR ALMOST ABOUT 10 YEARS, BUT NO ONE WAS ABLE TO LMAO.
+
+Baron Samedit
+---------------
+
+- Vulnerability was found by someone named lockedbyte and the exploit was introduced by someone named bl4sty (Can be found easily on twitter).
+
+	POC can be found here: https://github.com/lockedbyte/CVE-Exploits/tree/master/CVE-2021-3156
+
+- As with CVE-2019-18634 (which we saw in the second sudovulns room), this vulnerability is a buffer overflow in the sudo program; however, this time the vulnerability is a heap buffer overflow, as opposed to the stack buffer overflow we saw before. The stack is a very regimented section of memory which stores various important aspects of a program. The heap, on the other hand, is reserved for dynamic allocation of memory, allowing for more flexibility in how values and constructs are created and accessed by a program. As with the previous room, we will not go into a huge amount of detail about how this works in the interests of keeping the content beginner friendly. All we really need to understand is that this vulnerability is incredibly powerful, and extremely wide-reaching.
+
+Exploit code can be found here: https://github.com/blasty/CVE-2021-3156
+
+Simply, just the make the code and run the exploit on any box.
+
+This was it for this sudo vuln.

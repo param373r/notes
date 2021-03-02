@@ -1,0 +1,303 @@
+
+
+Introduction
+==============
+
+- Active directory is a directory service for windows domain network
+	- In simple words... It allows you to share your files and folders over other computers in your domain network.
+
+Prerequisites [As listed by room]
+-----------------------------------
+
+	- Knowledge on Basic Network Services
+	- Knowledge on Windows
+	- 	 " "    on Networking
+	-    " "    on Powershell
+
+	According to room, I am ineligible, because, I don't know much about powershell... Let's see what's ahead.
+
+- Details of uses and objects will be limited as this room, is just for an overview on active directory.
+
+What is Active Directory?
+---------------------------
+
+- Technically, it is a collection of machines and servers on a same domain, in which that domain is a part of some bigger domain. This is whole makes up an active directory.
+
+Scope of this room
+--------------------
+	
+	- Domain Controllers
+	- Forests, Trees, Domains
+	- Users + Groups
+	- Trusts
+	- Policies
+	- Domain Services
+
+All these parts of Active Directory, come together to make a bigger network of machines. 
+
+Why use Active Directory?
+---------------------------
+
+If you ask me, am gonna say, the intro is pretty interesting... It says that it helps with the following:
+	- Helps monitor and control the machines through a single domain controller
+	- It allows users to get remote access to their files and folders from any device inside a common domain, as well as the local storage.
+
+In cut-short, it is again, like a big skynet we see in movie, that connects the machine to machine (only if they share a same domain).
+
+Physical Active Directory
+===========================
+
+It is all the physical components of an active directory (other than the software ones), including:
+	- Domain Controllers
+	- Storage Servers
+	- Domain User Machines
+
+Domain Controllers
+--------------------
+
+- They are the brain of the active directory. 
+- These are the windows server which have the Active Directory Domain Services (AD DS) installed and promoted to a domain controller in the forest.
+
+- The outlist of tasks done by a domain controller:
+	- Holds the AD DS data store
+	- handles authentication and authorization
+	- replicate updates from other domain controllers in the forest, i.e. communicate and synchronize their database/data store with the other domain controllers.
+	- Allows admin access to manage domain resources.
+
+AD DS Data Store
+------------------
+
+- It stores the databases and processes running on their domain... 
+	- Like if Domain Controller is a brain of Active Directory, then AD DS is neuron, that holds information about the rest of the body features, 
+	- Or take it as a database or part of domain controller, that actually stores data and every info about the domain it is installed in.
+
+- The outline of tasks done by an AD DS:
+	- Contains NTDS.dit - a database containing info about domain controller and password hashes of all domain users.
+	- Stored in %SystemRoot%\NTDS (by default)
+	- Accessible to Domain Controller only.
+
+These were the basics about physical components of an active directory.
+
+The Forest
+===========
+
+- It is something that holds the bits and pieces of the Active Directory together.
+	- In literal sense, forest is defined as the "network connection" established between machines and servers in a same domain.
+
+Overview
+----------
+
+Forest can also be defined as the collection of domain trees inside of an Active Directory Network. It is hence a combination of a whole bunch of domain held together.
+	- Just to make you clear, yes there can be many domain controllers inside a forest.
+
+
+A forest may or may not contain the following, more on which in brief will discuss later:
+	- Trees: Hierarchy of domains in Active Directory Domain Services
+	- Domains: Used to group and manage objects
+	- Objects: Users, Groups, Printers, Computers, Shares
+
+	- Organisational Units (OUs) - Container for groups, computer, users, printers and other OUs
+
+	- Trusts: Allows users to access resources in other domains
+	- Domain Services: All the networking services: DNS, IPv6 etc
+	- Domain Schema: Rules for object creation... Like in XML/DTD
+
+Note: This might sound confusing, as for without pracitcal, what I would recommend is to write/type it down yourself and give stress to each word for faster understanding or just memorize it, and keep on going with the practical.
+
+Hierarchy in mind (till now):
+	Forests/Enterprises > Trees > Domains and OUs > Objects. 
+
+
+Users + Groups
+===============
+
+- These are up to us to create no matter how many...
+
+Note: By defauly, when you set up a domain cotroller, it comes with default groups and 2 default users: Administrator and guest.
+
+Users Overview
+----------------
+
+- Active Directory without users is nothing... 
+
+- There are basically, 4 types of users, in AD network... But that is dependent upon how a company manages it's permission to users.
+- Four types of users are:
+	- Domain Admins: The Big Boss - Controls everything and these are the ones with access to domain controller.
+	- Service Accounts(Can be domain Admins): These users are never used (most of the time) and are only used for service maintenance, and because it is service maintenance they might be given domain admin privileges.
+	- Local Admins: These are also admins, but at their own local machines... They can interfere with the normal users on their system... But cannot acccess the Domain Controller.
+	- Domain Users: The EveryDay Users - These are those who have local privileges and authorization to access and may have local administrator rights to machines, depending on how they are set.
+
+Note: If you have a good knowledge of playing with users and groups on linux and windows... You can relate this with them, these are then pretty simple.
+
+Groups Overview
+----------------
+
+- Groups are what makes everybody's work very simple in an organization, by not allocating individual permissions to individual users.
+
+- There are generally 2 types of groups:
+	- Security Groups: These are what an attacker calls a real cream of a cake. These are what defines privileges to a particular user on a machine and domain network.
+	- Distribution Groups: As an attacker these are not that important to us... These are groups used for specifying email distribution lists.
+		- NOTE: DISTRIBUTION GROUPS CAN BE PRETTY USEFUL AS PART OF ENUMERATION BY TELLING US ABOUT THE USERS PRESENT ON A SYSTEM.
+
+Default Security Groups
+-------------------------
+
+- Now hold yourself tight... This is gonna be pretty lengthy, but at the end of the day... Knowledge of them are gonna be pretty handy to us.
+
+Ok, so I went through them all, I am now sure that no one can do all of them in one go... But I remembered most(halfly) of it. Good Start. Here are the list of all security groups.
+
+
+- Domain Controllers: All domain controllers in the domain
+- Cloneable Domain Controllers: Members in this group and who are domain controllers are allowed to be cloned by someone with give privileges to do so.
+- Domain Admins: Designated administrator of the domain
+- Enterprise Admins: Designated administrator of the forest.
+
+Note:
+- The difference between domain controllers and domains admins is same as, administrator and system/nt in windows. 
+- Also, now that there are multiple machines within domain, so domain admins are domain's admin and enterprise admins admin's of the forest i.e. multiple domains.
+
+- Domain Computers: All workstations and servers joined to the domain.
+- Domain Guests: All domain guests.
+- Domain Users: All domain users.
+- Schema Admins: If you don't know what schema is... Checkout XXE room, you will learn it there, plus a new vulnerability index will be added to your arsenal. Or simply just research it... What is schema.
+
+- DNS Admins: DNS Administrators Group
+- DNS Update Proxy: DNS clients who are permitted to perform dynamic updates on behalf of some other clients (such as DHCP servers).
+
+Note: The difference is clear.
+
+- Read-Only Domain Controllers: Members of this group are Read-Only Domain Controllers in the domain
+- Enterprise Read-Only Domain Controllers: Members of this group are Read-Only Domain Controllers in the enterprise
+
+Note: A read-only domain controller (RODC) is a server that hosts an Active Directory database's read-only partitions/files/folders... which give access to the users to allow read-only operation from these files/partitions/folders on domain and enterprise/forest level.
+
+- Allowed RODC Password Replication Group: Members in this group can have their passwords replicated to all read-only domain controllers in the domain
+- Denied RODC Password Replication Group: Members in this group cannot have their passwords replicated to any read-only domain controllers in the domain
+
+Note: The users in this group are allowed/not allowed to cache their password to RODC databases. This is enough for now to understand... As these are just basics of active directory. 
+
+- Key Admins: Members of this group can perform administrative actions on key objects within the domain.
+- Enterprise Key Admins: Members of this group can perform administrative actions on key objects within the forest.
+
+Note: Key Admins are specially crafted users, (came in play after windows 2016 (I did a research to understand key admins, so found the fact hehe)), whose role is to perform administrative actions on behalf of domain/forest admins. I don't know why they are made, but trust me this is their actual role... They are not admin but have admin privileges... Take it as, a normal user who have power to run commands with sudo. This is it....
+
+- So the rest of the groups are pretty messy non-explainable so I categorized them altogether.
+
+- Protected Users: Members of this group are given additional protection, say like 2FA.
+- Cert Publishers: As the name suggests these users of the group are permitted to publish certificates to the directory. 
+- Group Policy Creator Owners: Members of this group can modify group policy for the domain.
+- RAS and IAS Servers: Servers in this group can access remote access properties of users. Don't ask me it's meaning... This is all I know 
+
+With this we wind up the users and groups.
+
+Trusts and Policies
+=====================
+
+- Trusts ad policies is like a constitution of a country that set some rules and terms on the basis of which every machine/domain inside a domain/forest can communicate with each other, maintaining a good level of security... 
+	- There is difference between trusts and policies... But ultimately they both are used to set rules on how the systems would interact. 
+	- Trusts are something which defines how domains 'communicate' with each other... Policies handles how a server operates, allowance and disallowance like firewall configuration, enabling features in active directory (eg. SMB signing). Later we will
+
+Domain Trusts Overview
+-----------------------
+
+- Trusts are set of rules what allows individual systems inside a forest, or may be forest itself, to access resources of each others.
+- There are 2 types of trusts that determines how domains communicate with each other.
+
+	- Directional - Trusts flows from trusting domain to a trusted domain
+	- Transitive - Trusts exapands to include other trusted Domains. i.e. external domains connection.
+
+Note: Understanding and reading through trusts in an active directory is important as it helps us to understand that how the trees and domains in a forest, communicate with each other. So that when we attack an active directory environment, we will be able to understand how to abuse these trusts and move around the network like a virus.
+
+Domain Policies Overview
+--------------------------
+
+- These are what covers a big part of Active Directory, they are what set rules for servers and other objects in a domain/tree/forest. 
+	- Think of domain policies as domain groups, instead of having permissions they contain rules, and instead of applying it to the users in a group, they are applied to a domain as a whole.
+
+- We call them the rulebook of the active directory, and can be edited by domain admins.
+	- Also, domain admins have power to add their own policies, to the domain controller.
+
+- Out of all, following are few examples of policies:
+	- Disable Windows Defender: Disables windows defender across all machine on the domain.
+	- Digitally Sign Communication (Always) - Can disable or enable SMB Signing on the domain controller.
+
+
+Active Directory Domain Services + Authentication
+===================================================
+
+- The core functions of an Active Directory Netword, yet, easily covered, and the part of active directory that's most vulnerable...
+
+Domain Services Overview
+--------------------------
+
+- As it sounds like, i.e. services provided by domain controller to the rest of the domain or tree.
+
+- There are a lot of the domain services in an active directory, but we will cover the default ones, that come when you set up a windows server as a domain controller.
+	- LDAP - Lightweight Directory Access Protocol; provides communication between application and directory services.
+	- Certificate Services: allows the domain conroller to create, validate, and revoke public key certificates.
+	- DNS, LLMNR, NBT-NS: Domain Name Services for identifying IP hostnames.
+
+Domain Authentication Overview
+--------------------------------
+
+- The most-est-est-est important part, when it comes to attacking an active directory - is also the most vulnerable part - the authentication protocol set in place.
+
+The 2 main types of authentication for active directory are:
+
+	- Kerberos
+
+	- NTLM
+
+Note: These are covered in depth in later rooms. 
+	- Suggested Room: Attacking Kerberos
+
+- Kerberos: The default authentication system on active directory; uses ticket-granting tickets and service tickets to authenticate users and give users access to other resources across domain.
+
+- NTLM: Default Windows authentication uses NTLM encryption to authenticate. You probably be knowing this by now right?
+
+AD in the Cloud?
+=================
+
+Note: Recently, there has been a shift in companies work, i.e. of active directory moving to cloud... 
+	- Now the most notable AD provider is Azure AD.
+		- It's default settings are much more secure than an on-premise physical Active Directory network.
+
+		HOWEVER, THERE'S ALWAYS AN EXISTENCE OF VULNERABILITY FOR US TO TAKE OVER X)
+
+Azure AD Overview
+------------------
+
+- Azure acts as a middle man between your physical Active Directory and your user's sign on. 
+	- Allowing more secure way to authentication, and hence making most of the active directory attacks ineffective
+
+Cloud Security Overview
+-------------------------
+
+- The Cloud security is same as physical security on AD, where the only difference is the change in environment, rest working is same.
+
+- The following is a list of things that have been replaced in cloud AD to increase security...
+
+Windows Server AD 			Azure AD
+
+LDAP						RestAPIs
+
+NTLM						OAuth/SAML
+
+Kerberos					OpenID
+
+OU Tree 					Flat Structure
+
+Domains and Forests			Tenants
+
+Trusts						Guests
+
+- Now, the room said, this is it... Do your own research if you want to know more about how these things and how Cloud ADs are more secure than Windows Server ADs, that was rude... And after this long room I don't wanna do that research... However, I will but later in some other note.
+
+THE PRACTICAL
+---------------
+
+- Now, as this room said in starting that we need a little bit knowledge of powershell to get through this room, I am now sure that I don't have it lol, though I am able to understand what commands here are for, I mean, easily readable even for a new to powershell person.
+
+Ok, so I did the practical, and found out that... I need to learn powershell well, for mastering active directory. Up my tasklist.
+
+

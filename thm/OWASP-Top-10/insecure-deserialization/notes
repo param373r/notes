@@ -1,0 +1,111 @@
+
+
+Insecure Deserialazation
+=========================
+
+- It is a type of vulnerability which occurs when an untrusted data is used to abuse LOGIC of an application.
+	- In my eyes, this is a very good type of vulnerability, as this is what depends on true skills of an attacker... Will see this when we go ahead.
+		- This is what, when applied with skills, can hack anything. Just need skills.
+	- This definition is still vast in its perspective. All the attacker does is, replace the input an application process with something malicious code.
+		- With this in mind, you can think that this vulnerability can exploit any thing ranging from RCE to DOS.
+
+Before we go any further let's understand what is difference between serialization and deserialization.
+
+	Serialization - It is the process of converting an object into stream bytes to store it in database, file, or can be used to transmit
+		- In simple words serialization is serializing an object's(a program's) execution state into something that can be stored somewhere... and later be used to resume the object to the same state where it was before.
+		- Eg, Save the current state feature in Virtual Box for Saving the VM. It does nothing other than serializing the bits and pieces of running VM from ram to permanent storage.
+	Deserialization - It is same as serialization, just in reverse order... Like it is the process of converting stored bytes in a file, database or (at the receiver's end) convert the transmitted data back to the execution state.
+		- Eg. Resuming the kali's machine state in virtual box.
+
+- Now that we know what is deserialization, we can try to understand the meaning of the topic of vulnerability... i.e. Insecure Deserialization.
+	- We can see the vulnerability lies in deserializing something... Something deseializes at the server end with the data, Well, what if the data is malicious... Oops... That data can lead to exploitation of the web application, hence data (malicious code) is insecure to deserialize.
+
+Note: OWASP rank this vulnerability as 8 out of 10 because of the following reasons:
+	- As it is logical flaw in a web app, and it can vary to many web applications... Every flaw needs to be uniquely exploited, and thus there is no tool to exploit this vulnerability. Because of its nature, attackers must have good knowledge on ToE (Target of Evaluation) to find a logic flaw. This is the thing why this vulnerability depends on hacker's true skillset.
+	- The logic flaw can be as dangerous as the attacker's skillset, the data loss/exposed that will happen is another issue. 
+		- If the attacker has capability of using his skillset to exploit the logic flaw in such a way that it can lead to a DOS attack... Then the organization will be unavailable to clients and thus they will be at a great loss.
+
+What's Vulnerable?
+--------------------
+
+At summary, anything that inputs or processes data, without any security/integrity checks ( or vulnerable logic flaws in security checks ), is vulnerable. Including:
+	- E-Commerce Sites
+	- Forums
+	- API's 
+	- Application Runtimes (Tomcat, Jenkins, Jboss, etc.)
+
+
+Objects
+========
+
+- In OOP, objects are made up of 2 things:
+	- State
+	- Behaviour
+
+	- For eg. Lamp is an object, now lamp can have different types of bulbs that is their state... and being either on/off defines their behaviour.
+
+- Simply, objects help you to reduce the lines of code you write over and over again.
+	- Therefore, you can simply use methods/functions to alter the object's state and behaviour
+
+
+De(Serialization)
+==================
+
+Example: You met tourists, they don't know english and you don't know their dialect eithier. They asked you for directions so you showed them a few pictures and you told them their way... 
+	- What we did was actually was serialized data and send it to the receiver and then he/she deserialized the data to find the landmark.
+
+How can we leverage Serialization?
+------------------------------------
+
+Simply, the malicious code is sent to the database, and when the data deserializes there, the code gets executed... as there is no filtering or input validation... 
+	- The system assumes that the data is trustworthy and thus executes it.
+
+
+Cookies 101
+=============
+
+- Cookies are generally created on webapp end, and then stored on the user's computer.
+
+Note: The websites use cookies to store user-specific behaviour on what they like the most.
+
+- Cookies are not permanent storage solutions like database... Some cookies are session ID's, and most of them gets cleared when the browser is closed. 
+	- Some do last longer, which is determined by the "expiry" parameter in the cookie.
+
+
+- Cookies can be sent in various website programming languages.
+	- Javascript
+	- PHP
+	- Python
+
+
+Cookies Practical
+===================
+
+IP: 10.10.8.238
+
+User Cookie: sessionId:"gAN9cQAoWAkAAABzZXNzaW9uSWRxAVggAAAAZmM3OWM0NWU5YmNkNDI1Mzk3MjUzZTA3Y2QwOGQyMThxAlgLAAAAZW5jb2RlZGZsYWdxA1gYAAAAVEhNe2dvb2Rfb2xkX2Jhc2U2NF9odWh9cQR1Lg=="
+
+I decoded the above cookie... and found the Flag 1...
+
+Flag 1: THM{good_old_base64_huh}
+
+I changed the userType cookie (from user) to admin, when I refreshed the page, I was redirected to  /admin page... And on the dashboard I found the Flag 2...
+
+Flag 2: THM{heres_the_admin_flag} 
+
+
+Code Execution
+================
+
+- This is practically exploitation of Insecure Deserialization of web application. 
+- Now the maker of this room has made it so easy by giving this writeup stuff in the start of the task... Which explains what we are doing and why we are doing... So it's like following the steps... However I will work on my own(I did read this once) for the sake of learning.
+
+IP: 10.10.8.238
+
+After clicking, Exchange my vim, a new cookie got added named, encoded payload. I then followed the writeup... And copy pasted a python code, that converts the that creates the cookie value.
+
+So I changed the command to get me a reverse shell. Opened a netcat listener on my local machine... I ran the script, copied the new cookie value, replaced it with the previous cookie value in encodedPayload cookie via cookie editor... Refreshed the page, and BAM... I got a reverse shell. I cat out the flag.txt...
+
+Flag: 4a69a7ff9fd68
+
+This was it for the Insecure Deserialization.

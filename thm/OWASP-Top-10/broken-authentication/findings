@@ -1,0 +1,24 @@
+Summary
+--------
+
+- Usual way of authentication is username and password.
+
+- HTTPS is stateless.
+
+- Session cookies are used to persist the user's session at the server.
+
+- Broken Authentication system can lead to data leak of a using client's or even the server admin.
+
+- Reasons to be vulnerable with this...
+	- Bruteforce attacks
+
+	- Weak Password Policies
+
+	- Weak Session Cookies
+
+- Counter-Measures...
+	- Implement strong password policy
+
+	- Lockout condition against bruteforce attacks.
+
+	- Multi-Factor Authentication

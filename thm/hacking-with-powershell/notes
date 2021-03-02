@@ -1,0 +1,279 @@
+
+
+Hacking with Powershell
+========================
+
+Scope of this room:
+	
+	- What is Powershell and how it works
+	- Basic Powershell commands
+	- Windows enumeration with Powershell
+	- Powershell scripting
+
+Tbh, I can swear this is gonna be lovely.
+
+IP: 10.10.94.16
+Username: Administrator
+Password: BHN2UVw0Q
+
+What is Powershell?
+
+	Powershell is windows scripting language and shell environment built in .NET framework
+
+- Powershell can thus execute .NET functions directly from it's shell
+
+- Most powershell commands are called cmdlets.
+	=> NOTE THAT UNLIKE OTHER SCRIPTING LANUGUAGE AND SHELL ENV, THE OUTPUT OF ANY "CMDLET" IS TREATES AS AN OBJECT.
+		- This makes powershell object oriented.
+
+- The normal format of a cmdlet is represented by Verb-Noun
+	- eg. Get-Command
+
+Common verbs include:
+	- Get
+	- Start
+	- Stop
+	- Read
+	- Write
+	- New
+	- Out
+
+To view a detailed list of approved verbs: https://docs.microsoft.com/en-us/powershell/scripting/developer/cmdlet/approved-verbs-for-windows-powershell-commands?view=powershell-7
+
+What is the command to get help about a particular cmdlet(without any parameters)?
+	Get-Help
+
+
+Basic Powershell Commands
+==========================
+
+To get help about a command you can type... Get-Help Command-Name
+
+- Get-Command command will list all the available commands for powershell.
+	- Running "Get-Command New-*" will list all the commands related to the New verb.
+
+Object Manipulation
+---------------------
+
+If we want to perform certain actions on the output of 1 cmdlet then we need to figure out 2 things...
+
+	- Passing out via piping
+	- using specific object cmdlets to extract information (like sort tail etc)
+
+Pipline
+--------
+
+- A major difference compared to other shells is that instead of passing text or string to the command after the pipe, powershell passes an object to the next cmdlet.
+
+- As we know an object contains methods and properties. 
+	- You can think of methods as functions that can be applied to output from the cmdlet and you can think of properties as variables in the output from a cmdlet. To view these details, pass the output of a cmdlet to the Get-Member cmdlet.
+
+		Verb-Noun | Get-Member
+
+	eg. Get-Command | Get-Member -MemberType Method
+
+		Will list all the functions used in module Get-Command.
+
+Creating Objects from Previous cmdlets
+----------------------------------------
+
+- One way of manipulating objects is pulling out the properties from the output of a cmdlet and creating a new object. This is done using the Select-Object cmdlet. 
+	- For eg. Get-ChildItem | Select-Object -Property Mode, Name
+
+- You can also use the following flags to select particular information:
+
+    first - gets the first x object
+    last - gets the last x object
+    unique - shows the unique objects
+    skip - skips x objects
+
+Filtering Objects
+-------------------
+
+- When retrieving output objects, you may want to select objects that match a very specific value. You can do this using the Where-Object to filter based on the value of properties. 
+
+Note: Powershell is sensitive so make sure you don't put any quotes around it.
+
+	Verb-Noun | Where-Object -Property PropertyName -operator Value
+
+	Verb-Noun | Where-Object {$_.PropertyName -operator Value}
+		- The second version uses $_ to iterate through every object passed via pipe... 
+
+	Here, -operator is a variable... Operator need to be specified like below:
+		- -contains: if ANY item in property match for the specified value
+		- -eq: if the value is exact same as the specified value 
+		- -gt: if the property value is greater than the specified value
+- For eg.
+	Get-Service | Where-Object -Property Status -eq Stopped
+
+Sort Object
+-------------
+
+- When the cmdlet outputs a lot of the result, you may need to sort it to view efficiently.
+
+	Verb-Noun | Sort-Object
+
+----------------------------------------------------------------
+
+To list parameters without using help...
+	(Get-Command Get-ChildItem).Parameter
+
+What is the location of the file interesting-file.txt
+
+	Get-ChildItem -Path C: -Include "interesting-file.txt" -Recurse -Force 
+
+This didn't work... So I tried using wildcards...
+
+	Get-ChildItem -Path C:\ -Include "*interesting-file.txt.txt*" -Recurse -Force
+
+Ans: C:\Program Files
+
+Specify the contents of this file
+	Get-Content .\Program Files\interesting-file.txt.txt
+Ans: notsointerestingcontent
+
+How many cmdlets installed on the system?
+	Get-Command | Where-Object -Property CommandType -eq Cmdlet | Measure-Object -Line
+Ans: 6638
+
+Get the MD5 hash of interesting-file.txt
+	Get-Command "*hash*"
+	Get-FileHash -Algorithm MD5 .\Program File\interesting-file.txt.txt
+Ans: 49A586A2A9456226F8A1B4CEC6FAB329
+
+What is the command to get the current working directory
+	Just using a little brain... I solved this using powershell
+		help pwd
+Ans: Get-Location
+
+Does the path "C:\Users\Administrator\Documents\Passwords" Exist?
+	Get-Location -Path "C:\Users\Administrator\Documents\Passwords"
+Ans: N
+
+What command would you use to make a request to a web server?
+Ans: Invoke-WebRequest
+
+Base64 decode the file b64.txt on Desktop
+	For this I had to go to google...
+	certutil -decode .\b64.txt out.txt
+	Get-Content out.txt
+Ans: ihopeyoudidthisonwindows
+
+=============================================================
+
+
+Enumeration
+=============
+
+So first you gained initial access to the box, try knowing the following things...
+
+	- users
+	- basic networking information
+	- file permissions
+	- registry permissions
+	- scheduled and runnig tasks
+	- insecure files
+
+
+----------------------------------------------------------
+
+How many users were on the machine?
+	Get-LocalUser
+Ans: 5
+
+Which local user does this SID(S-1-5-21-1394777289-3961777894-1791813945-501)
+	Get-LocalUser -SID "S-1-5-21-1394777289-3961777894-1791813945-501"
+Ans: Guest
+
+How many users have their password required values set to False?
+	(Get-Command Get-LocalUser).Parameters
+	Get-LocalUser | Where-Object -Property PasswordRequired -match False
+Ans: 4
+
+NOTE: -match searches for a regex expression whereas -eq searches for exact value
+How many local groups exist?
+	Get-LocalGroup | Measure-Object
+Ans: 24
+
+What command did you used to get the IP address info?
+Ans: Get-NetIPAddress
+
+How many ports are listed as listening?
+	Get-NetTCPConnection
+	Get-NetTCPConnection | Where-Object -Property -match Listen | Measure-Object -Line
+Ans: 20
+
+What is the remote address of the local port listening on port 445?
+	Get-NetTCPConnection | Where-Object -Property LocalPort -eq 445 
+Ans: ::
+
+How many patches have been applied?
+	Note: The patches here are meant the update fixes... i.e. HotFix
+	Get-HotFix | Measure-Object
+Ans: 20
+
+When was the patch with ID KB4023834 installed?
+	Get-Hotfix | Where-Object -Property HotfixID -eq KB4023834
+Ans: 6/15/2017 12:00:00 AM
+
+Find the contents of a backup file.
+	Get-ChildItem -Recurse -Filter *.bak*
+	Get-Content -Path .\Program Files (x86)\Internet Explorer\passwords.bak.txt
+Ans: backpassflag
+
+Search for all files containing API_KEY
+	This was typically weird... But...
+	Get-ChildItem -Path C:\ -Recurse | Select-String -Pattern "API_KEY"
+	Get-Content -Path C:\Users\Public\Music\config.xml 
+Ans: fakekey123
+
+What command do you do to list all the running processes?
+Ans: Get-Process
+
+What is the path of the scheduled task called new-sched-task?
+	Get-ScheduledTask | Where-Object -Property TaskName -match new-sched-task
+Ans: /
+
+Who is the owner of the C:\?
+	This took me time...
+	Tried Get-Disk		(NADA)
+	Tried Get-Partition (NADA)
+	Get-ACL C:\
+Ans: NT Service\TrustedInstaller
+
+=================================================================
+
+Basic Scripting Challenge
+===========================
+
+To create a variable in powershell script we use...
+
+$variable_name = value
+
+Woooshhh I did the beginner scripting challenge all on my own... 
+
+
+Intermediate Challenge
+=======================
+
+Build a port scanner
+
+$hostx = "127.0.0.1"
+$range = (130..141)
+foreach($i in $range){
+    $socket = new-object System.Net.Sockets.TcpClient($hostx, $i)
+    if ($socket.Connected){
+        write-output "Open";
+    }
+    else{
+        write-Output "Closed";
+    }
+    $socket.Close()
+}
+
+How many open ports did you find between 130 and 140(inclusive of the two)?
+Ans: 11
+
+I think the room was buggy, or the question was wrongly interpreted because it didn't shown me anything special. 
+
+Anyways... That was it for the room.

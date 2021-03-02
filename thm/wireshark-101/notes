@@ -1,0 +1,202 @@
+
+
+Wireshark 101
+==============
+
+I am gonna skip the part that I know, as this is a really long room.
+
+Now, I really don't know why I am doing this room... This is blue team based, but I always wanted to do this room to get a deep understanding of the wireshark tool so here it goes...
+
+Collection Methods
+===================
+
+Network Taps
+-------------
+
+	- Hardware Tap in the wires
+
+	- An inline tap for 2 devices connected to each other on the network.
+
+Mac Floods
+-----------
+
+	- This seems like a red teamer thing... Here an attacker/host tries to bruteforce the CAM table with MAC packets, and when the CAM table gets filled and it couldn't get anymore MAC entries, then in order to keep the network alive, the SWITCH broadcasts the network packets on it's network.
+
+	Note: This technique should be used with extreme caution and with explicit prior consent.
+
+ARP Poisoning
+--------------
+
+	- This is where we move back to the classics. Like, we send malicious IP and MAC packets to the (switch/hub)'s ARP table. This way, you force the ARP table to send all the packets intended for every IP to your MAC address inside a network.
+
+Filtering Captures
+====================
+
+Now this is something useful for the tool.
+
+Filtering Operators
+---------------------
+
+and (and / &&)
+or (or / ||)
+equals (eq / ==)
+not equal (ne / !=)
+greater than (gt / >)
+less than (lt / <)
+
+Note: There are other filters as well, BUT... Out of the scope of this room. Find related material here...
+
+	https://www.wireshark.org/docs/wsug_html_chunked/ChWorkBuildDisplayFilterSection.html
+
+contains 	(contains a string eg. tcp.stream contains "HTTP 1.1")
+matches 	(same as contains; instead uses regex)
+bitwise_and (& ; You know what this does)
+bitwise_or 	(| ; You know this too)
+xor 		(^^) 
+in 			(same as in in python)
+
+Basic filtering 
+----------------
+
+Filtering gives us a very large scope so here we go...
+	- Scope of this room is to filter IP, protocol etc. ONLY/-
+
+Filtering by IP
+
+	ip.addr eq 127.0.0.1
+
+Filtering by SRC and DST
+
+	ip.src eq <SRC IP> and ip.dst eq <DST IP>
+
+Filtering by PORT and PROTOCOL
+
+	tcp.port eq <PORT> or <PROTOCOL NAME>
+	Note: It is worth to know that wireshark can use both to filter the results(port or protocol)
+
+	udp.port eq <PORT> or <PROTOCOL NAME>
+
+Packet Dissection
+===================
+
+Not going into bore parts... Listing the main findings from each layer of a packet.
+
+	Layer 1 (Frame) - Will show you details related to the physical layer.
+	Layer 2 (Ethernet) - Will show you the source and destination MAC present in the packet
+	Layer 3 (IP) - Will show you the source and destination IP present inside a packet.
+	Layer 4 - (Protocol) This is where you see type of protocol (TCP/UDP). MOREOVER TELLS YOU THE SOURCE AND DESTINATION PORTS
+		Protocol Errors - Subpart of layer 4 shows the segments from TCP that needs to be re assembled.
+	Layer 5 (Application Protocol) - This is where you can see the protocol specific details that the packet has (ARP HTTP DNS etc)
+		Application Data - Part of layer 5, with all the body content of a packet. THE MAIN PART.
+
+THIS WAS IT WITH THE BORING THEORY... TIME FOR SOME PRACTICAL.
+
+ARP Traffic
+=============
+
+- ARP traffic will generally contain REQUEST AND RESPONSE messages.
+
+Note: Most devices will identify themselves or Wireshark will identify it such as Intel_78, an example of suspicious traffic would be many requests from an unrecognized source. You need to enable a setting within Wireshark however to resolve physical addresses. To enable this feature, navigate to View > Name Resolution > Ensure that Resolve Physical Addresses is checked.
+
+opcode for request ARP: Request (1)
+opcode for response ARP: Reply (2)
+
+ICMP Traffic
+=============
+
+- Type 8 means that it is a request packet 
+
+- Type 0 means that it is a reply packet
+
+- If not above the 2, then it is considered to be a malformed or suspicious packet.
+
+- Timestamp tells the date on which ping started...
+
+- Data is where you can see a string with random characters
+
+TCP Traffic
+=============
+
+- Whenever analyzing the packets of TCP make sure to look at sequence number and acknowledgement number.
+	- If the port is closed the ack number will be 0.
+
+Note: TCP packets need to be looked as a whole rather than analyzing a single packet.
+	#FollowTCPStream
+
+DNS Traffic
+============
+
+- There are couple of things that we need to notice while analyzing a DNS capture.
+	- FIRSTLY FILTER THE DNS. Then seek for the following:
+		- Query-Response
+		- DNS-Server Only
+		- UDP
+
+Note: If anything is out of place, then the packet is malicious, malformed, or custom made. #SUSPICIOUS.
+
+
+DNS Query packets contain the following information:
+	- Port no, and UDP protocol must be use for a correct packet
+	- Sometimes queries can put together the puzzle pieces of the story together, make sure to check them out.
+
+DNS Response packets contain the following info:
+	- The in addition to query packets, have another field called answers, which will give out the address requested domain.
+
+HTTP Traffic
+=============
+
+- This traffic is pure plain text no hidden treasures, unlike his brother HTTPS. So it's lovely.
+	- We can easily gather things like Request URI, File Data, Server etc etc.
+
+- Wireshark has some amazing features to analyze packets of HTTP traffic:
+	- Protocol Hierarchy
+		This information can be very useful in practical applications like threat hunting to identify discrepancies in packet captures.
+	- Export HTTP Object
+		LMAO, the easiest way to extract a zip capture or any files that were sent over network; #ExportingHTTPObjects
+	- Endpoints
+		This feature allows the user to organize all endpoints and IPs found within a specific capture.
+
+HTTPS Traffic
+==============
+
+- HTTPScan be one of the most annoying protocols to understand from a packet analysis perspective and can be confusing to understand the steps needed to take in order to analyze HTTPS packets.
+
+httpS overview
+----------------
+
+	Before sending data over encrypted channel the HTTPS establishes a channel (obvio), where it agrees on the following things:
+
+	- Client and server agree on a protocol version
+    - Client and server select a cryptographic algorithm
+    - The client and server can authenticate to each other; this step is optional
+    - Creates a secure tunnel with a public key
+
+Now, terms like SSLv2 record Layer, ssl version are common, no issue if don't know about them, the room is all about understanding the wireshark and it's features.
+
+	- A Client Hello packet showing the SSLv2 Record Layer, Handshake Type, and SSL Version is sent to the server to initialize the channel creation.
+	- Server Hello packet sending similar information as the Client Hello packet however this time it includes session details and SSL certificate information.
+	- the Client Key Exchange packet is sent next by the client side, this part of the handshake will determine the public key to use to encrypt further messages between the Client and Server.
+	- In the next packet, the server will confirm the public key and create the secure tunnel, all traffic after this point will be encrypted based on the agreed-upon specifications listed above.
+
+	Hence, the traffic between the Client and the Server is now encrypted and you will need the secret key in order to decrypt the data stream being sent between the two hosts.
+
+Practical HTTPS Analysis
+==========================
+
+- If you open the https.cap file you can view the data is encrypted. We can confirm from the packet details that the Application Data is encrypted. You can use an RSA key in Wireshark in order to view the data unencrypted. In order to load an RSA key navigate to Edit > Preferences > Protocols > TLS >  [+], you will need to fill in the various sections on the menu with the following preferences:
+
+	IP Address: 127.0.0.1
+
+	Port: start_tls
+
+	Protocol: http
+
+	Keyfile: RSA key location
+
+- Now that we have an RSA key imported into Wireshark, if we go back to the packet capture we can see that the data stream is now unencrypted.
+
+- We can now use other features in order to organize the data stream, like using the export HTTP object feature, to access this feature navigate to File > Export Objects > HTTP
+
+
+NOTE: Checkout the Zerologon notes further.
+This is it for the room.

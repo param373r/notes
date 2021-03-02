@@ -1,0 +1,39 @@
+
+
+Security Misconfiguration
+===========================
+
+- Security Misconfiguration is distinct than other vulnerabilities, as it is found due to bad implementation of configuration, which could have been better. 
+	- In simple words, silly mistakes.
+
+Security Misconfigurations include the following:
+	- Poorly configured permissions on cloud/hosting services
+	- Having unnecesarry features enabled
+	- Default accounts with unchanged passwords
+	- Detailed error messages that can reveal too much about the system to the attacker.
+	- Not using HTTP Security Headers, or revealing too much detail about the server.
+
+- This vulnerability can often lead to more vulnerabilities like: XXE injection, sql injection, RCE, IDOR, Sensitive data leak.
+
+Note: This room, is going to discuss only one type of the security misconfigurations, i.e. Default Passwords.
+	- There are others also (listed above), but the focus of the room is only Default Passwords.
+
+Now there are some facts given below of previous data attacks... But that's not important... So I ain't including it here.
+
+Practical
+----------
+
+IP: 10.10.17.50
+
+- When I put the IP in my browser... it loaded a site with title pensive notes... 
+
+- I did a quick google search on "pensive notes default credentials"...
+	- The very first link that popped up was of github repo it was put on... and it gave me the credentials...
+
+Credentials : pensive:PensiveNotes
+
+After I logged into the site... I saw the flag, in the first note from the top.
+
+Flag: thm{4b9513968fd564a87b28aa1f9d672e17}
+
+This was it for this task.

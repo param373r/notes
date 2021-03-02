@@ -1,0 +1,127 @@
+
+
+Linux: Local Enumeration
+=========================
+
+- The room includes the following:
+
+	- Stabilizing the Shell
+	- Basic Enumeration
+	- /etc purpose and senstivity
+	- Important files
+	- Enumeration Scripts
+
+Stabilizing shell
+-------------------
+
+- It was simple to stabilize with a one liner... i.e. /bin/bash -i... Rest I did a brief on it in what the shell room...
+
+- Then I created a rsa key pair on my attacker machine... Copied the public key to authorized keys on target machine... And got a stabler shell.
+
+Basic Enumeration
+-------------------
+
+When get access inside a machine first things to check are:
+	- uname -a (System info)
+	- .bash_history (Can have recent activity on the machine)
+	- .bash_profile and .bashrc (Can help us locate some important start up setting of the machine/terminal session)
+	- sudo -V (Check the sudo version; can lead to shellshock)
+	- sudo -l (Check for your sudo permissions)
+
+Flag: thm{clear_the_history}
+
+Enumerating /etc
+------------------
+
+- This folder is full of configuration details
+
+- Starting with /etc/passwd:
+	- It can give list of all the user and processes that could be running... And opens a lot of vectors for pivoting
+	- In case, you have writing access to /etc/passwd, you can get root by creating a custom entry.
+- /etc/shadow
+	- This file stores user password in hash format, if we can even get reading permission to this file, that's more than enough.
+	- We retrieve the password and try to crack it locally.
+
+- /etc/hosts 
+	- This file contains the hostname with their respective IP addresses.
+	- What can this file do? Well, this file can have local addresses of other systems on the network... This way we can enumerate the network further.
+
+Important files
+----------------
+
+find command:
+	Be sure to look for the following files:
+		- .log files
+		- .conf files
+		- .bak files
+		- SUID bit set files
+
+Flag: thm{conf_file}; cmd: find / -name "flag.conf" 2>/dev/null; /etc/sysconf/flag.conf
+
+There is a short paragraph on port forwarding... I am not sure how it is done and how are the ssh tunnels are formed... But here's a great article post to get your way through it: https://fumenoid.github.io/posts/port-forwarding.
+	- I am not including port forwarding here, as it is a bonus part of the room. It's not in the scope of these notes but just for little understanding and reference that link will be helpful.
+
+Automation Scripts
+--------------------
+
+There are 2 scripts for local enumeration(as per the room), and both the scripts can be found on github:
+	- Linpeas
+	- LinEnum
+		- "Linenum is a bit easier to use", said the room. 
+
+Note: It's always best to run multiple scripts and later compare their output.
+
+Resources and what's next
+---------------------------
+
+There are 7 suggested rooms:
+
+For in-depth  privilege escalation, consider these rooms:
+	- https://tryhackme.com/room/sudovulnsbypass
+	- https://tryhackme.com/room/commonlinuxprivesc
+	- https://tryhackme.com/room/linuxprivesc
+
+To practice your skills:
+	- https://tryhackme.com/room/vulnersity
+	- https://tryhackme.com/room/basicpentestingjt
+	- https://tryhackme.com/room/bolt
+	- https://tryhackme.com/room/tartarus
+
+This is it for the room.
+
+Extras
+-------
+
+Finding files on various criteria is nice...
+
+• Find files based on filename
+   ◇ find / -type f -name flag
+
+File directory based on their name
+	find / -type d -name flag
+	
+Files based on their size:
+	find / -type f -size 10c 
+		c = bytes
+		k = kilobytes
+		M = megabytes
+		G = gigabytes
+		
+For user or group:
+	find / -(user/group) pjrox -type f
+
+Find files modified after a particular date:
+	find / -type f -newermt ‘DD:MM:YYYY HH:MM:SS’
+
+Find files based on date modified:
+	find / -type f -newermt <start date format> ! -newermt <end date format>
+	
+Find files based on date accessed:
+	find / -type f -newerat <start date format> ! -newerat <end date format>
+	
+Find files based on specific keyword:
+	grep -iRl ‘folderA/flag’
+	
+Extra Notes
+
+To check the correctness of a command... test it here... https://explainshell.com/

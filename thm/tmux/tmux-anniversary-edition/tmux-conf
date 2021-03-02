@@ -1,0 +1,22 @@
+
+
+So this is an important file which contains options and customization for tmux's look and feel
+
+
+set -g is a parameter to set something in tmux as per global settings... which means whenever I boot up tmux these settings follow...
+
+set -g status-style bg='#44475a',fg='#8be9fd'
+	This line is to modify the color of the status bar.
+
+setw -g window-status-current-style fg=black,bg=white
+	This line adds highlight in the color of white for the currently selected window.
+
+set -g prefix C-a
+	Allow changing the prefix from ctrl b to ctrl a. If there is any need to use the alt key instead of ctrl. Then set prefix as M-b or another second character, such as M-a. Changing the prefix from ctrl b to alt a.
+
+Note: bind and bind-key options allow to add an extra key (or may be a new one if the key hasn't been alloted to the function yet), whereas set option overwrites the tmux's hotkeys for the updated ones.
+
+Note: You have to load the tmux file conf file after making changes, either by restarting as a new session or by the following command in tmux prompt:
+	source-file ~/.tmux.conf
+
+Note: There are custom commands given in the room... I didn't wrote all of em... If you want to reconfigure tmux... Then check it out, it's a free room, plus I did almost on my own...

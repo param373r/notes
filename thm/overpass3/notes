@@ -1,0 +1,21 @@
+
+
+Overpass 3
+===========
+
+I would say, I did learn a lot of things... Found a nfs service running on the inside port through some custom script I ran on the box
+
+MAKE SURE TO CHECK INTERNAL PORTS AS WELLL... IT'S HIGHLY HIGHLY RECOMMENDED.
+
+SSH PORT FORWARDING WITH NFS MOUNT... DUHHH AWESOME.
+
+ss is alternative to netstat... 
+
+forwarded 3 ports 111 2049 20048, rpc nfs mountd respectively... Don't know why, but this was really a hit all 3 for just a try.
+
+Then there was no root squash enabled... So used privileged mode with -p in bash after cp /bin/bash in the mount directory and assigning it root SUID.
+
+Boom bada boom.
+
+Note: ssh -D flag for using ssh as a proxy... Not sure about it gonna search
+	Ref: man ssh

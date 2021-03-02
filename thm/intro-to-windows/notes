@@ -1,0 +1,234 @@
+
+
+Intro to Windows
+==================
+
+This room stands to teach hands on and basics of active directory environment.
+
+Windows File System
+---------------------
+
+- A file system is what keep tracks of files on a system, else all the data will be a large body of bytes with no defined beginning or defined end.
+
+FileSystem Structure:
+	Logical Drives (eg. Disk C)
+	Folders ( eg. Downloads, documents etc)
+	Files
+
+Folders in C drive:
+	
+	Perflogs: Perf(ormance) logs; system issues or reports regarding performance are stored here.
+
+	Program Files and Program Files (x86): Default location of installed programs, unless you change their directory to D or E drives. /etc/bin/, /usr/bin/ /var(maybe) directories of windows
+	
+	Users: /home directory in windows.
+
+	Windows: System files that makes your system boot successfully...
+	/bin or /sys or /boot directory of windows
+
+Windows File Permissions:
+
+	Applied to: 
+		- Users 
+		- Groups
+
+	Permission that can be set:
+		- Full control: allows the particular user to set the ownership of the folder, set permissions for other groups, users.
+
+		- Modify: allows the particular user/group to read write and execute files.
+	
+		- Read and Execute: only read and execute no writable.
+
+		- List folders content: allows the user/group to list the content of a folder.
+
+		- Read: only allows the user/group to read the file 
+
+		- Write: only allow writing(this is autmatically set when user is given modify permissions)
+
+		- Special Permissions (SUIDs maybe): No description given; will see later.
+
+A great tool to use is, icacls, this can run in powershell and can give list what are the permissions assigned to different users and groups.
+
+Tool Markdown:
+
+	I - permissions inherited from parent
+	F - Full access (full control)
+	M - Modify right/access
+	OI - Object inherit
+	IO - Inherit only
+	CI - Containe Inherit
+	RX - Read and execute
+	AD - append data (add subdirectories; else it could have been write)
+	WD - write data and files
+
+Authentication on Windows
+===========================
+
+Ok so here, authentication is listed as for 2 types of active directory...
+	- On-Premise Active Directory
+	- Azure Active Directory
+
+On-Premise AD
+
+	- NTLM
+		- NTLM uses a challenge response sequence of messages between client and a server system.
+		- Doesn't provide data integrity or data confidentiality protection for auth network
+	- LDAP/LDAPS
+		- The main difference between LDAP and LDAPS is same as HTTP and HTTPS... where LDAP being the plain text request/response and LDAPS being the encrypted one.
+		- LDAP/LDAPS helps the user's workstation credentials using an API key to DC (Domain Controller) in order to validate and log in.
+	- Kerberos
+		- Another way to authenticate is using kerberos, it uses a symmetric key cryptography to authenticate i.e. ticket.
+		- If want to know more about kerberos, check out the kerberos-working.png file...
+
+Azure AD
+	
+Note: Azure AD is same as OP AD, the difference lies in their security... Like the following are replaced authentication method for validating users... Because they are secure...
+	- SAML (NTLM in On-Premise)
+		- Security Assertion Markup Language (SAML) is a type of SSO (Single Sign-On) standard
+		- It defines set of rules that allows users to access web applications WITH A SINGLE LOGIN, which is possible because service providers trust identity providers...
+			- Take it as same as Windows Sign in just on a bigger network and encryption more strong and safe.
+Note: Service providers are what users access all day (the machines/services on active directory)... Identity providers are something that provides the user's authentication. As simple as it is.
+	
+	- OAuth 2.0 (LDAP/LDAPS in On-Premise)
+		- This is also a standard that other applications on azure directory use to get access them.
+	- Roles of OAuth:
+		- Authorization server: Server that issues access token
+		- Resource Owner: Server that creates a normal entry for the issued access token(before sending it to the user)
+		- The client: It is the application that requests the access token.
+		- The Resource server: This is server which accepts the access token and grant the user with a session or its resources.
+
+	- OpenID Connect(Kerberos in On-Premise)
+		- Also known as OIDC... Is another authentication standard... Built on OAuth 2.0 as another layer of protection...
+			- This simply means that with the access token, a client is supposed to submit... or send this OID token, to get the requested resource/session.
+
+		- OpenID uses simple JSON web token... 
+			- Which OAuth 2.0 is about resource access, and sharing, OpenID Connect is all about user authentication.
+
+Windows Utility Tools
+======================
+
+Ok so here am gonna compare the windows settings to the linux ones... So that I could easily relate...
+
+Built-in Utilities
+	- Computer Management
+	- Local Security Policy
+	- Disk Cleanup
+	- Registry Editory
+	- Registry Editor (RedEdit)
+	- Command-line tools
+
+Note: There are no different registry editors... Both are same... The difference is one is GUI and other is CUI.
+Computer Management
+
+This Utility contains several other tools in turn:
+	
+	- Task scheduler: This acts like a crontab in linux... Set for a action to be taken when a certain condition is met... Like, a timer.
+
+	- Event viewer: One of the most important tools on windows... This is what keeps record of every thing that happened on the system... 
+		- Take it as a progam that maintains bash history... and /var/logs... This literally logs in every event inside the system... ranging from failed attempts to changing directory of a file that is later deleted.
+
+	- Shared folders - It is a directory or a folder that can be shared across the internal network or NFS... 
+
+	- Local Users and computers - This tool helps us maintain change or even add/delete users/group from the system... Take it as /etc/passwd... Keeps their entry and access level on the host system.
+
+	- Performance Monitor - This monitors the activities across devices such as CPU, memory and usage etc.
+
+	- Disk Management - Used like a thousand times... Helps you create and manage the disk partitions... Gparted in linu.
+
+	- Services and applications - This module is what capable of launching/stopping services... This holds even the startup applications... /usr/bin/service module in linux.
+
+Local Security Policy - This is what sets the policies of every user, group, program on the host... Allowing/disallowing them to perform a certain action in the system. Same as policyeditor in ubuntu.
+	- Most policies in windows are fine... Only a few needs tweaking...
+	- Policy eg. like... Password length, disable guest and local admin accounts.
+
+Disk Cleanup - Used like a hundred times... This is what used to delete files that are no longer needed.
+
+Registry Editor - The Windows registry database stores many important operating system settings.
+	- Settings ranging from size of taskbar to what happens after double clicking a file... 
+	- Whenever a new driver is installed in the system... It's settings are stored as hex digits (most of the times) in the registry editor. This driver is called up... Everytime a system boots up.
+
+Registry Editor (RedEdit)
+	
+Above was just a overview of registry editor... Here we are going to dive a little deeper.
+
+	- To access registry editor open run and type regedit... And the regedit gui will open up for you...
+	- Registry Editor can be considered a database that contains low-level settings for Microsoft Windows settings and applications. The registries are structured as follows:
+
+	    HKEY_CLASSES_ROOT
+	    HKEY_CURRENT_USER
+	    HKEY_LOCAL_MACHINE
+	    HKEY_USERS
+	    HKEY_CURRENT_CONFIG
+
+	- Above mentioned are common databases of registry...
+	- A feature of powershell, that you can browse the registry with it...
+
+		cd <reg db> (eg. cd HKLM:\ (HKEY_Local_Machine))
+
+	- There is a built-in commandline tool called 'reg', which can be used to add, remove, query, import, export etc. registry keys.
+
+Note: You can always type:
+	
+	reg /?
+
+	- to get a help menu on how to use this tool.
+
+Command line tools
+
+These include the following:
+	- cmd - cmd is a command line interpreter... legacy of Microsoft windows. Also, it is used to automate system related tasks using scripts and batch files...
+	- powershell - It is what mainly used by sysadmins to manage the network and domain as well as the computer and devices that are connected to it.
+		- Powershell can interpret both batch commands and powershell commands but not cmd, it's a powerful tool when it comes to managing active directory. It is more enhanced and has additional features than powershell.
+	- windows terminal - This is can be installed from microsoft stored; it is for those who likes to customize there terminal environment for work... and thus can be used for both powershell as well as cmd.
+
+Note: There is no point in remembering the path to all the registry key values... You can always look some up on the internet... Plus that's no skill to master... #BelieveMeWhenISayThat.
+
+Types of servers
+=================
+
+	- DC - Domain conroller
+		- Might be one of the most important servers because in an AD or AAD infrastructure we can control users, groups, restrict actions, improve security, and many more of other computers and servers.
+	- File server
+		- File servers provide a great way to share files across devices on a network.
+	- FTP server
+		- Makes possible moving one or more files securely between computers while providing file security and organization as well as transfer control.
+Note: File server are intended to transfer files over an internal network ftp can be used to transfer files across the globe.
+	- Web server
+		- Serves dynamic web pages
+	- Mail Server
+		- Mail servers move and store mail over corporate networks (via LANs and WANs) and across the Internet.
+	- Database Server
+		- Holds the data to be retrieved, accessed, modified, added, deleted. (You know the drill)
+	- Proxy server
+		- To share connections, filter requests, improve performance... we use a proxy server.
+	- Application server
+		- They are usually what connected to the database server and retrieves the data for the user (joins the client to the data).
+
+
+Users and Groups Management
+-----------------------------
+
+Now to note one thing... Till now, you have learnt a lot of things regarding Active Directory and theory part of windows system (mostly windows active directory).
+	This section is all about doing practical, ranging from...
+
+	Creating OUs, users and groups...
+
+	Adding users and groups to other (users and groups)/(groups) on the active directory...
+
+	Here we boot up a machine and copy the steps to get hands on... On how to manage active directory...
+		- I thank god for getting the cybermentor's active directory course... I will watch the whole course first, understand the basics of active directory from there, and then I might do practical here... For now... I am just marking this done.
+
+I will give active directory a grand finishing by mastering it... Hopefully by the end of 2020.
+
+Creating our first GPO
+------------------------
+
+Again a practical, gonna skip this... Now I am pretty much, confident that I know most of the theory part of active directory...
+
+	- And in my eyes... Active directory is just very simple but very big to study... I mean... Active directory as a whole is so simple that MOST-EST-EST settings on it is stored in a value of True/False, 0/1 hex... Just like a registry in a normal windows operating system...
+
+	- It's like a game of chess with a lot of (A LOTTTTT OF) rules... But definetly if the hack cannot be found in a weak encryption... Then it can be found via a misconfigurations... Or what I call silly mistakes... LMAO.
+
+Ohh and by the way GPO stands for group policy object; is a feature that adds additional controls to user accounts and computers.
+
+This is it for this room.

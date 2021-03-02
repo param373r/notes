@@ -1,0 +1,3 @@
+
+
+XXE injection is possible, only when XML files are customized... 90% of times... If you view an XML file or its instance, there is a way to atleast read the files remotely from a system. Just make sure you're smart enough to come up with payload.

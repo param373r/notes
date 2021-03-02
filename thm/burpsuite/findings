@@ -1,0 +1,10 @@
+Findings
+==========
+
+
+Research on:
+
+	- File Path Traversal = File traversal is nothing but reading (or may be even writing) directories or file present in the root directory of web app. 
+	This vulnerability allows you to view common 
+	- Read Issue Definitons in Target tool, Burpsuite ( A MUST )
+

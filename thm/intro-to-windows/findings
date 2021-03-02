@@ -1,0 +1,5 @@
+
+
+icacls - Powershell command line tool that can set ownership, check the user/group or even set/remove or deny permissions ON A PARTICULAR FILE OR FOLDER.
+
+For more info on the tool just run the tool without any arguments... and it will list the help menu

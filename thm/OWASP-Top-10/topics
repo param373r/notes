@@ -1,0 +1,32 @@
+
+
+So, I consider, this room, as one of the most important rooms... I never read through the whole OWASP top 10 vulnerabilities, yet...
+
+My plan's gonna be, to do 1 vulnerability from this room everyday, and if you get a chance... Then revise that vulnerability by reading through the official docs, or just research a bit more... Try to practice (if possible). I really kind of want to master these... Before my endterms got over...
+
+TOPICS
+============================
+
+	=> INJECTION
+
+	=> BROKEN AUTHENTICATION
+
+	=> SENSITIVE DATA EXPOSURE
+
+	=> XML EXTERNAL ENTITY (XXE))
+
+	=> BROKEN ACCESS CONTROL
+
+	=> SECURITY MISCONFIGURATION
+
+	=> CROSS-SITE SCRIPTING (XSS)
+
+	=> INSECURE DESERIALIZATION
+
+	=> COMPONENTS WITH KNOWN VULNERABILITIES
+
+	=> INSUFFICIENT LOGGING AND MONITORING
+
+
+Happy Hacking :)
+

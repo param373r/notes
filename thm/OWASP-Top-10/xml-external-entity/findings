@@ -1,0 +1,23 @@
+
+
+XXE Injection
+Scope of XXE
+	- Can lead to following attacks
+		- SSRF 
+		- RCE
+		- DOS
+	- It can allow the attacker to port scan the host on... (Reasearch, how?)
+
+Types of XXE
+--------------
+
+There are generally 2 types of XXE:
+	- In-band XXE Injection
+	- Out-of-band XXE Injection
+
+- Features of XML
+
+- Markup vs Markdown
+- URI vs (URL vs URN)
+
+- DTD breakdown

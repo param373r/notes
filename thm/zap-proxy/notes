@@ -1,0 +1,158 @@
+
+
+The ZAP
+========
+
+- Zed Attack Proxy; Similar tool to Burp proxy; robust enumeration tool; used to test web applications.
+
+Benefits of owasp zap over burp
+--------------------------------
+
+- Automated web application scan: This will automatically passively and actively scan a web application and AUTOMATICALLY DETECT VULNERABILITIES.
+
+- Web spidering: Automatically build website map(paid feature in burp)
+- Unthrottled Intruder: Can bruteforce as fast as your machine can (slow in burp due to community edition)
+- No need to forward individual requests like burp: Room says that it autmatically intercepts requests and build a sitemap while you browse it
+
+Burp tools vs Zap tools (name variations)
+
+Site map 		Site tree
+HTTP History	History
+Scope 			Context
+Intercept 		Break
+Repeater 		Request Edit
+Intruder		Fuzzer
+Spider 			Spider
+Scanner 		Active Scan
+BApp Store		Add on Marketplace
+
+Scope of this room
+-------------------
+
+	- Automated Scan
+	- Directory Bruteforce
+	- Authenticated Scan
+	- Login Page Bruteforce
+	- Install Zap Extensions
+
+Note: Zap lacks the ability to perform login timing attacks...
+	Suggested Room: Hackernote
+
+Automated Scan
+================
+
+It is the big blue thunder button on the dashboard in upper right pane as soon as you open up your owasp zap.
+
+	- This scan is what builds a sitemap, detect vulnerabilities on its own...
+
+Spidering
+-----------
+
+- There are 2 types of spidering technique that Zap uses
+
+	- Traditional spidering: It works as a normal spider used by search engines to crawl a site... No bruteforcing technique is used only just building a site map using the links found on the site.
+	- Ajax spidering: It is an add-on that integrates in ZAP; this is a crawler of ajax rich sites called crawljax. 
+		- You can use it to crawl and get better results.
+		- It can crawl the site for javascript files (which are neglected by the normal scan)
+		- Easiest way of using ajax crawler is with HTMLUnit
+		- To install HTMLUnit:
+
+			sudo apt install libjenkins-htmlunit-core-js-java
+
+		- Then select HTMLUnity from the Ajax Spider Dropdown(upper right pane).
+
+	Note: Results from Ajax Spider will be available in the lower pane(if selected).
+Note: The headless start in the ajax spider allows you to spider without showing the browser pop up for every link found on the site. Normal start with chrome and firefox will show you what the browser is doing in real time for spidering the site.
+Personal Note: I must say, this gives pretty much a lot of information on the target in just few moments.
+
+Manual Scanning 
+=================
+
+OK so this section is a whole on how to set up zap for manual testing...
+
+Tools > Options > Local Proxies > Add localhost (127.0.0.1:8080)
+
+Then, go to:
+
+Tools > Options > Dynamic SSL Certificates > Save
+	
+	Go to browser... View Certificates > Import > Import the Certificate 
+
+LMAO, ZAP has a new upgrade... Following that... Am gonna note things here...
+
+- Turn off the HUDs by clicking on green button at the bottom... So that you can view the whole page.
+
+- ZAP supports Passive and Active Scanning on the target... 
+
+	- Passive scanning is what shows the results by normally reading the web requests and all, like using of traditional and ajax spiders creating site maps, basically normal overviewing of the site.
+
+	- Active Scanning is where things get real offensive. The zap tries to enumerate further to the known vectors and trying to test no of scans to see if it is really vulnerable... This scan can really harm the web app(like if found a persistent XSS and tries to check it... the site will be spoiled with various alert and failed image load)
+
+- Alert notifications in zap will appear down near the button to turn off HUD mode, view it yourself when scanning through the website.
+
+- Page alerts are shown on the left hand side... you can browse through them... 
+
+- Site Alerts are shown on the right hand side... These are the alerts that are appeared on the pages on current domain/site(you are browsing).
+	- If there is a type of alert that is available on multiple sites then the alert dropdown will appear with multiple URLs.
+
+Note: Page alerts show you the alerts for the current page you are viewing, whereas site alerts include all the other sites you opened in your browser.
+
+- History: The history tab in the lower bottom helps you to view your page which are loaded as history... allows regex and filter capabilities too.
+	- Besides history tab lies your web sockets tab which helps you to view the web sockets and the incoming and outgoing messages... I don't know about the web sockets much, but I guess they are kind of a live connection between the client and server.
+
+- Sites: There is also an option of Sites on the right hand side panel, you can view the sites and the no of requests made by them in a neat view...
+	- Make sure to click on the [+] symbol to the far left of the request... Else you will just end up opening the head request.
+
+- Scope: This button is available on the left hand panel... By default everything will be out of scope... 
+	- If you want to make a site in scope click on the left panel.top button and then you can add that site to scope... To remove a particular part of the site from the scope, go to that part and click remove from scope...
+	- The icon will turn red when you're viewing a site in scope.
+
+Note: The ability to active scan and spider the site are only available when the site is in scope.
+
+- Bulb: Waaooww, ever wonder there are fields on a website, that are not allowed to be changed like read-only, or might be disabled for a custom entry... Well, there is this bulb icon on the left hand side, that you can use to edit this field...
+	- Click on the bulb icon... and the field that is disable for an entry will be enabled for you to type (in-browser).
+	- Fields enabled by this tool will be outlined in blue for you to identify that the bulb affected these fields
+	- This tool also enables you to view and fill in hidden fields in the site, in case you miss any in the source code.
+
+- Break Tool: On the left hand side panel, above the bulb and lower the scope tool, lies break... This tool is by default off when browsing the site... This tool helps us to intercept the request and prevent them to going further before a manual approval. 
+	- Step: Pass the current request and receive next (if any)
+	- Continue: Submit this request and turn off the break (continue normal browsing)
+	- Drop: Prevent the request from being sent
+	Break works with both, HTTP and web socket messages
+
+- Attack Mode is similar to active scan the only difference is it works in a different way...
+	- Unlike, active scan, it does not attack the known URLs, instead it attacks the URLs that are in scope and as soon as they are discovered while browsing the site... It does not show any progress... What it simply does is, attack the URL on the site (in-scope that the user is visiting).
+	- Take it as a king walking and the soldiers are clearing up everyone that comes alive infront of you... 
+
+Note: It is recommended to turn on the attack mode before exploring the site... and active scan after you're done exploring your part on the site.
+
+- Tool configuration is also available in the HUD mode(drag and drop feature is yet to be added)
+
+- Comments are present in HTML document and can be considered a lot informative... The comments tool automatically detects and displays the icons on the gui page, at the particular place where the commments are present.
+	- If the comments contain these strings (they are case in-sensitive), then the warning comment icon is displayed...
+
+		TODO, FIXME, BUG, XXX, QUERY, DB, ADMIN, USER, PASSWORD, PWORD, PWD, SELECT
+	- To view the comment just hover over the icons that appear when the comments tool is on... 
+		- And to copy the comment just click on icon.
+
+Toggle Scripts are a nice feature of ZAP, you can use them to enhance your web scanning further... 
+	- Take them as nmap scripts (just better), they can enhance your scans while scanning for any web vulnerability or enumerating some more services on the web app 
+
+Back to ZAP Proxy (old)
+==================
+
+- Bruteforcing directories... You can automatically bruteforce directories using custom-built Zap's directory bruteforcer... 
+	- Simple steps through GUI... but make sure to add wordlists(can be multiple if you want) or you can also increase the no of threads used to bruteforce... in Tools > Options > Forced Browser
+
+
+- Fuzzing / Bruteforcing logins on website is also possible with Zap's fuzzer (intruder; check the name variations again). Then rest process is same as burpsuite.
+
+- ZAP extensions are awesome... use the github.com/bugcrowd/HUNT extensions install them...
+	- So whenever you perform the active scan, HUNT will passively scan for SQLi, LFI, RFI, SSRF, and others.
+	- After installing HUNT script... Enable it in Scripts Tab > Passive Rules > right click on HUNT.py > enable. Once enabled you're good to go...
+	- Also enable Tools > Options > Passive Scanner > Check "Only scan messages in scope" 
+- These things come a lot handy...
+
+Suggested Room: HackPark
+
+This is it for the room.

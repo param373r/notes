@@ -1,0 +1,20 @@
+
+
+- Serialization and Deserialization
+
+- Reasons for this vulnerability to exist and working of logical flaws.
+
+Tip: Learning is best done through Analogies(Comparing and differentiating with one another)
+
+- Objects are made of 2 things:
+	- State (Type)
+	- Behaviour (Property)
+
+- The cookies that are asked by websites... Are actually user-specific behaviour tokens... These are stored to track what you visit the most or what you like, what content you share... And all that kind of crap. 
+	- Therefore allowing cookies to the site, is like allowing them to record your visits and likes... You can disable cookies on a site, but then that might make the web-app work unexpectedly.
+
+- Python's Frameworks:
+	- Flask
+	- Django
+
+- Python's Pickle Module: READ THE CTF KATANA...

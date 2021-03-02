@@ -1,0 +1,50 @@
+
+
+Insufficient Logging and Monitoring
+=====================================
+
+- When web applications are set up, every action performed by a user on the system must be logged
+	- This is a great way to know what are the recent changes made to the system.
+	- In case, if an attacker makes a move on the system and it leads to data loss, or data breach... Then we can record those actions and take reactions accordingly...
+
+The bigger impacts on the system made by an attacker could include:
+	- regulatory damage: If an attacker logged in and steal some user information not only this will affect the user, but also it will affect the owners.
+	- risk of further attack: If the attacker logged in and left a root kit inside, and the actions are not logged in then it can lead to n number of future attacks on the web app.
+
+The information stored in logs should include:
+	- HTTP status codes
+	- Time Stamps
+	- Usernames
+	- API endpoints/page locations
+	- IP addresses
+
+Note: These logs do have some sensitive information on them so its important to ensure that logs are stored securely and multiple copies should be stored in different locations.
+
+Monitoring/Detecting
+----------------------
+
+- Logging is more important after a breach or any incident that has occured.
+- The aim of detecting suspicious activity is to stop the attacker completely or to reduce the impact they have caused.
+
+- Common examples of suspicious activity include:
+	- Multiple Unauthorized attempts for a particular action.
+	- Requests from anomalous(something different) IP addresses or location
+	- Use of automated tools
+		- This can be detected by user-agent headers or the speed of requests
+	- Common Payloads
+		- It's common for an attacker to try commonly used payloads like "' OR 1=1--" or "<script>alert('1')</script>". Detecting these payloads can identify that someone was conducting an unauthorized/malicious testing on applications.
+
+Note: There are levels of impact in a suspicious activity... For higher impacts, actions need to be taken sooner. Thus they should raise an alarm to the relevant party.
+
+Practical
+-----------
+
+Analyze the log file and identify the IP address of attacker.
+	49.99.13.16
+
+What kind of attack is being carried out?
+	Brute Force
+
+This is it for the whole room. Phew... It was a good journey. 
+
+Peace.

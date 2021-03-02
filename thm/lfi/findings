@@ -1,0 +1,7 @@
+
+
+gtfo tool on github
+
+	gtfo -e (searches for exe windows)
+	gtfo -b (searches for binaries linux)
+	gtfo -ls exe/bins (lists all the binaries of exe and bins)

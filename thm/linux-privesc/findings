@@ -1,0 +1,6 @@
+
+
+For escalating privileges with NFS:
+	- Check out /etc/exports, JUST IN CASE, if no_root_squash is enabled on any of the file mounts...
+
+	

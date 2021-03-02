@@ -1,0 +1,24 @@
+
+
+- Active Directory Introduction and Overview
+
+- Physcial Active Directory
+	- Domain Controller
+	- AD DS Data Store
+
+- The Forest/Enterprise AD
+	- Components of a forest
+
+Users and Groups
+	- Types of Users
+	- Typers of Groups
+	- DEFAULT SECURITY GROUPS
+
+- Trusts and Policies
+	- Types of Trusts
+
+=> The most vulnerable part of active directory, Authentication
+	- Kerberos and NTLM Overview
+
+- AD in the cloud (Azure)
+

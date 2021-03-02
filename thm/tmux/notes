@@ -1,0 +1,11 @@
+tmux
+=======
+
+So basically, there's nothing to note about tmux in this room, however I will focus my attention towards creating and remembering keys by typing them here...
+
+
+ctrl + b = used for almost every tmux command initialization
+
+
+
+Note: Copy mode in tmux is same as using less command... You already figured that out by now, let's see can you stick with the thought.

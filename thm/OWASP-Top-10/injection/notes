@@ -1,0 +1,66 @@
+Injection in this room, is of two types:
+	- SQL Injection
+	- OS Injection/Command Injection
+
+Note: Injection attacks are based on what technologies we use in our web-app and how those technologies ineterpret the input.
+
+SQL Injectoin occurs when a user passes the sql queries to manipulate the data.
+
+Command Injection occurs when a user passes system commands to manipulate the data.
+
+
+What can an attacker do with these flaws?
+
+(SQL) Attacker can access, modify, delete data in the database, that can lead to exposure of sensitive information to the attacker.
+
+(OS) Attacker can execute system commands inside the host OS, that can lead to exposure of sensitive data of a user to the attacker.
+
+Defense Mechanisms against these attacks:
+
+- Using an allow list: 
+
+When input is sent to the server we can use regex to identify if the input is safe or not... If safe the input is then processed, otherwise discarded and the application throws an error.
+
+- Stripping of the input:
+
+If after processing the input with filters, found any dangerous characters... Those characters are stripped off and then the rest of the input is sent further... This way it can lead to no error generation, and smooth working of the web-app.
+
+
+
+A Brief on Command Injection
+
+Command injection generally occurs when a server side code (like PHP) tries to execute system command or make any system call. That is a way an attacker can exploit it. 
+Sometimes things won't end up something malicious to the server like a normal command i.e. id, whoami etc. or if someone just reads a few files... But if the attacker tries to establish a reverse connection he can get access to the system's user access that runs the web server.
+Through that the attacker will enumerate further vectors to privesc and can do something to ruin the system...
+
+
+Active OS Injection and Blind OS Injection:
+
+Blind OS Injection occurs when the system command made to the server doesn't return any response to the user in HTML document.
+
+Active OS Injection is when, the command made to the server displays the response to the attacker. You can find the response in HTML document.
+
+Note: passthru() is a function in php that let's the string passed into it to be executed as a system command. This is the major case where command injection starts to arise...
+
+
+
+And that's it for today... I completed the OWASP's todays part and later I solved the questions related to OS injection in the [Task 4] THM. N yeaps... No writeups ;)
+
+Good Job. And btw answers to the Task 4 questions are listed below:
+
+What strange text file is in the website root directory?
+	drpepper.txt
+
+How many non-root/non-service/non-daemon users are there?
+	0
+
+What user is this app running as?
+	www-data
+
+What is the user's shell set as?
+	/usr/sbin/nologin
+What version of Ubuntu is running?
+	18.04.4 (Command: lsb_release -a)
+
+Print out hte MOTD. What favourite beverage is shown?
+	DR PEPPER (Command: cat /etc/update-motd.d/00-header)

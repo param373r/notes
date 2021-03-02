@@ -1,0 +1,174 @@
+========================
+||Common Linux PrivEsc||
+========================
+
+
+
+Understanding PrivEsc
+=======================
+
+PrivEsc is important because it allows us to do the following things when we get a high privileged user:
+
+- Reset Passwords
+- Bypass access controls to compromise protected data
+- Edit software configurations
+- Enable persistence, so you can access the machine again later. (Backdooring)
+- Change privileges of other users
+- That cheeky ROOT FLAG <3
+
+Direction of Privilege Escalation
+===================================
+
+There are two main privilege escalation variants:
+
+- Horizontal Privelege Escalation
+- Vertical Privilege Escalation (Privilege Elevation)
+
+- Horizantly PE: This type of privesc is focused on hijacking another normal user's account (rather than elevating to super user). This is done to keeping in mind, that in case if another user has some SUID files attached to their home directory, can be later used to privesc and get the super user access.
+
+- Vertical PE: This is where we try to attempt getting the root/SYSTEM access i.e. increase our privileges to where we can do stuff that a normal user is not allowed to do like, reseting pass, and bypassing protected data.
+
+Enumeration
+==============
+
+Now there are ways to enumerate to privesc.
+
+Simplest is to use an automation script like LinEnum
+
+Ways to get LinEnum to the victim's machine
+--------------------------------------------
+
+- You can directly git clone the github repo
+
+- Host a SimpleHTTPServer and wget on victim's machine.
+
+- If you have sufficient permissions... copy the raw github code of LinEnum and paste it in nano/vi and save the file with a .sh extension.
+
+These 3 ways were listed in the tutorial, which I already knew, but never formatized. Well here they are now. HEEHEEHEE.
+
+
+The Enumeration on BOX
+-------------------------
+
+SSH Credentials - user3:password
+
+Target's Hostname - polobox
+
+Number of users on the hostbox - 8
+
+Number of shells on the hostbox - 4
+
+Cronjobs - user4 - ~/Desktop/autoscript.sh - Every 5 mins
+
+/etc/passwd - Writable group permissions 
+
+
+Abusing SUID/SGID Files
+=========================
+
+This all is about finding the SUIDs and SGIDs. In this section is given a whole bunch of crap regarding user group and others read write and executable permission, which I already know, so won't be going in detail in that.
+
+We can find SUIDs and SGIDs by a standard command used since ages... 
+
+Command: find / -perm -u=s -type f 2> /dev/null (For SUIDs)
+		 find / -perm -g=s -type f 2> /dev/null (For SGIDs)
+
+
+The Abusing
+-------------
+
+What is the path of the file is user3's directory that stands out to you?
+	
+	/home/user3/shell
+
+
+Exploiting Writable /etc/passwd
+==================================
+
+Understanding /etc/passwd format
+---------------------------------
+
+test:x:0:0:root:/root:/bin/bash
+
+As divided by colon:
+
+- Username
+- Password
+- UID
+- GID
+- Comment
+- Home DIR
+- Command/shell (This is the first command that runs when the user logs in.)
+
+
+Enumerating further we found out that user7 and user4 are members of root group, and also, /etc/passwd file is writable. Concluding that user7 and user4 with root privileges can edit the /etc/passwd file.
+OR
+We can add a new user with uid,gid, and shell to root.
+
+Login Credentials - user7:password 
+
+For creating a new user we need to create a password hash first...
+
+Command: openssl passwd -1 -salt [salt] [password]
+
+Password hash created with salt-new && password-123 - $1$new$p7ptkEKU1HnaHpRtzNizS1
+
+Entry to put in /etc/passwd - new:$1$new$p7ptkEKU1HnaHpRtzNizS1:0:0:root/root:/bin/bash
+
+Exploiting Vi Editor
+======================
+
+There is nothing special in this... I did this a 100 times during CTF meh.
+
+Exploiting Crontab
+====================
+
+What is Cron?
+The Crons daemon is a process that executes command on a specific and date and time. People generally use this to schedule activities either one-time-event or event for a regular execution/updation. We can create crontab files for cron daemon to execute commands and instructions at specific time or various intervals.
+
+How to view the cronjobs are active?
+
+/etc/crontab file have all the cron jobs listed. We should always check this file, in case automation script couldn't find anything.
+
+Format of a Cronjob
+---------------------
+
+Ok so this all goes in a horizontal tab form:
+
+# = ID
+m = minute
+h = hour
+dom = day of the month
+mon = month
+dow = day of the week
+user = user that will run this command
+command = the command that cron will execute.
+
+How can we exploit this?
+--------------------------
+
+Simple, just edit, create or redirect (if possible) to something, that can give you shell.
+
+Exploiting PATH variable
+==========================
+
+THIS ONES BRAND NEW FOR ME... Let's talk about it...
+
+Imagine you're given a SUID and it runs a system binary with root privileges, you can't read and write to the file... So what you can do is...
+
+Change the PATH variables to /tmp:$PATH (coz /tmp directory is ahead of rest of the path... the file that our SUID is going to run, will be first looked for into /tmp directory)
+
+Now that said, just create a fake binary with same name, with the contents of "/bin/bash" and make it an executable. So that when we run our SUID script it will try to call the command from system path... but it will get to us first... because that binary with our name is already saved in /tmp directory. WE GOT ROOTED.
+
+
+Final Notes
+-------------
+
+- Practice
+
+- Checklists are good. Try to make your own cherrytree, by experience and try outs
+
+- Try to read out automation scripts
+
+
+Peace.

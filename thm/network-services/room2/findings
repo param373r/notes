@@ -1,0 +1,16 @@
+
+- Exploits for SMTP enumeration...
+	- smtp_version ( finds a vulnerable version)
+	- smtp_enum (enuemrates for usernames and mailing list)
+
+- LAMP stack is a field of study or if I simply just say is a combination of the following:
+
+	- L - Linux
+	- A - Apache HTTP Web Server
+	- M - MySQL
+	- P - PHP (to manipulate SQL data)
+
+	- LAMP stack is when you build something with the following technologies... That is called LAMP stack development.
+
+- Script in nmap to enumerate mysql database service: mysql-enum
+

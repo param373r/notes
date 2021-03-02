@@ -1,0 +1,15 @@
+
+
+- PayloadAllTheThings
+- Tplmap (Can be used to search for the template running on a website and also finding it's payload online.) Available on github.
+
+Command line tools:
+	- tr (trim) -d (delimeter) "<value>"	
+
+- jwl-cracker (bruteforce the available password, pretty efficiently)
+	- It takes in parameters in order...
+	- Token
+	- Alphabet(s) (the combination of which can be used to crack the password) (Default: abcdefghijklmnopqrstuvwxyz)
+	- max-length: Set the max-length of the password... (Default: 12)
+
+	- Fact: In 4 seconds tried 300,000 passwords and the checksum/secret

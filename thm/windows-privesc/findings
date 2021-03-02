@@ -1,0 +1,12 @@
+
+
+These are my first notes on windows privesc, or to be honest, first time with understanding windows in shells and batch scripting.
+So go through them once.
+
+Following tools can be used to scan for privilege escalation on windows:
+
+- winpeas (best; colored output and hunts misconfigurations)
+- seatbelt
+- powerup
+- sharpup
+- accesschk.exe (use the one included in the course material; read notes to know why)

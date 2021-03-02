@@ -1,0 +1,4 @@
+
+
+grep -r "xxx" 
+	- Searches for "xxx" in every file/folder inside the current one. SUPER HOT.

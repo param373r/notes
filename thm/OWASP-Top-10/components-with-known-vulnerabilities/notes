@@ -1,0 +1,46 @@
+
+
+Components With Known Vulnerabilities
+=======================================
+
+Intro
+-------
+
+- There are many a times that a company forgets to update to the latest security patch... However it makes an attacker to exploit the web-app just with a very little effort i.e. searching an exploit for the degraded version.
+	
+- Because of this, OWASP has rated it 3(meaning high) on the prevalence scale.
+
+
+Exploit
+---------
+
+- Since this is about a known vulnerability our work is to research on the application's technology until we find an exploit.
+
+- Many a time, you won't even be given a version no of the web app, and you need to make a lucky guess... Thus comes the hit and trial method.
+
+- This is it for this vulnerability... Our work is pretty much done, all we need to do is some basic research to find the already available exploit.
+
+Practical
+==========
+
+Now this seems like a real challenge... All given is an IP and hack your way through the box... HAHA.
+
+IP: 10.10.209.113
+
+Open Ports:
+	- 22
+	- 80 (Apache 2.4.29)
+
+Well, let's cut to the chase. Well, first of all, I manually enumerated the box here and there for a while to find something I can use to get the shell...
+	- Tried a bunch of things, was getting to get an understanding of some secret files... But then I thought of the topic. That so far what I did under this particular vulnerability is all about a little research on the vulnerability. So I changed my perspective of looking to get shell at the box.
+
+- I google searched for project worlds online book store vulnerabilities, and I literally didn't expect this but I found 2 vulnerabilities (ignoring the second one), first one was of arbitary file upload. Well, I copied the exploit, ran it, and uploaded a php-reverse-shell via that exploit... 
+
+- Got a netcat listener running... So all I gotta do was to visit the link: http://10.10.209.113/bootstrap/img/php-reverse-shell.php to activate the exploit.
+
+- I got a reverse shell...
+
+Task: How many characters are in /etc/passwd?
+	1611
+
+So now, I am finally completed with this vulnerability too. 

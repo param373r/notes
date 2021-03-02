@@ -1,0 +1,79 @@
+Juice Shop
+===========
+
+Juice Shop room is based on Owasp top 10 vulnerabilities
+	- Injection
+	- Broken Authentication
+	- Sensitive Data Exposure
+	- Broken Access Control
+	- Cross Site Scripting
+
+So above mentioned are the vulnerabilites, that the room will walk us through...
+
+I thought of doing them a day after I complete the respective topic from the OWASP Top 10 room.
+
+Great, so as of 25th Nov, 2020 I have 2 room to tasks, to do here.
+
+Starting with...
+
+
+Injection
+-----------
+
+Well this room taught me email injection... LMAO
+
+So, I don't know why the room is like that, but there are answers already attached to it... May be they want us to just try the practical...
+
+For admin's injection
+
+{
+	"email": "' or 1=1 --",
+	"password": "a"
+} 
+
+For Bender's injection
+
+{
+	"email": "bender@juice-sh.op' --"
+	"password": "a"
+}
+
+Edited in burp.
+
+Broken Authentication
+----------------------
+
+Atleast, except for watching which password list to use to bruteforce the admin's password I did pretty all on my own..
+
+Admin's password guess...
+
+Loaded one of the password's list from seclists...
+
+Bruteforced with intruder....
+
+
+Ok I was wrong I copied that too... But hey, that's the room's fault okay?? That was the whole writeup infront of me... It's so hard to control.
+
+Senstive Data Exposure
+------------------------
+
+Tbh, I did that room 2 nights ago... And now, I am here doing it's room.
+
+Ok so I finished the room... Nohing new, "Poison Null Byte". I never heard of it before... And I wonder why so? 
+
+Nvm... I'll dodge and see if I can get time to think about it later.
+
+Broken Access Control
+-----------------------
+
+You know what, I will feel free to skip this room by reading the material... I mean I am still manually doing it... Reason behind I will do owasp juice shop fully from my side... create a write-up for that.
+
+So only headings will be up ahead.
+
+XSS
+----
+
+All three types were shown here...
+
+Note: XSS when performed using iframes... It is also called as XFS (Cross Frame Attack)
+

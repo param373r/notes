@@ -1,0 +1,172 @@
+
+
+Radare2
+========
+
+The intro says the room is not intended to teach everything in radare... It is just to give an overview how important things work in radare.
+	- Great, just what I needed.
+
+
+
+What flag to you set to analyze the binary upon entering the r2 console (equivalent to running aaa once your inside the console)     
+	-A
+How do you enable the debugger?     
+	-d
+How do you open the file in write mode?
+	-w
+How do you enter the console without opening a file    
+	- (r2 -)
+
+Analyzation
+============
+
+What command "Analyzes Everything" (all functions and their arguments: Same as running with radare with -A)
+	aaa
+What command does basic analysis on functions?
+	af
+How do you list all functions?
+	afl
+How many functions are in the example1 binary?
+	12
+What is the name of the secret function in the example1 binary?
+	secret_func
+
+Information
+============
+
+What command shows all the information about the file that you're in?   
+	ia
+How do you get every string that is present in the binary? 
+	izz
+What if you want the address of the main function?    
+	iM
+What character do you add to the end of every command to get the output in JSON format?
+	j
+How do you get the entrypoint of the file?
+	ie
+What is the secret string hidden in the example2 binary?    
+	goodjob
+
+Navigating Through Memory
+==========================
+
+How do you print out the the current memory address your located at in the binary?
+	s
+What command do you use to go to a specific point in memory with the syntax <command> <address>?
+	s
+What command would you run to go 5 bytes forward?
+	s+ 5
+What about 12 bytes backward?
+	s- 12
+How do you undo the previous seek?
+	s-
+How do you redo the forward seek?
+	s+
+How would go to the memory address of the main function?
+	s main
+What if you wanted to go to the address of the rax register?
+	sr rax
+
+Printing
+=========
+
+
+How would you print the hex output of where you currently are in memory?
+	px
+How would you print the disassembly of where you're currently at in memory?
+	pd
+What if you wanted the disassembly of the main function?
+	pdf main
+What command prints out the emoji hexdump? (this is not useful at all I just find it funny)
+	pxe
+What if you decided you were too good for rows and you wanted the disassembly in column format?
+	pC
+What is the value of the first variable in the main function for the example 3 binary?
+	1
+What about the second variable?
+	5
+
+MidTerm
+========
+
+How many functions are in the binary?
+	13 (afl | wc -l)
+What is the value of the hidden string?
+	you_found_me (izz)
+What is the return value of secret_func()?
+	4 (eax register has value 4 just before exiting the function)
+What is the value of the first variable set in the main function(in decimal format)?
+	12 (r2 -d midterm (pdf main ; Find the value in the comment section))
+What about the second one(also in decimal format)?
+	192 (commented in debugger mode)
+What is the next function in memory after the main function?
+	midterm_func (afl | sort (will sort it by memory address... That's what we want)).
+How do you get a hexdump of four bytes of the memory address your currently at?
+	px 4
+
+Debugging
+==========
+
+How do you set a breakpoint?
+	db
+What command is used to print out the values of all the registers?
+	dr
+How do you run through the program until the program either ends or you hit the next breakpoint?
+	dc
+What if you want to step through the binary one line at a time?
+	ds
+How do you go forth 2 lines in the binary?
+	ds 2
+How do you list out the indexes and memory addresses of all breakpoints?
+	dbi
+
+Fun commands:
+	pxc - show hexdump with comments
+
+Visual Mode
+=============
+
+Leaving this for now, for this is completely different and awesome feature of radare2. Will give separate time to this later.
+
+Note: To reverse debug in radare... Start the recording first with dts+
+	Then loop through the code and if want to go back a previous step use...
+		r2> dsb
+	- If want to go back a previous breakpoint use,
+		r2> dcb
+	- To set a value in the register use,
+		r2> dr eax=1234
+
+Write Mode
+===========
+
+
+
+How do you write a string to the current memory address.
+	w
+What command lists all write changes?
+	wc
+What command modifies an instruction at the current memory address?
+	wa
+
+
+Write mode is where we enter into binary patching...
+	- Opcode is the hex representation of instructions...
+		- like, cmp dword[var_4h], 5 has opcode 837dfc05
+
+	To patch a binary... Open the binary in write mode...
+		$ r2 -w ./binary
+
+		- Seek to an address with s <addr>, and then edit the opcode with wx <opcode>
+		OR
+		- You can also use wx 41424344 @ rbp-0x10 (To set the value of a variable at rbp-0x10 location to 'ABCD' (41424344 is hex format for ABCD)).
+
+	- If you want to edit the binary while debugging... You can set the opcode by going to a particular locaion
+
+		s <addr>
+		wa jmp <addr> / wa nop / (or you can specify even op code)
+
+	Note: I think the options of instructions that you can write in the binary are limited, coz I wasn't able to write a cmp instruction... Tho, jmp and nop works just fine... So stick with that.
+
+I am not kidding, the intension of the final exam was a tough CTF reversing question, because I tried to recreate the C code and then reverse engineer... I didn't try to find a pattern lmao... The pattern was, adding 0xa to every character in the password, which would result in the string 'youdidit'
+
+This is it for the room.

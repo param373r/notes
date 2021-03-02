@@ -1,0 +1,177 @@
+
+
+Encryption - Crypto 101
+=========================
+
+Scope of this room:
+	- Overview and perspective via CTF
+	- The two main classes of cryptography
+	- RSA, and some of the uses of RSA.
+	- 2 methods of Key Exchange
+	- Notes about the future of encryption with rise of Quantum Computing
+
+Key Terms
+-----------
+
+I think that's really basic... So I will be noting only those things that seems important and worth noting.
+
+Note: Encoding is not encryption, it's just a form of data representation like base64. Encodings are reversible, encryption may not.
+	- So base64 cipher, base64 hash terms doesn't exist we say, we found a string of base64 encoding. or we find a string of binary/hex/octal encoding.
+
+Cryptanalysis - Attacking cryptography by finding a weakness in the underlying maths.
+
+Note: Key and passphrase in cryptography is different. Key is means of correctly decoding/decrypting a ciphertext, whereas a passphrase is means of protecting the key (eg. SSH keys being encrypted and protected by a passphrase)
+
+NOTE: THIS ROOM IS FULL OF THEORY... YOU CAN DO CRYPTOGRAPHY WITHOUT READING THIS THEORY... BUT FORMATIZE EVERYTHING THAT YOU KNOW IN CRYPTOGRAPHY YOU MUST BE KNOWING CORRECT WAY OF DOING THEM. THUS, THIS ROOM REFINES YOUR SKILLS IN CRYPTOGRAPHY BY GIVING IT A FINAL TOUCH OF WHAT YOU ALREADY KNOW.
+
+Why is encryption so important?
+--------------------------------
+
+All that theory notes... You really don't need to read it... Hardly, anything valuable.
+
+Crucial Crypto Maths
+----------------------
+
+Lmao, it only taught you about using the modulo operator XDXD.
+
+Types of Encryption
+---------------------
+
+This one's a start ig...
+
+- Symmetric: 
+	- Uses the same key to encrypt and decrypt the data.
+	- Example DES and AES
+	Note: DES is not a good implementation of its encryption... So instead, it was modified to Triple DES encryption which made it more secure
+	- They tend to be faster as they use smaller keys(128 or 256 bits) to encrypt and decrypt
+
+- Asymmetric:
+	- Uses the pair of keys, one to encrypt and the other to decrypt
+	- Eg. RSA and Elliptic Curve Cryptography.
+	- They tend to be slower, as they use larger keys(2048 or 4096 bits) to encrypt and decrypt the data.
+
+RSA
+----
+
+Nothing special here, all basic about RSA.
+
+Establishing keys using Asymmetric encryption
+-----------------------------------------------
+
+Ok, so first thinking twice, read out the whole paragraph... 
+	- Use of Asymmetric cryptography is for exchanging keys for symmetric encryption.
+
+- Simply what this means is, when we try to communicate with someone, securely, we would want to share a secret code to decrypt the sent text, but what if someone stole the secret code in the middle. For that case, we use public and private key encryption to send the secret code... Public key to encrypt the secret code and private key to decrypt the secret code... Once it reaches to the receiver, the receiver decrypts the secret code with the private key, then they can communicate in a secure way via symmetric encryption.
+
+- In real life, cryptography is a little more complicated... There is another layer of security added i.e. of digital signatures and certificates. 
+
+Digital Signature
+------------------
+
+- Digital Signatures are actually way of verifying that it is really you, it works like, when you encrypt a file with your private key, and send it to the receiver, he makes sure that it is you who sent the file to him, by decryping the file with your public key (coz if the file is encrypted by your private key then definitely it is your public key that could decrypt it).
+
+Certificates
+-------------
+
+- They are a key use of public key cryptography.
+
+How does your browser makes sure that the site like facebook.com or the google.com is authentic?
+
+	- The answer is certificates. Basically, these certificates have a chain of trust, which starts from ROOT CAs. Like google.com. To verify that your site is authentic and real... you can buy an SSL certificate from google, as google being one of the ROOT CAs, and then google gave the certify that you're authentic... 
+	- The thing is you can create your own ssl certificate... But, your browser will show that warning symbol on the secure lock, telling connection is not secure... Well, whatever you request and going to the server is encrypted, the only issue that your browser tells you is, that the server may not be trusted.
+
+SSH Authentication
+--------------------
+
+NOw, here are small little things that you should know, just as a reminder and some tricks.
+
+- 'ssh-keygen' is used to create public/private key pair for the ssh.
+
+Tip: To get a permanent access to a server, create a key-pair locally, and then replace your public key with the host... So the next time you want to login the machine... You can use, your created private key, to get access to the server.
+
+- If your public key is in authorized_keys file, then you don't even need password to enter via ssh, this might come in handy for quick access. Hence, this can be used as a backdoor to the machine.
+
+Note: To use a private key you should be using valid file permissions i.e. 600 or stricter.
+
+Challenge
+-----------
+
+Converted idrsa.id_rsa file to john's crack format...
+
+CMD: python /usr/share/john/ssh2john.py idrsa.id_rsa > john_hash_format
+
+Then cracked the file using john
+
+CMD: john --format=ssh --wordlist=/usr/share/wordlists/rockyou.txt john_hash_format
+
+Password: delicious
+
+Explaining Diffle Hellman Key Exchange
+----------------------------------------
+
+This is a smart move I say... Just for the sake simplicity this is gonna be long... But this would only take one read, so hold it tight.
+
+For example:
+	- Alice and Bob wants to use symmetric encrypted way of transfering things... But couldn't rely on asymmetric encryption to transfer the secret code.
+
+	- So they come up with an idea that they both will generate their own private keys, Alice's private key A and Bob's private key B. and send each other their public key.
+
+	- They will mix their private keys with a common key (not public key because that comes in pair with private key). let's call that key C.
+
+	- Now alice and bob will mix thos keys with the common key C and make a pair AC and BC.
+
+	- Now what they will do is encrypt their message with each other's public key, common key and their very own private key.
+		- Therefore, alice will encrypt the message with A(private key), B(public key), and C.
+		- On the other hand, bob will encrypt the message with B(private key), A(public key) and C.
+		- Which means both will have an encryption key of ABC, for transferring files.
+
+Now let's test what will happen:
+
+	When Bob send a message encrypting with A's public key, B's private key and, C the common key, A will be able to decrypt the message with his (A) private key, B's public key, and C is the common key that they share.
+	- Whereas the attacker will be having A's public key and B's public and the common key that was public... So to decrypt the message from either end he will be needing an alternative key, to the encryption made from a public key, and that is private key. But the private keys were never shared between the two, which will make it impossible to read the data sent via encryption(unless bruteforce; but let's be real to bruteforce 2048/4096 bits will take the attacker decades to crack it) for the attacker. 
+
+	#Impressed. 
+
+	- Now, you might wonder, that what is the need of common key, when the game is about private keys. And that's true we can establish that secure connection without using the common key right?
+	- The thing is I didn't made this theory, it's just how DH key exchange works, so stop wondering and congrats, you understand this exchange really well.
+
+
+PGP, GPG and AES
+------------------
+
+PGP - Pretty Good Privacy; a software that implements encryption for encrypting files, digital signing and more.
+
+GPG/GnuPG is an open source implementation of PGP from the GNU Project.
+	- If you wonder what is GNU project. It's a purely open source community that brings people to collaborate and provide softwares for free. You think of this GNU community is the start of GNU license that you might use on github. GNU, was first started by a man, named Richard Stallman(check out the about page, to read the story of this whole GNU community).
+
+	- You can attempt crack gpg files with a john and gpg2john.
+
+AES - Advanced Encryption Standard aka Rijndael is a replacement for DES encryption for it's cryptographic flaw.
+	- AES and DES both work on blocks of data.
+
+	- There was a video link given to AES encryption (in case we want to understand it in depth), I watched a video the introductory part(exited around the starting of substitution of the key), and this one was impressive, like the algorithm's deep enough and worth a read. I am not including the AES in this note. Because it's already pretty lengthy.
+
+The Challenge
+---------------
+
+So, the challenge was to decrypt the message.gpg with a private key that was given to us...
+
+- So I imported the key with... gpg --import tryhackme.key
+
+- Then I decrypted the message.gpg with... gpg --decrypt message.gpg
+
+
+The Future - Quantum Computers and Encryption
+-----------------------------------------------
+
+- The very first line in the task... 
+	" Quantum computers will soon be a problem for many types of encryption "
+	- made me waaayyyyyyyy to go... jk.
+
+- When in year 2030, quantum computers come, then encryptions like RSA won't stand a chance to live, as with such high computational power of the quantum computers, these algorithms could be bruteforced within hours...
+
+- Same is with AES128 bit keys, likely to be broken, but 256 bit key can't be broken easily... Triple DES still sound vulnerable.
+
+- According to the sources from the room, there is research going on to make the encryption break free from quantum computers. Recommendations are to use RSA 3072 or AES 256 because these will be harder to break even with quantum power.
+
+With this I finished room.

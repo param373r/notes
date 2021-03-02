@@ -1,0 +1,52 @@
+Starting enum4linux v0.8.9 ( http://labs.portcullis.co.uk/application/enum4linux/ ) on Sun Jan 10 12:12:50 2021
+
+ ========================== 
+|    Target Information    |
+ ========================== 
+Target ........... 10.10.197.228
+RID Range ........ 1000-1003
+Username ......... ''
+Password ......... ''
+Known Usernames .. administrator, guest, krbtgt, domain admins, root, bin, none
+
+
+ ===================================================== 
+|    Enumerating Workgroup/Domain on 10.10.197.228    |
+ ===================================================== 
+[+] Got domain/workgroup name: WORKGROUP
+
+ ====================================== 
+|    Session Check on 10.10.197.228    |
+ ====================================== 
+[+] Server 10.10.197.228 allows sessions using username '', password ''
+
+ ============================================ 
+|    Getting domain SID for 10.10.197.228    |
+ ============================================ 
+Domain Name: WORKGROUP
+Domain Sid: (NULL SID)
+[+] Can't determine if host is part of domain or part of a workgroup
+
+ ================================================================ 
+|    Users on 10.10.197.228 via RID cycling (RIDS: 1000-1003)    |
+ ================================================================ 
+[I] Found new SID: S-1-22-1
+[I] Found new SID: S-1-5-21-2007993849-1719925537-2372789573
+[I] Found new SID: S-1-5-32
+[+] Enumerating users using SID S-1-5-32 and logon username '', password ''
+S-1-5-32-1000 *unknown*\*unknown* (8)
+S-1-5-32-1001 *unknown*\*unknown* (8)
+S-1-5-32-1002 *unknown*\*unknown* (8)
+S-1-5-32-1003 *unknown*\*unknown* (8)
+[+] Enumerating users using SID S-1-22-1 and logon username '', password ''
+S-1-22-1-1000 Unix User\kel (Local User)
+S-1-22-1-1001 Unix User\des (Local User)
+S-1-22-1-1002 Unix User\tryhackme (Local User)
+S-1-22-1-1003 Unix User\noentry (Local User)
+[+] Enumerating users using SID S-1-5-21-2007993849-1719925537-2372789573 and logon username '', password ''
+S-1-5-21-2007993849-1719925537-2372789573-1000 *unknown*\*unknown* (8)
+S-1-5-21-2007993849-1719925537-2372789573-1001 *unknown*\*unknown* (8)
+S-1-5-21-2007993849-1719925537-2372789573-1002 *unknown*\*unknown* (8)
+S-1-5-21-2007993849-1719925537-2372789573-1003 *unknown*\*unknown* (8)
+enum4linux complete on Sun Jan 10 12:14:35 2021
+

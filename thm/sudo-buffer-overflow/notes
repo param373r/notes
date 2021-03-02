@@ -1,0 +1,28 @@
+
+
+Sudo Part 2
+=============
+
+This is the 2nd part in continuation with the sudo vulnerabilities. 
+
+Sudo Buffer Overflow (CVE-2019-18634)
+---------------------------------------
+
+- Brought up by the same guy - Joe Vinnix, who found the security bypass vulnerability in sudo.
+
+- This vulnerability affects the versions of sudo earlier than 1.8.26.
+
+- In the earlier part we saw that a vulnerability misconfiguration which only works in a particular scenario of specific permissions.
+
+- This vulnerability exploits a general vulnerability of buffer overflow.
+
+	- The exploit was created by someone named Saleem Rashid
+		Source code of the exploit: https://github.com/saleemrashid/sudo-cve-2019-18634
+
+- The vulnerability was in pwfeedback option in /etc/sudoers.
+
+	This option is purely aesthetic, and is usually turned off by default (with the exception of ElementaryOS and Linux Mint - although they will likely now also stop using it). If you have used Linux before then you might have noticed that passwords typed into the terminal usually don't show any output at all; pwfeedback makes it so that whenever you type a character, an asterisk is displayed on the screen.
+
+- Here's the catch. When this option is turned on, it's possible to perform a buffer overflow attack on the sudo command. To explain it really simply, when a program accepts input from a user it stores the data in a set size of storage space. A buffer overflow attack is when you enter so much data into the input that it spills out of this storage space and into the next "box," overwriting the data in it. As far as we're concerned, this means if we fill the password box of the sudo command up with a lot of garbage, we can inject our own stuff in at the end. This could mean that we get a shell as root! 
+
+This was it for the sudo bof vulnerability.

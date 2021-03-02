@@ -1,0 +1,17 @@
+Findings
+==========
+
+- Format of a cronjob
+
+- How to privilege escalate using PATH variable.
+
+- /etc/crontab is worth checking regardless of automation script used or not... This lists every cron job running on that system
+
+- Format of a /etc/passwd
+
+- Ways to get linenum etc scripts to victim's machine
+
+TODO
+======
+
+- man openssl (cryptography tool; generally used to create password hashes for /etc/passwd)

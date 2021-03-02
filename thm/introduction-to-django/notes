@@ -1,0 +1,65 @@
+
+
+Introduction
+=============
+
+- Django is a framework of python, for web and is really advanced.
+- It is also the most secure developing frameworks, which in right configuration can strongly resist SQL injections in XSS.
+- It can automatically compile HTML and other markup languages, if a user isn't having knowledge of one.
+- If familiar with python, and wanting create a website, then django is a way to go. 
+	- As a penetration tester it is good to have this knowledge, to identify the weakness in a website powered by django.
+
+
+Getting started
+================
+
+- pip install django==2.2.12
+
+- To start a project
+	
+	django-admin startproject {project-name}
+
+- Run "python3 manage.py migrate" to automatically configure new files.
+- After creating the project you can see that django creates a file manage.py and a file directory named after your project.
+
+Note: manage.py is a command-line utility that let's you interact with our django project. 
+	- Helps in creating web-apps, managing databases, and most importantly running the server.
+
+	Syntax: python3 manage.py {commnand}
+
+Following are the commands that are generally used for manage.py:
+	- runserver
+	- createsuperuser
+	- startapp
+
+runserver command:
+	It is the most important command it runs the server on which our django made up runs...
+		- The biggest plus point is, the runserver command refreshes server in real time, in case if we want to make changes, we do not need to restart the server. The changes get reflected automatically, instantly. Though, we do need to restart the server when we have to add another app to the project.
+
+Note: If you are willing to run the server to your local network, just add 0.0.0.0:8000 after runserver command. (In case if you get an error afterward, just go to settings.py located your websites folder and add this address to ALLOWED_HOSTS)
+	
+createsuperuser command:
+	As it sounds like, it allows to create a super user(admin) accoung for our django web admin panel.
+
+	After running this command, go to IP:8000/admin to view your admin panel.
+
+startapp command:
+	Startapp allows you to initializean an app for your project.
+		- The no. of apps that can run on django depends on your memory, for django, it can handle n no of apps at once, required given your memory is enough.
+
+	CMD: python3 manage.py startapp {app_name}
+
+Creating a website
+--------------------
+
+When we create a new app after initiating a project, we should first make the following changes in the settings.py and urls.py
+
+- In settings.py
+	
+	Add your app's name in the "INSTALLED_APPS = []" list
+
+- In urls.py
+	
+	Add a path to your app in the 
+
+Password: WildNature

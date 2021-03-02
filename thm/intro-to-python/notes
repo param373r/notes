@@ -1,0 +1,56 @@
+Intro to Python
+-----------------
+
+So as I already know python, I won't be creating much notes in here. Just important key concepts.
+
+Room Covers:
+	- Variables
+	- Loops
+	- Functions
+	- Data Structures
+	- Libraries and PIP
+	- Files
+
+Things Learnt:
+	- Functions
+		- print()
+		- input() (The data passed into input function will by default be a string)
+		- type()
+		- int()
+		- str()
+		- float()
+		- bool() (If anything passed into this function via input() it will return true (as it will be a string that bool() is trying to convert) so always True until there is no value passed via input)
+
+Note: A function without return statement, returns None
+
+Note: You can put an else statement after for looop, this is a way of implementing your code like this...
+
+	for i in x:
+		print(i)
+
+	else:
+		print("Done")
+
+
+Here, after the loop will finish executing, this will add "Done" string to the end of execution of for loop.
+
+File Modes:
+	- r
+	- w 
+	- a
+	- a+ (Appending and Read)
+	- r+ (Read and write)
+
+File Functions:
+	- read() (This will read the whole file at once)
+	- readline() (This will read one line each time it is called)
+	- readlines() (This will read the whole file, and return a list, elements separated by "\n")
+	- write() (This function will write to the end of the file, whatever the string we pass in it)
+
+
+The Virtual Environment
+-------------------------
+
+This is amazing in case I am working on a ctf and I don't want to save my work for later, and want to work in only one time python script. I literally needed something like this.
+
+To later delete your work, just delete the folder from the directory in which you created, your virtualenv.

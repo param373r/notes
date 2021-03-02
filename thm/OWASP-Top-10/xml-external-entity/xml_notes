@@ -1,0 +1,21 @@
+
+
+These are notes for programming language... In these notes am gonna talk briefly about how XML works... In order for you to understand any new things in 'notes' file.
+
+- Entities are nothing other than being just variables of XML document, which defines helps us to prevent re-writing and re-using a particular value at multiple places.
+
+- Every XML document starts with a prologue:
+
+	<?xml version="1.0" encoding="UTF-8"?>
+
+Note: This is not compulsory to use, but it's good practice to add prologue in starting.
+
+- The XML document must contain a ROOT element.
+	- If an XML document has no ROOT element it would be considered wrong/invalid.
+
+- XML is case-sensitive language.
+
+- Like HTML, we can use attributes in XML too, like this...
+	
+	<text category="message">blablabla</text>
+	Here, category is attribute name and message is attribute's value.

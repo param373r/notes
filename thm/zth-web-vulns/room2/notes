@@ -1,0 +1,69 @@
+
+
+Zth Web 2
+==========
+
+These vulnerabilities won't get us any RCE or LFI... But can leak client's data that he would rather wanna keep private.
+
+This room covers the following vulnerabilities:
+	- IDOR
+	- Forced Browsing
+	- API based Authentication Bypass
+
+IDOR
+=====
+
+Insecure Direct Object Reference (IDOR) - It is a type of vulnerability that occurs due to misconfiguration in the web app's user input handling logic...
+	- Like token in user's URL... can be the only way to authenticate and can be copied by the hacker to manipulate user's account.
+	- If the token is changed from 1234 to 1235 then the user might login into another account; This is Insecure Direct Object Reference of a user's account.
+
+Practical
+----------
+
+Note: Not kiddin, I did the entire same challenge, the wording, and the flag for this, in OWASP Top 10 room. nevermind. I got a fresh revision
+
+Flag: flag{fivefourthree}
+
+Forced Browsing
+=================
+
+This is something you do with the URL of a website like instagram.com/belikeParamjot and then if you dont want to go to search bar, start typing few words(load the resulted users) and then scrolling through to find the user... Then you simple change the URL's end, instagram.com/belikeParamjot to instagram.com/cristiano...
+	- The room says that this could lead to other user's profile and various details that are not normally indexed to us to view.
+
+- LMAO, I have been doing this since I was in my +1, I am the grand master...
+
+Note: forced browsing requires logic as a hacker to identify if there's any way to get to that path.
+
+Automation with Forced Browsing
+================================
+
+- Wfuzz to the rescue.
+
+Challenge
+-----------
+
+Use wfuzz and find the flag on port 81
+	
+	Flag: flag{forcednooting}
+
+
+API Bypassing
+===============
+
+=> This is a bit of unique web vulnerability and DOES REUQUIRE A LOT OF RESEARCH BY THE HACKER.
+
+=> API bypassing can be hectic so their's hardly any solution(automated) or learnign on this... You need to read the api code and then think of someway to exploit it... 
+
+Exploitation
+-------------
+
+In this section he briefly explained 
+
+Challenge
+-----------
+
+Challenge Directory bruteforce and then fuzz the parameter to read flag.txt from the server.
+	Parameter found after fuzzing: file
+	Final URL: http://<iP>:82/api.php?file=flag.txt
+	Flag: flag{test1234} 
+It took me a lot of time... The parameter I was fuzzing was at somewhere near 7000th position... (This generally isn't the case when learning is concerned... But whatever the case is... I did it)

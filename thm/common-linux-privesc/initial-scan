@@ -1,0 +1,76 @@
+# Nmap 7.91 scan initiated Wed Nov 18 17:29:04 2020 as: nmap -sC -sV -v -oN initial-scan 10.10.154.77
+Nmap scan report for 10.10.154.77
+Host is up (0.50s latency).
+Not shown: 994 closed ports
+PORT     STATE SERVICE     VERSION
+22/tcp   open  ssh         OpenSSH 7.6p1 Ubuntu 4ubuntu0.3 (Ubuntu Linux; protocol 2.0)
+| ssh-hostkey: 
+|   2048 37:c9:2d:7e:01:c5:ea:33:a9:e2:19:ea:66:1c:95:82 (RSA)
+|   256 9f:48:65:f7:67:2e:92:cf:73:ce:0e:69:f1:32:46:40 (ECDSA)
+|_  256 ac:5f:9a:38:23:ee:ac:14:88:9e:aa:08:df:98:f4:a7 (ED25519)
+80/tcp   open  http        Apache httpd 2.4.29 ((Ubuntu))
+| http-methods: 
+|_  Supported Methods: OPTIONS HEAD GET POST
+|_http-server-header: Apache/2.4.29 (Ubuntu)
+|_http-title: Apache2 Ubuntu Default Page: It works
+111/tcp  open  rpcbind     2-4 (RPC #100000)
+| rpcinfo: 
+|   program version    port/proto  service
+|   100000  2,3,4        111/tcp   rpcbind
+|   100000  2,3,4        111/udp   rpcbind
+|   100000  3,4          111/tcp6  rpcbind
+|   100000  3,4          111/udp6  rpcbind
+|   100003  3           2049/udp   nfs
+|   100003  3           2049/udp6  nfs
+|   100003  3,4         2049/tcp   nfs
+|   100003  3,4         2049/tcp6  nfs
+|   100005  1,2,3      55501/udp6  mountd
+|   100005  1,2,3      55947/tcp6  mountd
+|   100005  1,2,3      60205/tcp   mountd
+|   100005  1,2,3      60901/udp   mountd
+|   100021  1,3,4      32881/tcp6  nlockmgr
+|   100021  1,3,4      40035/tcp   nlockmgr
+|   100021  1,3,4      45906/udp6  nlockmgr
+|   100021  1,3,4      58563/udp   nlockmgr
+|   100227  3           2049/tcp   nfs_acl
+|   100227  3           2049/tcp6  nfs_acl
+|   100227  3           2049/udp   nfs_acl
+|_  100227  3           2049/udp6  nfs_acl
+139/tcp  open  netbios-ssn Samba smbd 3.X - 4.X (workgroup: WORKGROUP)
+445/tcp  open  netbios-ssn Samba smbd 4.7.6-Ubuntu (workgroup: WORKGROUP)
+2049/tcp open  nfs_acl     3 (RPC #100227)
+Service Info: Host: LINUX; OS: Linux; CPE: cpe:/o:linux:linux_kernel
+
+Host script results:
+|_clock-skew: mean: 1h39m58s, deviation: 2h53m13s, median: -2s
+| nbstat: NetBIOS name: LINUX, NetBIOS user: <unknown>, NetBIOS MAC: <unknown> (unknown)
+| Names:
+|   LINUX<00>            Flags: <unique><active>
+|   LINUX<03>            Flags: <unique><active>
+|   LINUX<20>            Flags: <unique><active>
+|   \x01\x02__MSBROWSE__\x02<01>  Flags: <group><active>
+|   WORKGROUP<00>        Flags: <group><active>
+|   WORKGROUP<1d>        Flags: <unique><active>
+|_  WORKGROUP<1e>        Flags: <group><active>
+| smb-os-discovery: 
+|   OS: Windows 6.1 (Samba 4.7.6-Ubuntu)
+|   Computer name: polobox
+|   NetBIOS computer name: LINUX\x00
+|   Domain name: \x00
+|   FQDN: polobox
+|_  System time: 2020-11-18T07:00:02-05:00
+| smb-security-mode: 
+|   account_used: guest
+|   authentication_level: user
+|   challenge_response: supported
+|_  message_signing: disabled (dangerous, but default)
+| smb2-security-mode: 
+|   2.02: 
+|_    Message signing enabled but not required
+| smb2-time: 
+|   date: 2020-11-18T12:00:02
+|_  start_date: N/A
+
+Read data files from: /usr/bin/../share/nmap
+Service detection performed. Please report any incorrect results at https://nmap.org/submit/ .
+# Nmap done at Wed Nov 18 17:30:18 2020 -- 1 IP address (1 host up) scanned in 73.84 seconds

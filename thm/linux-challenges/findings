@@ -1,0 +1,33 @@
+Findings
+---------
+
+=> ps -aux - to list all processes
+
+=> tar xf archive.tar.gz - will unzip the gzip also
+
+=> Logs are stored in /var/log
+
+=> MOTD(Message of the Day) - are stored in /etc/motd or (/etc/update-mot.d in case of ubuntu)
+
+=> findmnt - Lists all mounted file systems in the OS
+
+=> rev - Reverse the output if piped into it.
+
+=> /etc/group
+=> /media a mount system?
+
+=> system information is usually present in /etc/*release, in case uname -a ain't working
+
+=> There is a difference between more and less check challenge 21
+
+=> use -E flag with grep to include regex DUMBOOOO
+
+TODO
+------
+
+=> man diff
+=> man sed
+=> man awk
+=> man curl
+=> man tr
+=>

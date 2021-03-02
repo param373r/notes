@@ -1,0 +1,369 @@
+Linux Challenges
+=====================
+
+TODO:
+------
+
+- Learn Commands: ls grep cd tail head curl strngs tmux find locate diff tar xxd
+
+- SSH'in to other users account using a password and a private key
+
+- Locating files on the system hidden in different directories
+
+- Encoding Methods (base64, hex)
+
+- MySQL database interaction
+
+- Understanding System Variables and PATHS
+
+- File Permissions
+
+- RDP and GUI
+
+
+New Topics
+-------------
+
+- Understanding CronJobs and MOTD's and system mounts
+
+
+----------------------------------------------------------------------------------------------
+
+
+SSH Credentials - garry:letmein
+
+----------------------------------------
+
+
+Ok so let's try to understand what's the next section is about...
+
+=> Each question MIGHT require you to switch between antoehr user to find the answer!
+
+Flag 1
+-------
+
+'''cat flag1.txt
+
+Flag 1: f40dc0cff080ad38a6ba9a1c2c038b2c
+
+There are flags hidden around the file system, its your job to find them.
+
+Log into bobs account to get flag 2.
+
+Username: bob
+Password: linuxrules
+
+''''
+
+Flag 2
+---------
+
+I logged into bob's account using 'su bob'.
+
+Flag 2: 8e255dfa51c9cce67420d2386cede596
+
+Flag 3
+--------
+
+With the question, I checked .bash_history and found the flag.
+
+Flag 3: 9daf3281745c2d75fc6e992ccfdedfcd
+
+Flag 4
+--------
+
+Question: Flag 4 is where the cronjobs are created.
+
+Well, this isn't talking about the directory... because the directory requires root access and user bob is not in sudoers. So, I tried to list available cronjobs by the command 'crontab -l' and it listed flag4.
+
+flag 4: dcd5d1dcfac0578c99b7e7a6437827f3
+
+Flag 5
+-------
+
+I used the find command 'find / -iname flag5.txt 2>/dev/null'
+
+and it listed me that the flag was in /lib/terminfo/E/flag5.txt
+
+flag 5: bd8f33216075e5ba07c9ed41261d1703
+
+Flag 6
+--------
+
+grep the flag out of /home/flag6.txt, first two characters are "c9". EZ PZ... "grep c9 flag6.txt"
+
+flag 6: c9e142a1e25b24a837b98db589b08be5
+
+Flag 7
+--------
+
+To view all running processes... So I used ps -aux | grep flag7
+
+flag 7: 274adb75b337307bd57807c005ee6358
+
+Flag 8
+--------
+
+To decompress I used "tar xf flag8.tar.gz"
+
+flag 8: 75f5edb76fe98dd5fc9f577a3f5de9bc
+
+Flag 9
+---------
+
+hosts file... That is, /etc/hosts.
+
+There is this wierd domain to localhost, i.e. "dcf50ad844f9fe06339041ccc0d6e280.com", guess that's the flag.
+
+flag 9: dcf50ad844f9fe06339041ccc0d6e280
+
+Flag 10
+----------
+
+Find all others in the system, therefore we have to view /etc/passwd
+
+"5e23deecfe3a7292970ee48ff1b6d00c:x:1002:1002:,,,:/home/5e23deecfe3a7292970ee48ff1b6d00c:/bin/bash"
+
+This string...
+
+flag 10: 5e23deecfe3a7292970ee48ff1b6d00c
+
+
+---------------------------------------------------------------------------------------------
+
+Now we hae used the baseic Linux commands to find the first 10 flags, we will move onto using more functions that Linux has to offer.
+
+Flag 11
+---------
+
+So the challenge was to find where the bash alias are stored... i.e. .bashrc
+
+flag 11: b4ba05d85801f62c4c0d05d3a76432e0
+
+Flag 12
+---------
+
+Challenge was to find where the MOTD are stored in ubuntu /etc/update-mot.d directory
+and when I cat out all the files, I found the flag in 00-header file
+
+flag 12: 01687f0c5e63382f1c9cc783ad44ff7f
+
+Flag 13
+----------
+
+This was an easy challenge... where I need to use one command i.e. "diff script1 script2" and the unique line in script2 gvave me the flag.
+
+flag 13: 3383f3771ba86b1ed9ab7fbf8abab531
+
+Flag 14
+--------
+
+Challenge: Where are the system logs saved on linux system i.e. /var/log, and the password was in flagtourteen.txt
+
+flag 14: 71c3a8ad9752666275dadf62a93ef393
+
+Flag 15
+---------
+
+Challenge: Where information about the system is stored?
+I went crazy on this challenge... Coz tried harder and couldn't get any... so at the I tried hint and do crazy things like running command like this...
+
+Command: find / -type f 2>/dev/null | grep release (and sorted through almost every release that seemed fair, and the flag was in /etc/lsb-release)
+
+flag 15: a914945a4b2b5e934ae06ad6f9c6be45
+
+Flag 16
+--------
+
+I ran the findmnt - this finds the file systems mounted to the main os
+tbh, that was just a time waste... the mounts are usually in /mnt directory... When I took the help of a writeup I found that there is a mount directory /media... that's bad for me coz I scratched my head for like hours, that why would someone insert a pendrive, to a temporary booted box... Nvm, this was a good challenge and I failed to do...
+
+flag 16: cab4b7cae33c87794d82efa1e7f834e6
+
+Flag 17
+---------
+
+Credentials alice:TryHackMe123
+Flag found in home dir
+
+flag 17: 89d7bce9d0bab49e11e194b54a601362
+
+Flag 18
+--------
+
+Flag hidden in the home dir 
+
+flag 18: c6522bb26600d30254549b6574d2cef2
+
+Flag 19
+--------
+
+Challenge: Read the flag from 2345th line of flag19 file present in home dir
+Command: cat -n flag19 | grep 2345
+
+flag 19: 490e69bd1bf3fc736cce9ff300653a3b
+
+Note: The Hint was to use sed command
+
+---------------------------------------------------------------------------------------
+
+This section is how data is represented in a linux file system.
+
+Flag 20
+----------
+
+Flag was base64 encoded, so after decrypt the flag came out to be...
+
+flag 20: 02b9aab8a29970db08ec77ae425f6e68
+
+Flag 21
+---------
+
+Challenge: Inspect the flag21.php file. Find the flag.
+
+I am so dumb that I thought it will be easier to read a php code... LMAO, we were actually dealing with inspecting the files in linux... Duh, which means we gotta use more/less commands on the file...
+In my case the file gave me the flag, when I ran it with less (less flag21.php, this is because less is like the "inspect the tab" in chrome... showing the hidden texts, comments etc.) 
+ProTip: I consider inspecting a file with more is a bit advance, because I remember I solved a challenge with which I gained a permanent shell from a terminating shell session using more and terminal window resizing)
+
+flag 21: g00djob
+
+
+Flag 22
+----------
+
+Challenge: convert hex bytes into ascii... 
+Command: cat flag22 | xxd -r -p
+
+flag 22: 9d1ae8d569c83e03d8a8f61568a0fa7d
+
+Flag 23
+---------
+
+Challenge: reverse the text in the flag
+Command: cat flag22 | rev
+
+flag 23: ea52970566f4c090a7348b033852bff5
+
+Flag 24
+---------
+
+Challenge: Find the human readable strings in a compiled binary
+Command: strings flag24
+
+Flag 25
+--------
+
+No flag just a complete button with skipped written in question
+
+Flag 26
+---------
+
+Ok so there was this one mroe challenge that I couldn't figure out... when I saw writeup, I was sure, I won't be able to reach there in a million years lol. So I will explain this one later... let's copy the flag and more on
+
+Command: find / -xdev -type f -print0 2>/dev/null | xargs -0 grep -E '^[a-z0-9]{32}$' 2>/dev/null
+flag 26: 4bceb76f490b24ed577d704c24d6955d
+
+Flag 27
+--------
+
+Challenge: Find and retireve flag27
+
+A fairly typical challenge, to find the flag27... find / -type f -user root -iname flag27 2>/dev/null
+
+The flag was in /home/flag27
+
+To retrieve the flag... I checked via command sudo -l... It showed that the alice user can run /bin/cat /home/falg27 as root, so I ran it using the sudo command.
+
+flag 27: 6fc0c805702baebb0ecc01ae9e5a0db5
+
+Flag 28
+--------
+
+There was no flag 28, just a basic question, what is the kernel version... uname -a 
+
+flag 28: 4.4.0-1075-aws
+
+Flag 29
+----------
+
+Challenge: Remove all spaces in file, Remove all new line spaces, Split by comma and get the last element in the split.
+Command: cat flag29 | tr -d ' ' | tr -d '\n' 
+
+and then select the last word after comma
+
+flag 29: fastidisuscipitmeaei.
+
+Note: The challenge was intended to be solved with 'sed' command
+
+----------------------------------------------------------------------------------------
+
+Flag 30
+---------
+
+Challenge: curl the flag
+Command: curl http://10.10.3.221/
+
+flag 30: fe74bb12fe03c5d8dfc245bdd1eae13f
+
+Flag 31
+---------
+
+SQL credentials: root:hello
+
+Challenge: flag is the database name...
+Command(s): mysql -u root -phello 
+			show databases;
+
+flag 31: 2fb1cab13bf5f4d61de3555430c917f4
+
+Bonus Flag Challenge: Find the flag in the database given above...
+Commands; show tables;
+		  select * from flags;
+
+Bonus Flag: ee5954ee1d4d94d61c2f823d7b9d733c
+
+Flag 32
+--------
+
+Challenge: Download the flag32.mp3 file and play it locally to find the flag.
+Command: scp alice@ip:/home/alice/flag32.mp3 .
+
+I tried scp but some error was constantly occuring so I downloaded filezilla and connected to the alice's account via ssh... I downloaded the file, and then listened to the audio...
+
+flag 32: tryhackme1337
+
+Flag 33
+---------
+
+Challenge: Where your personal $PATH's are stored?
+The personal PATH's are stored in .profile file, I wasted sometime here, forgotting there are 3 users I can check for personal PATHs... The flag was in bob's .profile.
+
+flag 33: 547b6ceee3c5b997b625de99b044f5cf
+
+Flag 34 
+---------
+Challenge: system variables flag
+Command: $flag34
+
+flag 34: 7a88306309fe05070a7c5bb26a6b2def
+
+Flag 35
+--------
+
+Challenge: Find flag in groups present on the system
+
+/etc/group, one can also use "getent group" command...
+
+flag 35: 769afb6 
+
+Flag 36
+---------
+
+Challenge: Find user with a group hacker, and retrieve the flag (Reason: flag36 was only readable to the root user and the people belonging to group hacker)
+
+Command: groups bob alice garry (This command gave me there groups, and seems like bob was the one with hacker group)
+Alternate Command: getent group hacker (This command directly gives that who all are sharing this group, (I found this in a writeup))
+
+So I logged in as bob, and ran this command. find / -group hacker -iname flag36 2>/dev/null (flag was in /etc/flag36)
+
+flag 36: 83d233f2ffa388e5f0b053848caed1eb

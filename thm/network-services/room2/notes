@@ -1,0 +1,225 @@
+
+
+Well this room, is network services part 2, and is a sequel of the first room.
+
+So, in this room, we are going to learn about the following services:
+	- NFS
+	- SMTP
+	- MySQL
+
+Understanding NFS
+-------------------
+
+- NFS = Network file system; as said, helps us to share files and directories over a network.
+
+- This is done by mounting a file system or portion of it to the server.
+	- Clients on the server can access the files with same privileges that were assigned to the respective files.
+
+How does NFS work?
+
+- Not going in too much detail... NFS, with the help of RPC (Remote Procedure Call; this helps OS to communicate with one another(or client-server case; where one is client other is server (just easy like that)) over a network), establishes the NFS service to mount the one's file systems over the other system.
+
+- First clent will request to mount a directory from a remote host on a local directory(same way to mount a physical directory). The mount service will then connect to relevant daemon using RPC.
+
+- Later the server checks if the user has permission access the mount system... 
+
+- For NFS to establish... an RPC call is made to nfsd (NFS daemon) on the server. This call takes the following parameter:
+	- The file handle (windows; file descriptor - linux)
+	- The name of file to be accessed
+	- UID
+	- GID
+Note the file handle is nothing, just file descriptor we use in linux... they are the same... So we need to input that to specify that we need to open the file as in stdin mode or stdout mode.
+
+What runs NFS?
+
+NFS is a protocol, file transfers... Which are even possible between non windows computers...
+	- A computer running windows can act as file server for the other non-windows clients... and hence vice versa.
+
+Enumerating NFS
+-----------------
+
+- NFS is running port 2049 i.e. the default port.
+
+- showmount and mount are some important commands
+	- showmount -e <IP>; let's you list the shares on the host that are available to mount.
+	- mount command helps you mount the share that you want from the host server.
+		- sudo mount -t <type of device to mount> <IP>:<file system share to mount> <path; where to mount it locally> -nolock
+		Note: -nolock flag, specifies to use no NLM lock...
+
+Exploiting NFS
+----------------
+
+- This is gonna be lengthy, but it's easy to understand our goal is to put an SUID file in the share we just mounted into our system... It will sync that SUID to the system and then we can use it to escalate our privileges via ssh
+
+Note: by cat-ing out the files in .ssh directory (mounted fs)... I founded that the user in the box is "cappucino"
+
+So I logged in via ssh, and downloaded a fake /bin/bash file from the link given in the room, gave it the suid bit... and changed user to root.
+
+Then I ran that file on ssh, got root by running the binary...
+Flag: THM{nfs_got_pwned}
+
+ 
+Note: When you do chmod +s operation on any binary it is not selected as 'S' in file permissions... That's not Suid... The escape to the problem is first change the file permissions to executable and then change it to suid bits... That's the magic done here.
+
+
+Understanding SMTP
+--------------------
+
+- SMTP = Simple Mail Transfer Protocol
+
+- 3 basic functions of SMTP:
+	- It verifies who sends the emails through the smtp server 
+	- It sends the outgoing mail.
+	- If the outgoing email can't be delivered it sends the message back to sender.
+
+- POP - Post Office Protocol
+
+- IMAP - Internet Message Access Protocol
+
+Note: Smtp is responsible for sending outgoing mails...  whereas pop and Imap are responsible for retrieving and organizing the mails from mailbox (receiver's end)
+
+- The main difference between POP and IMAP is that POP is simple to work with as it downloads the inbox from the mail server to client, whereas IMAP sync current inbox with new mail on the server... 
+	- In short it means that IMAP tries to sync a wide variety of things... If a change on the mail server is made the IMAP will persist those changes across other devices of client, whereas POP only syncs the new items that are new in inbox... The changes made to the mail server are not persisted over other devices running POP.
+
+How SMTP Work?
+
+- Nothing much complicated SMTP works as the postman... The user will have to supply the letter with a postal delivery service(like an address)...
+
+- The role of SMTP here is, to act as a sorting office.
+	- User -> SmTP Server -> WWW -> POP/IMAP Server -> Recipient
+
+
+- SMTP server has a default port of 25.
+
+
+Default working of SMTP
+-------------------------
+
+- Sender's email client on his computer will connect to it's SMTP server... 
+	- This initiates the SMTP Handshake on port 25.
+
+- After a connection is established the email client will send the email's data, including email addresses of both parties, email, attachments etc.
+
+- The SMTP server checks if the recipient is on the same domain (Local workgroup) or not...
+	- If not it sends the mail via www.
+
+- The SMTP server, before sending the mail, will make a connection with the recipient's SMTP server, to check if it's alive or dead...
+	- If dead it puts the mail to SMTP queue.
+
+- If the host is found alive it sends the mail, and on the receiver's end,  SMTP server verifies the incoming email to the receiver.
+	- Verification as in if the domain and username has been recognized the server forwards the mail to POP/IMAP server.
+
+- The E-Mail will then show up in recipient's inbox.
+
+
+Enumerating SMTP
+------------------
+
+Enumerating Server Details:
+	- We need to fingerprint the SMTP server before we begin and we are going to use 'smtp_version' auxilliary module in metasploit
+	- This module is going to scan the network range for SMTP servers and detect their version running on it.
+
+Enumerating Users from SMTP:
+
+	- Enumeration is performed by inspecting responses from the SMTP commands we send to the server.
+	- The two internal commands that allow the enumeration of users:
+		- VRFY (confirm the names of  valid users)
+		- EXPN (which reveals the actual address of user's aliases) and lists of email (mailing lists)
+	- Therefore, using SMTP commands we can enumerate the users. 
+	- There is another great module we can use, to enumerate users and there mailing list via metasploit i.e. smtp_enum
+
+- If you're confused with SMTP enumeration(probably because you didn't know how it works with commands via telnet) or in case you are preparing for OSCP and can't use msf for enumeration... Just search on google SMTP commands cheatsheet... And connect to the SMTP server via telnet <IP> 25(default port)
+
+- Also, you can use non metasploit tools such as "smtp-user-enum" install it in kali via apt-get.
+
+
+Exploiting SMTP
+-----------------
+
+So what do we know till now:
+	- A user account name : administrator
+	- The type of SMTP server (Postfix) and OS running (Ubuntu)
+
+- And nothing much important is specified here about the exploitation same old hydra bruteforce the ssh now... So...
+
+CMD: hydra -l administrator -p /usr/share/wordlists/rockyou.txt 10.10.7.170 ssh -vV
+
+Password: alejandro
+
+Flag: THM{who_knew_email_servers_were_c00l?}
+
+
+Understanding MySQL
+--------------------
+
+MySQL is RDBMS based on SQL. 
+
+- Some Terms
+	- Database: Collection of structured data
+	- RDBMS: Software or service to manage database.
+		- Relational means the data is formed in structured format like tables.
+	- SQL - Programming language.
+
+How does MySQL work?
+
+MySQL, as an RDBMS is made up of server we can use to administer data using SQL commands. 
+
+The server handles all the data modification, creation of tables and manages requests useing MySQL protocol.
+
+Working of mysql:
+	- MySQL creates a database for storing and manipulating data, defining the relationship of each table.
+	- Client requests for data in SQL syntax from the database.
+	- The server responds to those requests with the information that has been requested.
+
+What runs MySQL?
+
+It runs on any platform. 
+
+Enumerating MySQL
+-------------------
+
+Credentials : root:password
+
+Default Port of MySQL protocol: 3306
+
+Note: We're later going to exploit mysql using metasploit... However MySQL exploits can be manualized... In case prepping for OSCP.
+
+mysql -h [IP] -u [username] -p[password]
+
+Note: Do not give space after -p flag... Space will be counted as password char.
+
+Metasploit Module: mysql_sql
+
+set the options... and exploit.
+
+Exploiting MySQL
+-----------------
+
+What do we know till now?
+
+	- MySQL credentials : root:password
+	- The version of MySQL running 
+	- The number of databases.
+
+- Schema: Schema is just like a database... where database is used to store data in it... a database schema(folders withing database) mainly used to group logical objects together.
+
+- Hashes are nothing just a way to secure storing the passwords and other important stuff in a database (generally of a fixed string length)
+
+Practical
+----------
+
+Starting with another modules in msf
+	- mysql_schemadump (dumps the database's schema)
+	- mysql_hashdump (dumps the hashes in database)
+
+using the hashdump exploit we found a user:password hash... We cracked the hash using,
+
+CMD: john mysql_user_hash
+
+Credentials: carl:doggie
+
+Then I logged in via ssh, and cat out the MySQL.txt 
+
+Flag: THM{congratulations_you_got_the_mySQL_flag}
+
+That's it for the room. Peace.

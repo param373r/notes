@@ -1,0 +1,44 @@
+
+
+SSRF
+=====
+
+SSRF = Server-Side Request Fogery
+
+- This is a type of vulnerability in which attacker manipulates the site, to get data from the site's internal network systems.
+	- This is basically, when attacker gains a foothold on the site... He can use the site to bypass the firewall, and access systems like database and users and server internal files. 
+	- As because it is the site requesting data (on behalf of attacker) from it's internal network this isn't any kind of suspicious activity for the firewall or either the sysadmins (unless the site is asking for permissions like ssh or so (I mean why would a site be wanting a connection for ssh lmao)).
+
+Causes of SSRF
+================
+
+- It is a broadly classified vulnerability which begins from unsanitized inputs.
+	
+Given in the room are 2 code examples that show that the user can input malicious code and can access any file on the server.
+	- Example 1 php code
+	- Example 2 Flask (python framework) code
+
+Not gonna waste time in explaining simple codes... They are nothing other than unsanitized inputs that you have been seeing through different rooms.
+
+Note: IPs can be converted into decimal/hexadecimal... Search "how to convert an ip into decimal" and pinging that integer/hexadecimal value is possible
+
+SSRF payloads
+==============
+
+Basic Payloads
+----------------
+
+Now, again, I won't be covering details of payloads here... Check them out on PayloadAllTheThings... Why? Because payloads are very basic and can be made with your own common sense.
+
+Also, Learn bash scripting.
+
+Challenge
+-----------
+
+How many internal+external ports are open on the machine.
+	So, I created a bash script which checks for the top200 ports, rather than doin an entire port scan... with just a few research.
+How many users are there on the system?
+	Payload: file:///etc/passwd
+	Users: 3
+
+This was it for the room.

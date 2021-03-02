@@ -1,0 +1,242 @@
+
+
+SQL Injection
+===============
+
+Ok so, cut to the chase, here's gonna be only important points regarding SQLi.
+
+Types of SQLi
+	- Error based
+	- Boolean based
+	- Union based
+
+Error Based SQLi
+------------------
+
+- It relies on error messages, which can be used to retrieve any sensitive messages. 
+	- In some cases, error based injection is all an attacker need to enumerate an entire database.
+
+Methodology here is simple... All you gotta do is produce error and study them, enumerate the query used in backend php scripts by logic if you could... 
+
+
+Boolean based SQLi
+--------------------
+
+- Boolean based SQLi relies on the result whether the response received from the server is True or False.
+	- This technique is generally used in BLIND SQL INJECTION.
+
+- To identify the blind SQL, we try to assume the query behind each response from the server. 
+	- Again, it's purely based on your familiarity with SQL and database ops. It's just a skill you need.
+
+For instance:
+	- If we insert 1' in the id parameter, it should produce an SQL error (if no filter is present). This error is not shown, which can mean both the things, either it's blind SQLi vulnerability or it's not vulnerable to SQLi at all.
+
+	- Put a normal input the webapp will work correctly, then change it to the error string (i.e. ?id=1'), if the previous result disappered, means there is a new response sent by the server which is most prolly in case of an error (can be either xss or xxe, but since we are inputting the query for sqli then it won't be other than that). Great the web app seems to be 70% vulnerable to blind sqli.
+
+	- Now, try fixing the error with "id=1' --+"(or anything like that). This will bring back the result, which means, commenting the rest of the output worked for us. 100% sure the target is suffering from the bsqli.
+
+Note: Blind SQLi relies on true or false... You can manipulate the output with 1 or 0 like, "?id=1' OR 1 --+". This should not change the resulting page, but if you put 0 instead of 1, then the output of the result before should disappear. This is where we verify the true blind SQLi.
+
+EXPLOITATION WITH BLIND SQLI:
+
+NOTE: THIS IS INSANE.... THE EXPLOITATION OF BLIND SQL INJECTION... I HIGHLY RECOMMEND YOU TO SCRIPT YOUR WAY OUT. I MEAN IT.
+
+Take the following string in mind id=1'
+
+	- So what we are really going to do is, we are going to ask questions from the database in form of sqli strings and the server will respond in true and false.
+		Note: When I say true and false, I mean to say, that we are going to ask for first letter of database()'s name and ask that if it is 'a', then 'b', and then similarly for the second, third letter, and so on. It's crazy right?? But this is the only method ig. If the letter matches the position's letter in database's name... Then the result for the =1' will be displayed, else a blank... 
+			- If this seems complex, then just imagine the real webapps where the sql once the user logs in, where you have to manage the cookies and session tokens, at the same time. Yeaaps. It's just needs practice. The methodology is simple.
+
+		- Might be wondering, why not compare the full name instead, can save us a lot of work ig. The problem is, what do we compare with... I mean we can fuzz the database name in the id parameter... But again... there's always a chance, that after a long list of fuzzing, the database name was not in the fuzzlist. We can do this efficiently by comparing a particular list, against a set of characters (including numbers).
+			- Do note that, you can include 256 characters in the ascii standard or atleast the total on your keyboard.
+			- At the end, how do we know when to stop? Simple... If there are no characters in one round of fuzz for a place... then the last obtained character was the last character in the database name.
+		- Similarly it is for other queries as well... This all was for just database... think about dumping a whole database of a big organisation with this technique, and millions of records... HAHA... SCRIPT IT OUT.
+
+	- Enough with the theory and talking... Now let's move on to the practical and real command execution part.
+
+The Practical with BSQLi
+--------------------------
+
+	- substr() function is in sql which does is help you select a piece of string within a string. We will be needing this when selecting alphabet at a particular index from the database's name (if we are considering to get the database command).
+		- substr(str,i,n); This takes 3 parameters
+			- Where str is the string we need to select the substring from, it can also be a variable.
+			- i is the index, to determine where to start selecting the substr.
+			- n is the number of characters to select from the substr.
+
+		eg. select substr("Strange Fox", 5, 3); will return us "nge".
+
+	- Now, to put all things together...
+
+		?id=1' AND (substr((select database())),1,1) --+
+
+		will extract the first element in database()'s name... The plus at the end is specifying space in URL.
+
+NOTE: Do note that, as we are performing a blind sqli so we won't be getting any output of the following command... Thus comes in our true and false method.
+	
+	?id=1' AND (substr((select database())),1,1) = s --+
+
+	- So if the database's name has the letter s at the index 1. Then the result for query id=1 will be shown... If not, the page will be as it is before making the query #Blank.
+	- Our paylaod is everything after the first single quote.
+	- If you don't want to script the whole attack, you can wfuzz with this payload, replacing the letter with FUZZ keyword and then carry out to get the database name. 
+		- Similarly, using these commands, dump the whole database.
+
+Other notes:
+	- If you don't wanna use characters, and speed up the things, then you can use the built-in ascii function(converts the character into decimal). Then payload will be...
+
+		<URL>?id=1' AND (ascii(substr((select database()),1,1))) = 115 --+
+
+	- Also, in a real world pentest, you don't have to go for a linear search for characters(i.e. apply 1 character at one time). You can go with the binary search (i.e. USE THE COMPARISON OPERATORS; THINK ABOUT IT).
+		- If you're using ascii function to convert the characters to string... Then you can use comparison signs like <,> so that you can identify whether the INDEXED CHARACTER IN THE DATABASE'S SUBSTRING IS GREATER THAN OR SMALLER THAN A VALUE...
+		- IF SMALLER, THEN GO TO THE LESSER HALF AND TRY SEE IF THE THAT IS STILL SMALLER... YES? GO FURTHER DOWN... IF NO... THEN GO UP THE UPPER HALF (less than the initial values you got down from).
+
+	NOTE: THIS TECHNIQUE NEEDS TO BE SCRIPT OUT, BUT CAN REDUCE THE TIME OF FINDING NAMES AND DUMPING IN HALF.
+
+	- Payload would look like this...
+
+		<URL>?id=1' AND (ascii(substr((select database()),2,1))) < 115 --+
+
+UNION BASED SQLi
+------------------
+
+- Ok, so this isn't any special type of SQL injection... But this is the one, which everybody use the most.
+
+- Starting with the basics:
+	- UNION is the command used to combine the output of 2 select statements.. and thus allows you to use it mutiple times...
+
+	General UNION based payload looks like this:
+
+		?id=' UNION SELECT 1, 2 FROM passwords
+
+- The USQLi has 3 stages:
+	- Determine the number of columns and names of tables inside the database
+	- Check which column may contain juicy information inside any table in .
+	- Dump the data using UNION payload shown above.
+
+- Starting with stage 1:
+	- How do you think the passwords table in payload come? That is enumeration. You can get the database names later... First things first YOU NEED TO FIND THE NUMBER OF COLUMNS IN THE CURRENT DATABASE'S TABLE IN USE.
+		- You can simply do that by the following payload:
+
+			' ORDER BY 1-- 
+			' ORDER BY 2-- 
+			' ORDER BY N-- 
+
+		- Keep increasing the number until you get an error... If it is a case of blind SQL... Then it can come as a problem... Though there might be a way bypass this, with error handling in sql... I don't know SQL much, at the current moment... But on the basis of other languages I knew you can catch the error with exception handling.
+		- Now when you get to know that the error has occured... The total no of columns that are available in the current table are the no, you got previous to the error one.
+
+	- Later you can find the database name using the following payload(assuming there are 3 columns available from the order by method we used above...
+
+		?id=1' UNION SELECT database(), 2,3--
+
+- Getting to stage 2
+	- Generally the information you are looking in a database is a string... So you need select column which supports values as VARCHAR, i.e. string values. You can use the following payload to find that(assuming no. of columns 3)
+
+		' UNION select 'a', NULL,NULL--
+		
+		- If column 1 supports the varchar values... then there will be no error... if not, then there will be error displayed(if it no error is shown; case of bsqli; go for boolean based not union).
+	Note: NULL needs to specified for the rest of the columns(that are not being tested in the current used payload) else it will throw an error(generally; I mean why take chances)
+
+	- Similarly use this payload by changing positions of 'a' in the further columns, and identify which else column supports varchar values.
+		- Just in case, you want to find a reg id or serial no, or any column that supports integer values only, replace 'a' with an integer like, 4. 
+
+- Stage 3
+	This is where we use a final single payload to dump the database's data.
+
+	- Here's a small list of thing you'd want to retrieve:
+		1. database()
+		2. user()
+		3. @@version
+		4. username
+		5. password
+		6. table_name
+		7. column_name
+
+	Note: This is not in the room... But to dump only the tabl names of any database. You can use the following payload(assuming 3 columns only):
+
+		' UNION select group_concat(table_name),2,3 from information_schema.tables where table_schema==database()--
+
+	Note: This is to dump data of other tables inside the database...
+		- Information_schema is the table which contains meta-data, nothing but information about all the tables and columns of the database. So make sure you don't substitute it with the current database's name... again.
+
+	- Similarly, to dump all the columns in all the tables of current database... You can use the following payload(columns = 3):
+
+		' UNION select 1,group_concat(column_name),3 from information_schema.columns where table_schema=database()--
+
+		- Don't get confused, with what column to extract from which database, when using the final command to dump database. It's actually pretty simple because in MOST OF THE CASES, THE COLUMN NAME IS RELATED TO THE TABLE NAME... KEEP YOUR EYES OPEN AND YOU'LL BE ABLE TO FIGURE, WHERE TO JOIN THE PUZZLE PIECES.
+
+	- Now, you have all the column names and the table names, inside the current databse... let's dump it(columns = 3):
+
+		' UNION SELECT 1, username, password FROM users --
+
+		where users is the table in which username and password are the column names.
+
+Bingo... You dumped the database.
+
+Note: If the available column names (to be selected) is less than the column names you want to dump... from another table... Then do it turn by turn, a bunch of columns in one go, and the other bunch in second go, or so on...
+
+- There is also one more type of sql injection that is, TIME BASED SQLI, it's also usually blind... But definitely requires automation to detect time lag, whenever an error is occured...
+	- Hence, it won't be included in exams where sqlmap or other automation tools are banned.
+
+Here, we are finished with the manual dumping of the database, the next section is on how to automate the sqli... Rather than doing all this hectic work manually.
+
+======================================================================
+
+Automating SQLi
+=================
+
+The SQLMAP
+-----------
+
+- No need to introduce this legend...
+
+Most important flags used with sqlmap:
+	- -u (specified the url)
+	- --dump/--dump-all (dump the dbms)
+	- --os-shell (prompt for an interactice system shell vis sqlmap :heart_eyes:)
+	- --os-pwn (prompt for OOB shell, meterpreter or even VNC)
+	- --wizard (simple wizard interface for beginners (ignore this one))
+	- --batch (If you have used sqlmap before you must be knowing that sqlmap asks for user prompts often before starting and checking further; This switch never asks for user inputs and proceeds with the default values) DO USE THIS SWITCH
+	- --dbms (This takes an argument i.e. type of database, which limits and forces the tests for a particular database instead going for normal(casual) and for all.)
+	- --passwords (enumerate any or all users password hashes)
+
+	- --all (retrieve everything)
+	- --level=LEVEL (levels of tests to perform(1-5))
+	- --risk=RISK (risk of tests to perform(1-3))
+
+To get more commands refer to the following links:
+
+	- https://www.security-sleuth.com/sleuth-blog/2017/1/3/sqlmap-cheat-sheet (COMMAND EXAMPLES)
+	- https://www.netsparker.com/blog/web-security/sql-injection-cheat-sheet/ (ALL IN ONE CHEATSHEET)
+
+Burpsuite + SQLMAP
+===================
+
+	- I call this The DOUBLE BLASTER / POWER DUALS... hehe. It does nothing... If you can't figure out the parameter or want to reduce your effort... You can capture a request in burp, save the item and then use -r flag in sqlmap adjoining the file created with burp. And sqlmap will figure out all the possible parameters and start testing for sqli AUTOMAGICALLY.
+
+That's it in automating SQLi section... So little? That's the power of automation... Effort is reduced to null.
+
+Resources given below are important... Do check em out if not found the answer in the above things.
+
+Resources
+==========
+
+Payload Lists:
+1. https://github.com/payloadbox/sql-injection-payload-list 
+2. https://github.comparison/swisskyrepo/PayloadsAllTheThings/tree/master/SQL%20Injection 
+
+Guides & Blogs:
+1. https://www.sqlinjection.net/
+2. http://pentestmonkey.net/cheat-sheet/sql-injection/mssql-sql-injection-cheat-sheet 
+3. https://github.com/trietptm/SQL-Injection-Payloads 
+4. https://pentestlab.blog/2012/12/24/sql-injection-authentication-bypass-cheat-sheet 
+5. https://resources.infosecinstitute.com/dumping-a-database-using-sql-injection/ 
+(Special thanks to TheMayor for linking the last one)
+
+Labs and practice:
+1. https://portswigger.net/web-security/sql-injection
+2. https://github.com/Audi-1/sqli-labs [It is the app installed in sqli's thm room; Highly recommended do it on your own]
+3. https://github.com/appsecco/sqlinjection-training-app
+4. https://tryhackme.com/room/gamezone 
+5. https://tryhackme.com/room/avengers
+6. https://tryhackme.com/room/uopeasy 
+7. https://tryhackme.com/room/jurassicpark 
+

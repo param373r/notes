@@ -1,0 +1,13 @@
+Quick Notes
+-------------
+
+Spool service is like console outting in windows
+
+Generally, our victim won't be having access to other network interfaces... but here, this room, had this VM other networks available... To see/manage other interfaces we can use a post module autoroute... 
+
+autoroute is an awesome module... and msf is great... Just that, I need practical experience more.
+
+If get time... Try to read on proxychains, in msf auxiliary/server/socks_proxy
+
+
+NOTE: auxiliary/server/sock4a is going to deprecate in future... so use... the above proxy... mentioned.

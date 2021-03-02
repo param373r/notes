@@ -1,0 +1,168 @@
+
+
+Intro to x86-64
+================
+
+I did this room earlier... Now I will be noting down important points only.
+
+Tool used: Radare2
+	radare2 is a framework for reverse engineering and analysing binaries. It can be used to disassemble binaries(translate machine code to assembly, which is actually readable) and debug said binaries(by allowing a user to step through the execution and view the state of the program).
+
+Tool References:
+	https://github.com/radareorg/radare2/blob/master/doc/intro.md
+	https://gist.github.com/williballenthin/6857590dab3e2a6559d7
+	https://web.archive.org/web/20180312191821/http://www.radare.org/get/THC2018.pdf
+
+A 5 point difference between AT&T vs Intel syntax:
+
+	http://web.mit.edu/rhel-doc/3/rhel-as-en-3/i386-syntax.html
+
+Fun Facts:
+	
+	- Intel first started out by building 16-bit instruction set, followed by 32 bit, after which they finally created 64 bit. 
+		- All these instruction sets have been created for backward compatibility, so code compiled for 32 bit architecture will run on 64 bit machines. 
+	- As mentioned earlier, before an executable file is produced, the source code is first compiled into assembly(.s files), after which the assembler converts it into an object program(.o files), and operations with a linker finally make it an executable. 
+
+Radare Intro:
+
+Note: r2> means it is in-radare2 shell aliases.
+	r2 -d <binary-name> - Will open the binary in debugging mode.
+
+	r2> aa - Tells radare2 to analyze a binary (aaa is for maximum analysis).
+		- It analyzes most symbols and entry points in the executable.
+
+	r2> e asm.syntax=att - Sets the syntax to at&t.
+
+	r2> afl - Lists all the function names in a binary.
+		- Most executable's entry point starts with main, so try to find that.
+
+	r2> pdf @main - (pdf means print disassembly function) What this does is displays the assembly instructions of main function.
+
+
+- The values on the complete left column are memory addresses of the instructions, and these are usually stored in a structure called the stack(which we will talk about later).
+- The middle column contains the instructions encoded in bytes(what is usually the machine code), and the last column actually contains the human readable instructions.
+
+The core of assembly language involves using registers to do the following:
+
+    - Transfer data between memory and register, and vice versa
+
+    - Perform arithmetic operations on registers and data
+
+    - Transfer control to other parts of the program
+
+- As the room focuses on x86-64 bit registers... we are going to learn about 16 registers, in short.
+
+%rax	-	6 
+%rbx	-	General
+%rcx	-	Purpose
+%rdx	-	Registers
+%rsi 	-	In
+%rdi	-	64 bit Processors
+
+%rsp	- Stack Pointer
+%rbp	- Frame Pointer/Base Pointer
+
+%r8 	- Rest of the registers
+%r9 	- Rest of the registers
+%r10	- Rest of the registers
+%r11	- Rest of the registers
+%r12	- Rest of the registers
+%r13	- Rest of the registers
+%r14	- Rest of the registers
+%r15	- Rest of the registers
+
+mov instruction:
+
+	movq source, destination
+
+This involves:
+
+    - Transferring constants(which are prefixed using the $ operator) e.g. movq $3 rax would move the constant 3 to the register
+
+    - Transferring values from a register e.g. movq %rax %rbx which involves moving value from rax to rbx
+
+    - Transferring values from memory which is shown by putting registers inside brackets e.g. movq %rax (%rbx) which means move value stored in %rax to memory location represented by %rbx.
+
+The last letter of the mov instruction represents the size of the data:
+
+
+Intel Data Type	| Suffix | Size(bytes)	
+	Byte 			b 			1
+	Word			w 			2
+	Double Word		l 			4
+	Quad Word 		q 			8
+	Single Precision s 			4
+	Double Precision l 			8
+
+Some other important instructions are:
+
+    - leaq source, destination: this instruction sets destination to the address denoted by the expression in source
+
+    - addq source, destination: destination = destination + source
+
+    - subq source, destination: destination = destination - source
+
+    - imulq source, destination: destination = destination * source
+
+    - salq source, destination: destination = destination << source where << is the left bit shifting operator
+
+    - sarq source, destination: destination = destination >> source where >> is the right bit shifting operator
+
+    - xorq source, destination: destination = destination XOR source
+
+    - andq source, destination: destination = destination & source
+
+    - orq source, destination: destination = destination | source 
+
+Triggering if-else
+===================
+
+- We know, if-else, now those if-else in assembly is triggered by jmp, cmp and sometimes test instructions.
+
+- For cmp and test instructions:
+	
+	- cmpq source2, source1: it is like computing a-b without setting destination
+Note: The source1 is being compared with source2 i.e. destination-source.
+    - testq source2, source1: it is like computing a&b without setting destination
+
+- For jmp it goes a little vast:
+	
+	- jmp	unconditional
+	- je	equal
+	- jne	not equal
+	- js	negative
+	- jns	non negative
+	- jg	greater
+	- jge	great or equal
+	- jl	less
+	- jle	less or equal
+	- ja	above(unsigned)
+	- jb	below(unsigned)
+
+Note: The last 2 values of the table refer to unsigned integers. Unsigned integers cannot be negative while signed integers represent both positive and negative values. SInce the computer needs to differentiate between them, it uses different methods to interpret these values. For signed integers, it uses something called the two’s complement representation and for unsigned integers it uses normal binary calculations. (Now, gladly I learnt 2s and 1s compliment in my first year, from a good teacher.)
+
+r2> db <address> - will set a breakpoint at the following address.
+
+r2> dc - will start/continue the execution and will stop at next breakpoint.
+
+r2> ds - seeks to the next instruction
+
+r2> dr - will display the current value inside a register.
+
+r2> px <variable reference> - To view the value of a variable in hexdump...
+	- eg. px @rbp-0x4 (where rbp-0x4 is a variable)
+
+	- Note: When checking the value, only view the 0 offset. 
+
+r2> pxd <variable reference> - To view the value inside a variable in signed integer.
+
+lOOPS
+-------
+
+Loops aren't a new concept to us, as they are just jumping back to previous instructions using cmp and jmp instructions.
+
+So there's nothing much other than a few exercises in this room.
+
+Note: It is always beneficial to set the breakpoint at cmp instruction... As, this is the point where the values are finalized before moving ahead (to new iteration or out of the loop in condition breaks)
+
+Completed the crackme1 and crackme2 challenges with peace <3.

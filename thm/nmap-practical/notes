@@ -1,0 +1,163 @@
+
+This machine is for scanning purposes only, please don't login... Like heck yeaa, lol.
+
+Nmap normal room had these common basic scans:
+	- -sT (TCP scan)
+	- -sS (Syn scan)
+	- -sU (UDP scan)
+
+This room had these scans also, but in less detail:
+	- -sN (NULL scan)
+	- -sF (Fin scan)
+	- -sX (Xmas scan)
+
+Now all the scans above are similar to each other (except for UDP)... The difference comes in there working... But still we're gonna do them, as we must know that these types of scans also exist...
+
+Nmap Switches
+---------------
+
+This is a new section... Added into this room, when I checked this room, back in eve... The good part is I was able to to do all the questions in this category without the help of google and seeing the nmap -h on terminal... So I think I can exclude this section from my notes, as nothing new was learnt
+
+TCP Scans
+-----------
+
+- They do a full 3 way handshake and send the ending ack and then declare the port as open
+- Now, if a port is closed... the host will reply with a RST flag... 
+- If a port is behind a firewall, then it might drop nmap requests... or many a times it will return RST, and nmap will show the port is filtered.
+
+SYN scans
+------------
+
+- They are just like TCP scan... Just at the end of three way handshake nmap sends the RST flag, which means connection wont be established...
+
+- Also known as, Half-open and Stealth Scans
+Advantages of SYN scan
+	- It can be used to bypass OLDER Intrusion Detection Systems as most of the time they are looking for a three way handshake... This is not the case with MODERN IDS solutions; and because of this, SYN SCANS ARE ALSO KNOWN AS STEALTH SCANS
+	- SYN scans are often not logged by applications listening on open ports, because of the same reasons, and hence are stealthy
+	- They are significantly faster than TCP Connect Scan.
+
+Disadvantages of SYN scan
+	- Syn scans require root privileges, as this scan requires the ability to create raw packets, which is the privilege only given to root #byDefault
+
+	- Unstable services are sometimes brought down by SYN scans, bad in case a client has provided an in-production environment.
+
+
+With all the disads of syn scan, ads always win... and hence syn scan is good.  
+
+Note that...
+	- SYN scans are default scans for nmap if ran with sudo privs... Else, the default scan in nmap is TCP connect scan.
+	- If a port is closed then the server responds with a RST TCP packet. If the port is filtered by a firewall then the TCP SYN packet is either dropped, or spoofed with a TCP reset.
+
+UDP Scans
+-----------
+
+- UDP scans are stateless and thus they just send packets hoping that they make it to the target system... 
+
+- As said, there is no response from UDP open ports, so nmap marks all of them as open... If there is no response then the case is that port is either open or filtered... NMAP sends the request a second time to double check... If no still no response the port is market as empty.
+	- In case the port is closed, the target should respond with an ICMP(ping) packet containing message that the port is unreachable... If that's not the case then the port is automatically identified as open...
+	- It's because of this nature of UDP scans that these take a lot more time than TCP scans. (Room's fact: To scan top 1000 port it will take around 20 mins with a good internet connection)
+
+- When UDP scanning, packets are sent as empty raw ones... As ports in use by well-known service will send a protocol specific payload in ICMP packets, which will give more accurate results.
+
+NULL/FIN/XMAS Scans
+---------------------
+
+- These 3 scans are less commonly used than the other 3.
+
+NULL Scan: This is a TCP Scan, with no flag set at all. An RST flag is sent when the port is found to be closed.
+
+FIN Scan: This is also a kind of NULL Scan, instead of sending completely empty packet... It sets the FIN flag in it. The closed port will return RST flag, rest won't
+
+XMAS Scan: It is a type of scan, made with malformed packets and expects RST for closed ports... 
+	- This is called the XMAS scan because of the (PSH, URG and FIN) flag set... If you view the packets of XMAS Scan in wireshark, you can view the flags that it sets, seems like a blinking christmas tree, 000101001.
+	Stupid... But try to use this scan the whole December lmao...
+
+
+
+- These scans follow UDP scans... If the port is open then it will return no response if closed the ICMP packet will respond with port unreachable.
+
+- Acc to RFC 793, the hosts are suppose to return an RST packet whenever a malformed packet is sent, tho this is not the case always...
+	- Windows (and some cisco devices) do follow this statement... They do send a RST packet, which guarantees that the port is closed, with XMAS/NULL/FIN scans.
+	
+- We can use NULL/XMAS/FIN scans to perform firewall evasion, as many firewalls are set to drop the TCP packets with the SYN flag set... 
+	- In those cases... There are these types of scan that can bypass the port identification.
+
+Note: Most modern IDS are savvy to these kind of scans, so don't rely on them 100% 
+
+ICMP Network Scanning
+-----------------------
+
+- This is a scan done by nmap when we use the -sn flag... 
+	- This type of scan seeks response for every alive hosts on the whole specified network... If an ICMP response is received... Then, it marks the host as alive...
+	- This is not always accurate(think about it), because this tells about any host that is connected to the network we are scanning, but might not be running an network service...
+
+NSE Overview
+--------------
+
+- NSE - Nmap Scripting Engine; powerful scan using scripts; extended functionality of nmap considerably.
+	- They are written in Lue programming language.
+
+Some well known NSE scripts are the following:
+	- safe - Won't affect the target
+	- instrusive - Not safe; likely to affect the target.
+	- vuln - Scan for vulnerabilities
+	- exploit - Attempt to exploit vulnerability.
+	- auth - Attempt to bypass authentication for running services.
+	- brute - Attempt to bruteforce credentials for running services.
+	- discovery - Attempt to enumerate further for running services.
+
+Working with NSE scripts
+--------------------------
+
+- There is nothing more special than the other scripts that nmap has to offer... 
+	- One thing to note is... There might be some scripts that require some arguments, so to specify those arguments we use the flag... '--script-args'
+	- The syntax we use that flag with the nmap is '--script-args <script name>.<script parameter 01>=<value>,<script name>.<script parameter 02>=<value>' 
+		- Args separated by comma, and connected to corresponding script with periods.
+
+- '--script-help' flag helps on telling what arguments can a particular script takes. 
+
+Searching for NSE scripts
+----------------------------
+
+There are 2 ways of finding nmap scripts, 
+	- Nmap's official site
+	- /usr/share/nmap/scripts/script.db
+
+
+To find a script of a related topic we can use the following techniques:
+	- grep "ftp" /usr/share/nmap/scripts/script.db
+	- ls -l /usr/share/nmap/scripts/*ftp*
+
+To search a script for a particular script scan category:
+	- grep "safe" /usr/share/nmap/scripts/script.db
+
+- Installing new scripts is possible by manually downloading them from the site...
+	- Command: sudo wget -O /usr/share/nmap/scripts/<script-name>.nse https://svn.nmap.org/nmap/scripts/<script-name>.nse && nmap --script-updatedb
+
+Note: You can manually create your scripts in lua for nmap and then to use it... You have to use the same command to update the script.db i.e. nmap --script-updatedb
+
+Firewall Evasion
+------------------
+
+- Someone firewall blocks the ICMP packets so that scanning ain't get possible...
+	- nmap initializes scan by send a ping command to the host, if a ping reply is received by the nmap scan, then nmap enumerates further scanning of the ports... If not received, then nmap marks the host as dead and don't scan it at all...
+	- To bypass this ping check in nmap we use -Pn flag... This way, we can bypass the ICMP packet blocks by firewall
+		- Note that with this -Pn flag on... The nmap scans takes longer time to scan(if the host is dead), as nmap double checks the port if no RST is returned... because the host is dead i.e. no connection at that particular IP, and hence scans become a lot longer...
+
+Some usefule flags to consider when having firewall evasion in mind:
+
+-f - Use to fragment the packets(dividing into smaller pieces) making it letss likely for the packets to be detected by firewalls.
+
+--mtu <number> - accepts a Maximum Transition Unit to the packet... If the packet formed is larger than the defined size... It gets fragmented.
+
+--scan-delay <time>ms - used to add delay between sending the packets, in case there is a time-based firewall trigger with constant sending of packets... (Looks to me like firewalls are pretty amazing things to work with).
+
+--badsum - this flag can be used to determine presence of firewalls...
+	- Basically what this flag does is send packets of invalid checksums that any real TCP/IP stack would drop, however firewalls might respond to those packets automatically, without checking their checksums.
+
+Practical
+-----------
+
+This section was nothing much... Just scanning the box with your own skills.
+
+- And just so you know... There is a book available on NMAP. Google it.

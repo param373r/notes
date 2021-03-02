@@ -1,0 +1,141 @@
+
+
+
+I am going to skip most part of the room, which is really very basic... 
+The only reason I am noting the rest of the room because of the tips and methodology it teaches you... It's like... One of the most essential part of your hack and most difficult. I REPEAT KEEP YOUR EYES OPEN... EVEN FOR THINGS THAT AIN'T SPECIAL AND YOU've SEEN A THOUSAND TIMES...
+
+Overview
+----------
+	- Service Exploits
+	- Weak File Permissions
+	- Sudo
+	- Cron jobs
+	- SUID/SGID
+	- Password & keys
+	- NFS
+	- Kernel Exploits
+	- PrivEsc Scripts
+
+Service exploits
+-----------------
+- Starting with normally searching for a service and finding an exploit for it... This sums up the service exploits
+
+Weak file permissions
+----------------------
+	- Readable /etc/shadow
+	- Writable /etc/shadow
+	- Writable /etc/passwd
+
+Sums it up
+
+Shell Escape Sequences
+------------------------
+
+IF YOU HAVE PRIVILEGES TO RUN APACHE 2 AS ROOT... THEN THINK HOW YOU CAN BECOME ROOT... 
+
+	ONE WAY I READ IN WRITEUP IS TO USE -f <FILE> FLAG AND READ /etc/shadow THIS WILL LIST THE VERY FIRST LNE AS INVALID COMMAND (NOTICE THAT THE VERY FIRST LINE TO READ IN THE /etc/shadow IS OF ROOT USER) AND HENCE IT CAN REVEAL THAT INVALID COMMAND 'ROOT:<PASSWORD HASH>: STUFF STUFF' 
+
+	NOTE: THIS IS NOT LISTED IN GTFOBINS BECAUSE THIS WILL NOT GET YOU ROOT IF YOU CAN'T CRACK THE HASH.
+
+	YOU SEE THIS IS PURE SKILL... I NEED TO DEVELOP IT.
+
+N yeaa, I literally wrote this whole paragraph just for letting know that there is this way to critical think.
+
+Sudo Environment Variables
+---------------------------
+
+This is pretty awesome... This states a very new method... I got the idea... But I gotta copy these long commands so pasting the whole para here...
+
+Cronjob
+--------
+
+- Change the file so every time it executes it can give you a reverese shell or so...
+
+- If ran a command without specifying the full path... use the path variable exploitation method to exploit the cronjob happening over and over again (change path variable to /tmp/ and name the file exactly what cronjob is running(in the tmp directory))
+
+Cronjob wildcards
+-------------------
+
+This is something new... There are at times wildcards used in cronjobs to cover a no of operation and reduce the code...
+	- For eg. Suppose if tar is running on your home directory as a cronjob (with sudo privileges), then you must know that there is a way we can use tar to privilege escalate...	
+	- As stated by gtfobins... tar has command line options that let you run other commands as part of a checkpoint feature.
+
+	- So in your home dir create these 2 files...
+		touch /home/user/--checkpoint=1
+		touch /home/user/--checkpoint-action=exec=<script_to_run>
+
+	So when the tar will try to execute it's operation with the wildcard... These files will be executed as options in tar... This will make our made script to be run as root... and the best part is tar doesn't need to be owned by user... it's just a command ran by root.
+
+SUID/SGID Methods
+
+Known Exploits....
+
+	Search the gtfo bins to exploit the suid... The normal way
+
+Shared Object Injection...
+	- Can use this... when the suid depends on other files to work... If you can't directly get access to root via SUID and find with either source or strace... that the suid is calling another program piece of code... that can be accessible to you or you have permission to write to the file, that you can manipulate the SUID WITH THAT SHARED OBJECT,by INJECTING malicious code or so.
+
+Path Variable... 
+	- Similar to other ways... Just in case, you find an SUID running an application in turn... Like service apache2 start(strings on the SUID or strace or source)... Note, the SUID isn't calling full path to service executable, so keep your eyes open here... You can compromise the SUID by adding another executable in the custom PATH (added by you) and SUID will end up spawning a bash shell with root privileges for you.
+
+MISCiLLanEOUS Exploiting of SUIDs and SGIDs
+	
+	In bash <4.2-048 it is possible to define shell functions that can replace file paths...
+			- Then later export those functions so they get executed instead of the real binary.
+
+		So for eg. If there is an SUID running(suppose /usr/local/bin/suid-env2) an another service in turn (suppose /usr/bin/service)
+			- Then you can create a bash function, /usr/sbin/service and "spawn a shell" command inside the function and then export it...
+
+			function /usr/sbin/service { /bin/bash -p; }
+			export -f /usr/sbin/service
+
+		Now when you run the SUID, it will run the function instead and spawn a bash shell for you instead.
+
+	Part II: This is available only in versions lower than bash 4.4 (4.4 excluded)
+
+	The vulnerability here is that when we open an SUID in bash debugging mode... bash uses an environment variable called "PS4" to give prompt for debugging statements for the SUID.
+
+		So now think... If we could change the value of this variable to create a copy of /bin/bash instead of spawning a debugging prompt, (coz it's an SUID, if debugging has to be done, then also it will be as the owner i.e. root) Hack implemented...
+
+		When the SUID gets in debugging mode with bash... it will automatically start the PS4 prompt... We could create a copy of /bin/bash in /tmp directory and then allot the SUID privileges... "One /bin/bash -p" will give us root
+	
+	Note: Don't directly try to run /bin/bash -p ( I tried it... and instead of working as a bash shell it didn't execute commands instead it kept on debugging the SUID whenever I type a command and press enter... So, let the auto debug complete, meanwhile create a copy on /bin/bash with suid in /tmp and after the debugging gets completed run the binary get root and enjoy your stay)
+
+Password and Keys
+------------------
+
+Again one of the dumbest sections, but let's see.
+	
+	- Sometimes user might use their password on terminal and not on password prompt... and this can reveal their password in the .bash_history file... Or simply if the user ever used something to log in via command line... Like, mysql....
+
+	- Sometimes user might leave something in his/her config files... for eg... .ovpn and .config folder in his home dir... Worth a checkout
+
+	- SSH key can be found in .ssh (home) dir, the new thing here is there is root_key also, which is for the root user... With this key a user is allowed to ssh into root account of the vm... This is hardly found... But once found... Don't miss the opportunity.
+
+NFS
+----
+
+Here is something new...
+
+	The very first concept here is of root squashing...
+		- Root squashing is a security feature that is there for someone who mounts the target's system into his machine... 
+
+		Note: Just in case, if the user is running root on the host where the file system was mounted, then when he creates the file, the file owner will be root... If this is the case, then anybody can create an SUID with local root on the mount and then execute it on the remote end to execute privileges...
+			- Here comes the role of 'nobody' user (check /etc/passwd), when root squashing is enabled, any file created by even root user, will stored as user 'nobody' on the system... This has prevented a lot of attacks tbh. And this whole is the concept of root squashing, to squash the root privileges from another host to the server's(mount server) host.
+
+	Now note that everytime this feature is not useful, so do checkout /etc/exports file to see, JUST IN CASE, if the user has disabled the root squashing on any mount system... If the root squashing is disabled on any of the mounts then there will be a flag "no_root_squash" on that mount's property in /etc/exports.
+
+	A possible way to exploit this is... mount the no_root_squash file system... and create a payload in that directory(with root user on your local machine) give SUID permissions... and execute the script as local user on target machine to escalate privileges.
+
+Kernel Exploits...
+
+	- These are what I consider dangerous since the beginning... Because if something gone wrong... This could leave the system barren...
+		- Even the room says, that kernel exploits can leave the system in an unstable state, and keep them as your last resort.
+
+	One of the most famous kernel exploit... Dirty Cow, search it up.
+
+
+Some famous linux privesc scripts...
+	- LinEnum
+	- linpeas
+	- lse (linux smart enumeration; better than linenum)

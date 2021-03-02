@@ -1,0 +1,145 @@
+
+
+XML External Entity
+=====================
+
+First of all, this is not a vulnerability... It is a feature of XML that allows entities to be referred out of the document itself, like including a system file's output, or referring from a link. But, to note that XXE Injection is a vulnerability...
+	- This vulnerability is based on injecting strings/code so that when the XML document gets parsed by XML parser it executes the following string/code or injected string, which could lead to file local file inclusion... And we can view the files resting on server, that could leak credentials.
+
+
+syntax to declare these entities in XML is something like this...
+
+Syntax:
+	<ENTITY notes SYSTEM "note.txt"> ( This helps us view the file note.txt that is present on the server)
+
+	<ENTITY link SYSTEM "http://belikeparamjot.tk/malware.exe">
+		- Note: This may not be a suitable way to exploit XXE. This is me, took example to show, that external entities can also included links too)
+
+Note: SYSTEM and ENTITY are keywords
+
+Now, do note that understanding XXE is not easy, if you have no previous knowledge of XML and DTD. So, I don't know if I will be able to master this vulnerability whole in today's time or not... But I will try my best.
+
+Do check out xml_notes file before going through this... That file is made with purpose of understanding the XML and DTD language basics.
+
+
+Scope of XXE Injection
+------------------------
+
+	- Allows attacker to interact with the backend systems on the internal network and allows him/her to read the files on that system if allowed by the user running web-service or on which have enough privileges to do so,
+	
+	- Attacker can cause DOS attack or may be even perform SSRF inducing the web-application to make request to other applications.
+	
+	- Can also lead to port scanning( Google it, how?; or not if you already knew) and even lead to RCE
+
+Types of XXE
+--------------
+
+	- In-band XXE attack is the one which gives out response to the payload the attacker has injected.
+
+	- Out-of-band XXET attack is like blind XXE injection... No response of the payload is given in the HTML document. 
+		- The attacker has to redirect the output to some other file or their own server.
+
+
+eXtensible Markup Language
+============================
+
+Markup Language vs Markdown language
+--------------------------------------
+
+Now this topic is not inside the room, this just came to my mind when I read the heading extensible MARKUP language and co-related this to github's MARKDOWN. I thought that this could be something I should no for once.
+
+- To be honest this isn't any topic... This is just out of curiosity. 
+
+The Answer:
+	- Well, by analyzing a pattern in behaviour of markup languages, and markdown languages... I can say, that most of the programming languages are programming language.
+	- When I read about markup  language on wikipedia it showed me that markup languages were created by some dude, to implemented formatting in elements, variables. 
+	- Later I read on stackoverflow that MARKDOWN language is a kind of markup language i.e. used to format raw text...
+	- That's it, and I would say that the MARKDOWN language is the most basic of MARKUP languages.
+
+Now getting back to the room.
+
+What is XML?
+
+- XML is a markup language
+- It is used to set defined rules for encoding documents
+- It is both humand and machine readable.
+- It helpsis storing and transporting data.
+
+Features of XML
+
+- Platform Independent and Programming Language Independent
+	- Also, supports the technology change (whenever that happens)
+	- It simplifies data sharing because of its nature of platform independent.
+
+- The data stored in XML can be changed at any point of time without affecting the data representation.
+
+- It's validation from it's schema and DTD ensures that the format is syntax error free.
+
+- Doesn't require any conversion while transferring the data.
+
+Note: If you want to check out the syntax... It's in xml_notes file
+
+URI/URL/URN
+------------
+
+Let's understand what is URI URL and URN.
+	- URI - Uniform Resource Identifier
+		- URL - Uniform Resource Locator
+		- URN - Uniform Resource Name
+
+As by the representation of the above structure, you can see that URI is something that can be both... locator or a name or both... whereas locator is used to specify an address and urn used to specify just a name(it's not used because generally names can be same but not address)
+
+Also this wasn't the part of room. It was extra to know... Now starting with DTD.
+
+
+DTD - Document Type Definition
+================================
+
+A DTD is a file extension that defines a legal structure of XML document, includig elements, attributes and entities.
+
+Example of DTD:
+	<!DOCTYPE note [ <!ELEMENT note (to,from)> <!ELEMENT to (#PCDATA)> <!ELEMENT from (#PCDATA)> ]>
+
+Let's understand the above code...
+
+- !DOCTYPE note: DOCTYPE declares the root element, beneath which all the elements will be placed.
+
+- !ELEMENT note: ELEMENT declares the elements of an XML document of (datatype) type. 
+
+- #PCDATA - This is a way to define that the declared element is of PCDATA type...
+	- This is like a data type, and there are other also(Google it). 
+	- PCDATA stands for Parsed Characeter Data.
+
+
+XXE Payload
+=============
+
+An XXE payload would be something like defining an entity and use system keyword to access the system files... Sample payload:
+
+	<?xml version="1.0"?>
+	<!DOCTYPE root [<!ENTITY read SYSTEM 'file:///etc/passwd'>]>
+	<root>&read;</root>
+
+So, if a website is vulnerable to XXE then it would display the contents of /etc/passwd.
+Note: This payload will run with the privileges of XML parser... If parser is running as a normal user then... the privileges of accessing those system files would be of that user... lly, if the parser is being run as root, you can read any file in the host's system.
+
+Exploiting
+============
+
+
+What is the name of the user /etc/passwd?
+	falcon
+
+Where is falcon's SSH key located?
+	/home/falcon/.ssh/id_rsa
+
+What are the first 18 characters for falcon's private key?
+
+
+When I got the ssh key, I logged into falcon's account just for fun... That I watched a user.txt file... 
+
+User Flag: 34447308044820445174
+
+I kept wondering that if there is an easter to root the box... So I enumerated the machine further... Found that the falcon was in the lxd group... I then rooted the box using lxd priv esc... ez pz... But there was no user flag so I created a file with touch named "HACKED!!"
+
+This is it for 4th vulnerability i.e. XXE. It was fun learning this one.

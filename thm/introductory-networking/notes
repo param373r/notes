@@ -1,0 +1,234 @@
+
+
+The OSI Model
+==============
+
+
+
+I DID THIS ROOM WITH A NEW THOUGHT TODAY... IT'S WORTH NOTING THAT ALL MY INTERPRETATIONS REGARDING NETWORKING BEFORE THIS WAS WITH A DIFFERENT MINDSET... WITH THE SAME WORDS... PLEASE DO READ THIS IF REACHED TILL HERE.
+
+
+OSI - Open Systems Interconnection 
+
+NOTE: OSI model is a representation of data from our device to the router... Not to the internet... The physical layer is the wire of broadband taking it to the antenna... and further transmit the data.
+
+Application layer includes all the data at application level...
+NOTE: THIS INCLUDES PROTOCOLS LIKE HTTP, FTP.
+
+WHAT'S DIFFERENT NOW IS, BY TAKING AND NOTING FOLLOWING THINGS IN MIND.
+
+PHYSICAL LAYER - BITS
+
+DATA LINK LAYER - FRAMES
+
+NETWORK LAYER - PACKETS
+
+TRANSPORT LAYER - SEGMENTS(TCP)/DATAGRAM(UDP)
+
+SESSION LAYER - Includes SESSION MANAGEMENT, AUTHENTICATION
+
+PRESENTATION LAYER - DATA REPRESENTATION/FORMATTING (ENCRYPTION)
+
+APPLICATION LAYER - APPLICATION LOCAL CALLS AND SYSTEM CALLS (Basically normal application processes) 
+
+
+NOTE - For simplicity, take it like, presentation layer is different by application layer, as it (might) includes encryption/decryption of data before sending...
+
+If network engineers were to troubleshoot, there, scope generally remains around transport layer... Even the session management is also a application layer task.
+
+Important Notes
+-----------------
+
+- The router level starts from Data link layer... 
+
+- The TRANSFER of requests and response from router to our devices are managed by transport and network layer. 
+	The difference is, transport focuses on how to handle the data being recieved... TCP/UDP i.e. accuracy or speed. Once chosen and formed a segment... That segment is passed onto network layer, which focuses on data transfer onto the router by forming packets... 
+
+	So we can also say that, transport layer focuses on communication of processes running and network layer focuses on communication of hosts.
+
+- The PC level includes session, presentation, application... 
+	Now to be fair this is neglected because even session layer is mostly handled by in-app services.
+
+	To sum up... PC level is where data is being set for launching at the application level... TRANSFER is where data is being prepared for launching at the OS level (Launch to the router) 
+
+Layer 7 - Application Layer
+-----------------------------
+
+As we are doing networking here this won't be brief... It's hardly a part of real networking.
+
+- Manages accepting/rejecting requests from applications
+
+- Data is generally in standardize form (Depending on the app's code... The way code is implemented)
+
+
+Layer 6 - Presentation Layer
+------------------------------
+
+- Processes data in the app to station it for departure, if a network connection is to be done...
+
+- Encryption/Decryption/Transformation/Compression is also handled at this level.
+
+Layer 5 - Session Layer
+-------------------------
+
+- This layer tries to set up a connection with the other computers across the network, BEFORE WRITING THE DESTINATION OF THE DATA, ON THE SEGMENTS OF THE DATA RECEIVED FROM PRESENTATION LAYER.
+
+- This layer handles authentication/sessions created across network etc. i.e. all about session of the packet being sent across the network.
+
+NOTE: THIS AUTHENTICATION IS NOT USERNAME AND PASSWORD AUTHENTICATION... THIS IS SYN-ACK AUTH... i.e. if the server is up and ready, tuned to recieve the data.
+
+- This layer helps us to manage multiple requests in a PC, by smartly allocating a port to the service, running inside the OS.
+
+Layer 4 - Transport Layer
+---------------------------
+
+- The two most common protocol of transport layer are TCP and UDP
+	- TCP - ACCURACY
+	- UDP - SPEED
+
+Layer 3 - Network Layer
+------------------------
+
+Now, network layer is explained as a layer that communicates with the outer internet... which might confuse me when I later come back here... I am not saying that's wrong but am sure enough that the person that made this room, interpreted the information wrong... Or may be at this point of writing the note, I don't find it suitable to create the basis of networking for me.
+
+- All I need to know for now is, it transmits and manages the data segments across logical addresses i.e. hosts(IP) in a network. 
+
+Layer 2 - Data Link Layer
+--------------------------
+
+This layer focuses on physical addresses in the transmission not the virtual/network ones... 
+
+- After the router/hub/switch/reciever recieves the data from network layer, and adds MAC of the recieving endpoint i.e. someone for whom the message is intended for. 
+
+- The MAC address is unique for every existing device that has a NIC (Network Interface Card), which helps the device to differentiate itself from the others in the network.
+
+- This layer has the crucial role to play, which is to present data in a format suitable for transmission.
+
+Note: MAC addresses are burnt in card and they can't be changed for any reason... But yeaa, they can be spoofed on packets by a macchanger.
+	When data is sent across the network... it's actually the physical address that helps to identify the for whom the data is intended for...
+
+- It is the role of this layer to make sure that data transferred over the network is in proper format or not corrupted.
+
+Layer 1 - Physical Layer
+--------------------------
+
+The physical layer is where the binary data is converted into signals... The role of this layer is to transfer data across the devices (including antenna) via cables and wires.
+
+That's it about the physical layer... Rest things including cable types... CAT5 CAT6 cables (which are not mentioned in the room's task, I wrote it down from my previous knowledge), which is really not the crux here.
+
+That's it in the OSI model.
+
+Here, we move on to the next task....
+
+
+ENCAPSULATION
+--------------
+
+- The adding of headers by each layer... As the data goes through, is known as encapsulation.
+
+- The receiving end decrypts the data in an orderly fashion, i.e. layer by layer... This process of dismantling the data is known as de-encapsulation.
+
+Note: The process of encapsulation and de-encapsulation described here are very important, as they are standard to what is implemented in the computers throughout the world... 
+	This makes sure, that if one device sends some data to another part of the world... It's understood via network.
+
+
+The TCP/IP model
+------------------
+
+OSI(Application + Presentation + Session) = TCP/IP(Application)
+
+OSI(Transport) = TCP/IP(Transport)
+
+OSI(Network) = TCP/IP(Internet)
+
+OSI(Data link + Physical) = TCP/IP(Network Interface)
+
+
+- Learnt about 3 way handshake: syn syn/ack ack; used in establishing a tcp connection.
+	- Therefore, TCP requires syn/ack response in order to send data, whereas UDP sends data with just syn packet.
+
+- TCP/IP model came before OSI model
+
+Wireshark
+-----------
+
+This seems like a challenge to me... So I will do it at the end of the room.
+
+[Network Tools] Ping
+----------------------
+
+So, I finally found my answer to the question I have been looking for days...
+
+Firstly, the question was... Why does the Nmap scan shows the host is down... Whereas ping shows that the connection to that host is alive.
+
+Answer: This because NMAP does a port scan... and what ping does is, checks for host's live-ness. The thing to note is, ping runs a host check on ICMP protocol, which works on Network Layer. This means that there is a chance that there might not be any on going service (with open port), but the host is connected to internet via a router... and that's why the ping tells us the host is live... But nmap ain't show any running ports on the host machine.
+
+That being said... I am a bit relieve, for answering one of my doubts I searched earlier.
+
+- The biggest advantage of ping is most devices/OS have it pre-installed, and it works on almost every... network device. This device can be greatly used to identify the host's live-ity. 
+
+[Network Tools] Traceroute
+----------------------------
+
+This tool simply helps us to map the whole route to our destination.
+
+[Network Tools] WHOIS
+----------------------
+
+Domain names - the unsung saviours of the internet.
+
+This tool can help us dig pretty much a lot of information about the domain name of a particular website... 
+	Ranging from registerar's name to the buyer's address.
+
+[Network Tools] DIG
+---------------------
+
+URL/domains are resolved by DNS... What dig does is... It helps you retrieve DNS entries for the following domain from the DNS.
+
+- If you search a site on browser... The domain is first searched to the cache of DNS local on your OS. If not found there... A request  the router's DNS is sent(most ISPs maintain this DNS for them) (The DNS used in router is known as recursive dns) if still not found, the router forwards the request to outer DNS (13 root servers) on the domain we entered...
+
+These root name servers further drop down the requests to authoritative name servers... When finally found the domain, it sends the information regarding the domain DNS records, with the linked IP address.
+
+Now, there are tables inside these DNS servers, the dig command helps us retrieve those entries from those servers.
+
+- TTL is time to live for a packet in the internet when sent across the router... It is measure in seconds... So if by chance a request is sent across the server via dig command it returns the following:
+
+;; ANSWER SECTION:
+google.com.             179     IN      A       216.58.196.110
+
+This means that the TTL was 179 seconds (~2 mins 59 seconds), which means data with expire after 179 seconds inside the internet.
+
+Wireshark
+-----------
+
+So finally, we're back to the challenge analysis.
+
+A bit of theory... 
+
+Each packet shown in wireshark is a brief description with encapsulated data 	
+
+Frame: This is showing details from phycial layer...
+
+Ethernet: This is showing details from data link layer (including MAC addresses)
+
+Internet Protocol Version 4: This is showing details from the Network layer
+
+Transmission Control Protocol/User Datagram Protocol: This is showing details from transport layer
+
+Hypertext transfer Protocol: This is showing details of app data and applicatoin layer things... This is the crux.
+
+
+Note: This is not a wireshark room, so we won't get into deep... To get into deep check wireshark room.
+	Suggested Room: Wireshark 101
+
+Poof: Done with the room.
+
+
+
+Further Reading
+-----------------
+
+A book, paid one... I know you won't be buying it, (room says that the book helps in prep of CCNA, but I will stick to the official resources for that anyway). Just for reference... If want the book... You know, which room to look to.
+
+
+This is it for this room... Moving on network services

