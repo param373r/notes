@@ -1,0 +1,189 @@
+
+
+PCAP badge
+============
+
+These are gonna be in-general notes for all the challenges I do in this badge.
+
+
+01:
+	- Wireshark allows us to view Follow the TCP stream, so that we don't have to read the hex data of every packet sent from the server in a single connection via individual packets.
+
+02:
+	- In this challenge, the file only contains the TCP connection of a user connecting to a server using telnet. Connecting with telnet is insecure as anyone who can see the traffic, or access a packet capture of the connection is able to see the username and password used as well as all the commands that the user executed.
+
+	- Using Wireshark, you can open the file. Once the file is loaded, you should be able to right-click and select "Follow TCP Stream" as you did in the previous exercise.
+
+	- The interesting part here is that you should see the difference in color between the data coming sent by the server and the data sent by the client. You should see the server sending a banner (with the version of the Linux Kernel) and a prompt with Login:. Then you should see the response from the client. The server is then asking for the Password. The client provides the password (The key to solve this exercise). Finally, you can see the Debian Message-of-the-Day (MOTD) and the command ran by the user.
+
+03:
+	In this challenge, the file only contains the TCP connection of a user connecting to a server using FTP. Connecting with FTP without TLS is insecure as anyone who can see the traffic, or access a packet capture of the connection is able to see the username and password used as well as all the files retrieved by the user.
+
+	Using Wireshark, you should be able to retrieve the content of the connection using "Follow TCP Stream". Using that, you should be able to see the username and the password (the key to solve this exercise) used to connect to the server.
+
+04:
+	In this challenge, the file only contains the FTP connection of a client retrieving a file in passive mode. The retrieval of the file happens in two stages/TCP connections:
+
+    	The client authenticates and tells the server what file it wants to retrieve followed by the PASV command. The server will send back an IP address and port to the server. You can see the port and IP by inspecting the packet after the PASV command. You will need to explore the content of the packet to see the IP and port.
+    	The client connects to that IP and port to retrieve the file.
+
+	Using Wireshark, you should be able to retrieve the content of the file using "Follow TCP Stream" on the right TCP connection. Using that, you should be able to see the content of the file retrieved (the key to solve this exercise).
+
+05:
+	This challenge is identical to the previous one but a bit of noise has been added to make finding the right packet a bit more complex.
+
+	Using Wireshark, you should be able to retrieve the content of the file using "Follow TCP Stream". Using that, you should be able to see the content of the file retrieved (the key to solve this exercise).
+
+06:
+	- In this challenge, the file contains the connection of the root user to a server using rsh. The trust relationship between the client is the server is performed by creating a .rhosts file on the server with the IP of the client. This is obviously very insecure.
+
+07:
+	- In this challenge, the file contains a rlogin connection to a server. Connecting to a server using rlogin is insecure as the credentials are transmitted in cleartext. By inspecting the packets, you should be able to get the password used to log in.
+
+08:
+
+In this challenge, the file contains the network traffic captured during a SMTP connection to send an email. By inspecting the TCP connection you will see that the user provides a username and password to log in (they are both base64 encoded as part of the protocol).
+
+You should see the following exchange:
+
+AUTH LOGIN
+334 VXNlcm5hbWU6
+dmljdGlt
+334 UGFzc3dvcmQ6
+[...]
+
+Where:
+
+    AUTH LOGIN is the client telling the server it wants to log in
+    VXNlcm5hbWU6 is the base64 of Username:
+    dmljdGlt is the base of the username.
+    UGFzc3dvcmQ6 is the base64 of Password:
+
+Using Wireshark, you should be able to retrieve the content of the connection using "Follow TCP Stream". Using that, you should be able to see the username and the password (the key to solve this exercise) used to connect to the server (after base64-decoding it).
+
+09:
+	- In this challenge, you should be able to retrieve an email sent to a @pentesterlab.com address. Once you retrieve the recipient, you should get the key.
+
+10:
+	- I did this using Export Objects > IMF > Save
+In this challenge, you should be able to retrieve an email. You should see that this email contains an attachment.
+
+You can get the content of the attachment in two ways:
+
+    - Save the full email as a .eml file and open it with your favorite client.
+    - Save the attachment part (begin ... end) and decode it using uudecode.
+
+Then you should get access to a zip file and can just decompress it using unzip.
+
+11:
+	- In this challenge, you should be able to retrieve a POP3 login from an email client. You should find the username and password as part of the network dump.
+
+12:
+	- In this challenge, you should be able to retrieve an IMAP login from an email client. You should find the username and password as part of the network dump.
+13:
+	- In this challenge, the file only contains a single HTTP request. The key is available as a GET parameter.
+
+14:
+	- In this challenge, the file only contains a single HTTP request. The key is available as a POST parameter. One interesting thing to notice is that the header Content-Length contains the actual size of the body. This is the information the server uses to know how much data it should read from the TCP socket.
+
+15:
+	- In this challenge, the file only contains a single HTTP request. The key is available as a cookie. You can find the cookie by inspecting the header and looking for the line starting with Cookie:. Then you will see on the same line the cookies. The format is as follow:
+
+		key1=value1; key2=value2
+
+16:
+	- In this challenge, the file only contains a single HTTP request. The key is available in the body of the response as part of the HTML code.
+
+17:
+	- In this challenge, the file only contains a single HTTP request. The key is available in the Set-Cookie header from the response.
+
+18:
+	- In this challenge, the file only contains a single HTTP request. The key is available in the Authorization header of the request. The credentials are provided using Authorization Basic. The username and password are concatenated using a : and base64 encoded. The key is the password used.
+
+19:
+In this challenge, the file only contains a single HTTP request. The key is available in the Authorization header of the request. The credentials are provided using a Bearer token. The token is using the JSON Web Token (JWT) format. The format used follows this patterns:
+
+    The header.
+    a dot .
+    The payload.
+    a dot .
+    The signature.
+
+The key is stored as part of the payload. The payload is base64 encoded and stored in JSON. Using this information you should be able to get the key.
+
+20:
+	- There seem to be some problem with the exercise... I can't extract the GZIP manually. I gotta use the wireshark... To view the contents
+	- In this challenge, the file only contains a single HTTP request. The key is available in the body of the response as part of the HTML code. However this time, the response is gzip'ed. This compression is used to limit the amount of data that needs to be transferred.
+
+21:
+In this challenge, the file only contains a single HTTP request. The key is available in the body of the response as part of the HTML code. However this time, the response is deflated. This compression is used to limit the amount of data that needs to be transferred.
+
+Using Wireshark, you can open the file. Once the file is loaded, you should be able to right-click and select "Follow" -> "TCP Stream". This command will open a new window with the full TCP connection. This command basically reconstruct the connection so you're able to inspect the data without having to worry about the lower layer (IP and ARP). Then you need to select "Show and save data as" and select "RAW", then you can click on the "Save as..." button. Once you have the file save, you can edit it to remove everything aside from the body of the response (located after the last header). Finally, you can save the file and run gunzip on it to decompress the content and get the key. However, since the content is deflate instead of simply gzip, you will need to add some magic bytes to the response to get gunzip working:
+
+printf "\x1f\x8b\x08\x00\x00\x00\x00\x00"  | cat - pcap_21_extracted_body | gunzip 
+
+Where pcap_21_extracted_body is the file containing the body of the response.
+
+22:
+	- In this challenge, the file only contains a single HTTP request. The key is available in the body of the response as part of the HTML code. However this time, the response is chunk-encoded. This doesn't really change your ability to see the key. But you can observe that there is no Content-Length header and some hexadecimal number in the body. The idea behind chunk-encoding is that the server can send content without waiting for the full response to be ready. The server sends the size of a chunk (in hexadecimal) followed by the chunk.
+
+23:
+	- In this challenge, the file only contains two HTTP requests and responses. The key is available as a parameter of the second request. Both requests (and responses) use the same underlying TCP connection thanks to the use of Connection: keep-alive.
+
+24:
+	- In this challenge, the file only contains a single DNS query and the matching answer. You can see that this time UDP is used. You can still inspect the traffic to get the key in both the query and the answer. In this sample, the client asks for an A record to get the IP address corresponding to a given hostname (the hostname being the key to solve this exercise).
+
+25:
+	- In this challenge, the file only contains a single DNS query and the matching answer. You can see that this time TCP is used. You can still inspect the traffic to get the key in both the query and the answer. 
+	- It's a very common misconception that DNS traffic only happens using UDP. Here we can see that it can also work using TCP. 
+	
+	Note: You can use dig, you can use the option +tcp to force your client to use TCP instead of UDP
+
+26:
+	- In this challenge, the file only contains a single DNS query and the matching answer. You can see that this time UDP is used. You can still inspect the traffic to get the key in both the query and the answer. This time, the client doesn't ask for a A record to get an IP, it asks for a TXT record, and you can get the key in the answer from the server. 
+
+27:
+In this challenge, the file contains multiple DNS packets. One common issue with IoT devices is that they use a predictable transaction ID (a random number). The transaction ID is used to protect the client from an attacker sending malicious response. Since the attacker may not be able to intercept the query (for example if the attacker is on the same network but not in the middle), the attacker cannot predict the transaction ID and respond with a valid response. IoT devices can suffer from one of the following issues:
+
+    - Using a transaction ID that is fixed (for example only 0).
+    - Using a transaction ID that is very predictable (Or incremental).
+    - Not checking the transaction ID from the response to ensure it's the one matching the query they sent.
+
+In this example, we will cover the first case (fixed transaction ID set to 0. You need to find the DNS query with the right transaction ID and the hostname is the key to solve this exercise (without the domain).
+
+	- As said the correct transaction ID is 0. So the key was with transact ID 0x00000
+
+28:
+	- In this challenge, the file contains multiple DNS packets. We can see that an attacker is trying to inject DNS response but the attacker cannot predict the transaction ID. You need to find the response matching the query from the actual client.
+	- Filter used: dns.id == <transaction-id>
+		Ref: https://www.wireshark.org/docs/dfref/d/dns.html
+29:
+	- In this challenge, the file contains an ICMP request and reply (a "ping"). ICMP can be used as a covert channel to send information from one system to another without raising alarms. Here the key to solve this exercise is embedded in the ICMP request.
+
+30:
+	- In this challenge, the file contains a TLS connection. The client is connecting to the server and getting the certificate as part of the Server Hello (as a response to the Client Hello. In the Server Hello you can find a lot of information about the server, including the certificate and the Common Name (or CN) of the server's certificate. The key to solve this exercise is the CN (without .pentesterlab.com).
+
+	- A good challenge I must say <3
+
+31:
+	- In this challenge, the file contains a TLS connection. The client is connecting to the server and sending a Client Hello. Since a single IP may host multiple TLS server on the same port, the server needs to know what certificate it needs to send to the client. If the server sends the wrong certificate (for example by sending a valid certificate for pentesterlab.com when the client tries to access ptl.io), the client will reject it. However, there is no way at the TCP level to know what TLS server the client tries to connect to. Thankfully, the client can use a TLS extension named Server Name Indication or S.N.I. as part of the Client Hello. The key to this challenge is the S.N.I. value sent by the client (without .pentesterlab.com).
+
+32:
+	- In this challenge, the file contains a TLS connection. The connection is encrypted using TLS. However, you should be able to decrypt it using the private key. To do so you need to select one of the TLS packets and right-click to go to Protocol Preferences then RSA keys list. From there you can feed all the details: IP address, port, protocol (use http or tcp) and the server's private key pcap_32_server_private_key.pem. Once you click Ok, you should see the decrypted traffic that contains the key to solve this exercise. 
+
+33:
+
+In this challenge, the file contains a TLS connection. The connection is encrypted using TLS. This time, the connection uses Forward Secrecy (you can compare the Cipher Suite in the Server Hello between pcap_32.pcap and pcap_33.pcap. Since Forward Secrecy is used, you cannot decrypt the connection with the server's private key. This ensures that if the server's private key is compromised, someone sniffing the traffic prior to the compromise cannot recover the cleartext traffic.
+
+However, by modifying the client or the server, it's possible to retrieve the pre-shared key used to secure the communication: pcap_33_premaster.txt. Here, you can use this key to decrypt the communication. To do this, you can follow the following steps: right-click on a TLS packet, select "Protocol Preferences", then TLS debug file (or SSL debug file in older versions). Then, you can just pick the file pcap_33_premaster.txt using the (Pre)-Master-Secret log filename field. You should then get access to the cleartext traffic that contains the key. 
+
+34:
+	- In this challenge, the file contains a TLS connection. The client is connecting to the server. This time the client sends a client certificate to authenticate against the server. You can find the certificate as part of the Certificate, Client Key Exchange message from the client. The key to solve this challenge is the common name used by the client.
+
+35:
+	- In this challenge, the file contains a connection to a MySQL server as well as a query and response (on top of the ones done by the client). The key to solve this exercise is the password field for the admin user in the SQL response.
+
+Summary
+========
+
+	- Make sure you saw the video for PCAP 10

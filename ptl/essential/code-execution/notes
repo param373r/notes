@@ -1,0 +1,77 @@
+
+
+Command Execution
+==================
+
+01:
+	- Code Execution comes from lack of filtering or/and escaping of user-controlled data.
+	- You can use // in php to get rid of code on a particular line. To comment out a block of code /* hello world */
+	- You can use "." to concatenate strings in firefox...	
+		- "hacker" === "ha"."ck"."er"
+	- If there's a blind code execution... You can find it out by time-based detection. # sleep(10)
+
+	- To get a code execution... We need to find what language is ran on the backend... Tbh, after my previous engagement with exercises... I am sure that php is not the only language that can run on backends... Ruby is another imposter.
+		- To find out you can try to following things:
+			- View the response headers
+			- Try to produce some errors from the backend
+			- Hit and trial with + and . to concatenate strings.
+	- To keep the command execuction clean... You can use the following payloads:
+		- Dummy code: ".system('uname -a'); $dummy="
+		- By commenting out the rest of the code:  ".system('uname -a');# or ".system('uname -a');//
+	- You might need to URL encode a few characters before using them.
+
+02:
+	- This challenge is based on a vulnerability in PHPMyAdmin: CVE-2008-4096
+	- Great exercise... Awesome stuff learnt... Did a lot of hit and triall... But did all on my own... Thanks to the CVE... Guiding me wrong at first. Now I see, that knowledge of a programming language to exploit the code is a must... So you can craft your custom payloads.
+
+	- When ordering something developers can use 2 things:
+		- order by in SQL
+		- usort in PHP.
+	- "CREATE_FUNCTION AND USORT IN PHP ARE HIGHLY DANGEROUS", said the docs.
+
+03:
+	- Here we talked about another weak MODIFIER(NOT FUNCTION)... PCRE_REPLACE_EVAL (/e): This modifier will cause the function preg_replace to evaluate some value passed into it as a PHP code.
+		- Though we do need to edit pattern parameter we passed in as well and add //e to it... (Try getting a code injection to evaluate multiple params with a single param and commenting the rest ones out).
+
+	- Also just so you knnow... It's pee-reg as in preg_replace
+
+04:
+	- This example is based on the function assert. When used incorrectly... RCE.
+	- I am proud of this, that I solved this challenge within a minute, without reading the challenge description... And roaming around to read what the assert function does.
+		- The payload I used was this...
+			' OR system ("id"); //
+		- The payload given by the exercise was...
+			hacker'.phpinfo().'
+	- Tbh, the second one was indeed neat... I need to learn that too(that how to properly format your BUG)
+
+05:
+	- This is where the ruby app comes in... The problem code was
+		@message = eval "\"Hello "+params['username']+"\""
+	- We can execute command in ruby by enclosing them using ``. Eg. `id`
+	will print me current user I am.
+	- In default ruby error page... You can see the source code too... KEEP YOUR EYES OPENNN.
+
+	- eval evaluates a given code... Executes... Executes a given code... Huh.	
+
+06:
+	- This time it was a python application, and I thought I could easily pull this out... But for some reason os.system doesn't work... Instead of finding an alternative I read the text below... Stating... Do a os.popen(command).read()
+		- The reason was... The system command executes a shell command... It doesn't give the output... So it will run... but won't give the output. But... In this case... For this to run successfully we will enclose the os.system() command in str(). So that it works adjoining the string concatenation. The eval function was used.
+
+07:
+	- Yeaps, solved this challenge using __import__('os').system().
+	- High score.
+
+08:
+	- This was an awesome challenge with some great challenging skills. Although, I didn't use my brain to that extent... But... What I did finally... was understand that we can use __import__ multiple times in a single line... 
+	- The challenge was to execute the binary /usr/local/bin/score but can't contain /'s in them. So, base64 encoding worked for me.
+
+	My Final Payload: hacker"%2Bstr(__import__('os').system(__import__('base64').b64decode('L3Vzci9sb2NhbC9iaW4vc2NvcmUgMTM0NWI0ODctMmY2My00OWU5LTk3ZTQtZTcwNTlkODU0MGVi')))%2B"
+09:
+	- Fuckkkk I am so dumb... The double quotes broke the code and produced error, thought that is my way through it... It broke the JSON code lol... To break the inner perl code... We needed to use single quotes...
+	- One thing I was doing wrong was to apply space directly and not URL-encoding it... It's just a lot to take in. 
+	- A very good challenge had me thinking for a while... And did the most
+
+ 
+
+Summary:
+	- Make sure to watch challenge video for exercise 8. 

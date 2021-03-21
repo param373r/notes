@@ -1,0 +1,23 @@
+
+
+File Include Vulnerabilities
+=============================
+
+01: 
+	- Occured due to common logic flaws... And not proper filtering.\
+		- If call to vulnerable function (require{,_once}, include{,_once}), can trigger LFI/RFI.
+	- By default php disables loading of REMOTE files via... disabling this in php.conf(type kinda file) allow_url_include
+	- File include can include files by dirtraversing too.
+
+02:
+	- This exercise demonstrate the use of a SUFFIX(an append of extenstion type thingy to the file... So that it doesn't spot to something else. #Justastupidfilter).
+	- To demonstrate the bypass for LFI:
+		- Use NULL at the end of the file.
+	- To demonstrate the bypass for RFI:
+		- Use ?blah=<SUFFIX> or &blah=<SUFFIX> to the site's URL.
+
+	- This time the payload required NULL byte only to first argument i.e. URL include for RFI. When used with the ?c=uname it threw an error.
+
+
+Summary:
+	- TODO the summary.	

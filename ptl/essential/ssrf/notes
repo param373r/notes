@@ -1,0 +1,31 @@
+
+
+Server Side Request Forgery
+============================
+
+This type of vulnerability allows an attcker to get access to a functionality of server which he is not authorized to by default. 
+	- This can be done by sending a mal-formed request via the web-app, impersonating the us as the web app.
+
+01:
+	- This can be used to access internal pages, perform network scans, trigger behaviours in different systems...
+	- The challenge was to access the web-root of a web service listening at port 1234 in the website. That could be done using http://127.0.0.1:1234/
+
+02:
+	- This exercise is same as previous. But this time 127.0.0.1 is blocked... So we can use localhost instead.
+
+03:
+	- So localhost and 127.0.0.1 both are banned... In this case we can convert an IP address to it's decimal form and then request a webpage. This is gonna do same af.
+		- a.b.c.d IP to decimal = a(256)^3 + b(256)^2 + c(256)^1 + d
+	- Note that this can be bypassed in TONS OF WAYSS. You can bypass it using octal notation, using hex. Or anyother IP address in the region of 127.x.x.x(excluding 127.0.0.0; everything points to localhost, yeaps tested it mahself; just don't use .0 at last)
+	- To know more... You can find a blacklist of all IP addresses, some where on the surface web too.
+
+04:
+	- This was a nice target... But I put 2 and 2 together... And got the key.
+		Payload used: http://assets.pentesterlab.com.hackingwithpentesterlab.link:1234
+
+	- Alternatively, we could use localhost.
+	- Also, it is really useful if we can view the source of a page and it's filtering.
+
+Summary
+========
+	- TODO the summary

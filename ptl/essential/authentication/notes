@@ -1,0 +1,39 @@
+
+
+Authentication
+===============
+
+01:
+	- register for a user, change the cookie to admin, get the key
+	- There is a different between cookies and sessions(saw in the code review video)
+	- Sessions are stored on server side... Whereas cookies are stored on client side... Therefore, cookies can be manipulated to by an attacker, but to manipulate a session is a difficult task.
+		- The vulnerability in this exercise was that cookie was set to user logged in. A user can modify the cookie and change the user residing on the client side to whomsoever he wishes to...
+
+02:
+	- md5 hash of the username as a cookie, encrypting admin into md5 format and then changing the cookie... Got us the cookie.
+	- NOTE THAT when doing, echo admin | md5sum in linux It's gonna take a new line which will break the code. So use...
+
+		```echo -ne "admin" | md5sum``` to work with only the string.
+
+03:
+	- This program shows a simple vulnerability, but smart ig. Which is of, string comparison... 
+		- The fact that sql does a case-insensitive search... May allow you to create another "aDmIn" user that is bypassed by the filter and retrieve you the data available to actual admin user.
+
+04:
+	- Another, yet smart approach to authentication... Even if a database is comparing case-sensitive search... This can also be bypassed using trailing spaces... As in it is different from the previous user... But the entry stored in database will be admin only.
+
+	- Now that I tried, this was a vulnerability in previous challenge too... Just it's focus was to use case-insensitivity to get the key.
+		- Also, in current challenge the vulnerability doesn't work if the trailing spaces are before the "     admin" user. K then, first left, the right... then both.
+
+05: 
+	- This was a nice little challenge to play with... So the challenge description was... "The developer might forgot to stop the execution after a certain period of time". So the php script at the backend will still render that particular page, even if redirection is executed... And thus we can view that page either by curl, repo
+		- To stop that execution, we can use die() function in php and it will not render the rest of the HTML file, after redirect.
+	- To solve this challenge you can also use curl, as curl doesn't follow redirects by default.
+
+Note: This last one was not completely authentication based... It's like, if we try to view dashboard it will redirect us to login page first... But we can still view the contents of the dashboard with curl or in burp's tab. If the page doesn't die at last. This can be some serious information disclosure...
+	- Now apart from the bug hunting... this could be pretty good trick to know more about a challenge even in ctfs.
+
+Summary
+========
+
+	- To be updated soon enough.

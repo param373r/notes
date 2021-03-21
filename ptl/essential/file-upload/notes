@@ -1,0 +1,20 @@
+
+
+File Upload
+=============
+
+You know the drill hack it up.
+
+01:	
+	- No filter used.
+	- Fun Fact: Retrieved a file shell.php in the web's root directory. Make sure to understand what the code is doing in it.
+
+02:
+	- The restriction by the server is that... the file cannot contain .php at the end... So you can use .phtml or .php3 or .php5 extensions as well.
+	- Or you can use .pHp or .Php, #will work the same, BUT... Won't execute the same. It will be just a different file extensions.
+	- Found another shell.php (different from the previous one... Try to analyse that too)
+
+Summary
+========
+
+	- TODO the summary.

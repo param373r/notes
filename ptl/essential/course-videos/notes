@@ -1,0 +1,57 @@
+
+
+Introduction to SQL Injection
+-------------------------------
+
+	- Basic intro BTS php code. (How does ' or -- ' works)
+
+Introduction to XSS
+--------------------
+
+	- Methodology behind an xss.
+	- Just a side note... That cross site scripting can be a server side fault (i mean ofc... But the way you should look at it is... Server side executing a bunch of code... from the input or a parameter). In most cases, JS runs as the code on browser which is rendered by the browser... After being reflected from the server... 
+		- PS: Wait until you get sure about this.
+
+Introduction to Directory Traversal
+------------------------------------
+
+	- Base point, we can't access anything (by default) outside the web root directory #/var/www/*
+	- There are cases we may wanna check for these.
+		- Available access control
+		- Analytics (to web pages, so we can find out what other web pages are there that we can access)
+		- Store files in another location(like uploading something. And see if it returns a path to us)
+		- Create files dynamically (which means we have permission to create files remotely or edit the webpages; which is like a real serious issue, DUH.)
+
+	- A good practice for accessing the directory outside the web root, can be create a script in the current directory that can include files from another location on the installation.
+	- Then a basic code example how LFI can be implemented.
+
+
+Introduction to HTML encoding
+-------------------------------
+
+	- To prevent the XSS, developers tend to HTML encode the inputs.
+	- Most encoding is done using HTML-encoding
+		- Named
+		- Hex
+		- Decimal
+
+	- Named: Examples()
+		- &lt; 		-> 	<
+		- &gt; 		-> 	>
+		- &quot; 	-> 	"
+		- &amp; 	-> 	&
+
+	- Hex: Hex values in cross site scripting or more like this, that %3e is url-encode #FML...
+		- &#x3e;	-> 0x3e
+		- &#x3c;	-> 0x3c
+
+	- Decimal: Decimal values are similar to hex html-encoding, just that it has a missing x;
+		- &#65;		-> A
+		- &#98;		-> b
+
+Introduction to XSS2
+---------------------
+
+	- In this video there are some very distinct ways in which xss payloads can be created, and test for sanity... Make sure to watch this again. I am just cutting some time over here.
+
+	- More with HTML encoding... And trying the payload ```1234 ><'"``` i.e. to test for if there is any encoding that the server is doing... so we can reverse the operation.

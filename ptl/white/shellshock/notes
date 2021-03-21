@@ -1,0 +1,31 @@
+
+
+Yeaps, from this point onwards the notes are going to be in their respective folders...
+
+Shellshock
+===========
+
+- Also known as CVE 2014-6271.
+- This impacts execution of bash through CGI scripts.
+
+CGI - Common Gateway Interface; Allows server to run user's process requested via site access.
+	- CGI scripts are just like normal scripts written by developer to perform tasks(services they offer to their users) by users on their servers.
+	- They can be written in any language: Python perl bash c etc.
+
+- When you call a CGI, the webserver will start a new process and run the CGI.
+	- Some web servers like apache uses environment variables to pass the information that needs to retrieved from the server and is intended.
+
+- Shellshock is the vulnerability that exploits those CGI scripts and give you RCE.
+	- Shellshock is a type of vulnerabilities, there are other CVEs available to this vulnerability like: CVE-2014-6277, CVE-2014-6278, CVE-2014-7169, CVE-2014-7186, CVE-2014-7187 etc.
+
+Note: You cannot run CGI scripts in web root. It's not the CGI, it's some problem in bash
+
+The source of the issue is that Bash can have internal function declaration in its environment variable. The first version of the vulnerability is related to the ability to run arbitrary commands after a function declaration.
+	- First, we need to declare that the environment variable is a function using (). Then we will add an empty body for the function. Finally, we can start adding the command we want to run after the function declaration. More details can be found in the following email on oss-sec
+	- When a server uses environment variables to pass headers to a Bash based CGI, we will be able to run arbitrary command by declaring an empty function and add a command after this declaration. 
+
+Payload to use: () { :;}; echo "execute any command you want"
+
+- Most common way to inject the payload is through user-agent header.
+
+NOTE: THIS KIND OF VULNERABILITIES IS REALLY INTERESTING AND OFTEN STAYS UNDETECTED FOR A LONG TIME AS IT'S LOCATED DEEP INSIDE THE INTERACTION BETWEEN COMPONENTS, WORTH A SHOT.

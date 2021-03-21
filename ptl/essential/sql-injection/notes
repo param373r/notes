@@ -1,0 +1,48 @@
+
+
+SQL injection
+===============
+
+You know the drill solve the exercises until you hit a wall.
+
+01:	
+	- Use single quotes and the infamous Mysql payload. 
+	- Make sure you give space after the comment -- .
+
+02:
+	- Potato POTATO, use double quotes this time.
+
+03:
+	- The developer has checked the amount of things to retrieve from database. Bypass it by restating the statement to LIMIT 1, and commenting the rest. 
+
+04:
+	- This time there is a filter of NO SPACE SHOULD BE USED INSIDE THE FIELDS. This can be bypassed using \t (tab)
+
+	Note: you cannot directly inject \t in the password... It will be interpreted as a string, not as a tab character. Use burp or curl to url-encode the + signs to %09 (the tab in ascii hex)
+		- It happened in burp but not when I tried to curl the request. May be the referer header needs to specified.
+
+	- So with the description of next exercise I solved this one... Again.
+
+05:
+	- You can also use # in mysql to comment things out... Benefits? No need to specify space after and before use of #.
+	- Also, this one has No Space filter too.	
+		- The twist here was... You can't use \t either. So I used to following payload all ba mah self
+
+			'or'1'='1'#ezpzlmnsqzy
+	Note: The payload won't work if the strings isn't used... Why? Because '(quotes) here are used as a delimiter to differentiate the OR with 1, else it will be read as 'or1'='1'.
+	- Alternatively you can use || instead of OR, and then work with integer.
+		'||1=1# OR '||1# Would work just fine.
+
+06:
+	- addslashes() in php allows you to escape the quotes and other special characters to strings. 
+		- In 2006 Chris Shiftlett's Blog gave us a way to bypass addslashes() function i.e. by changing the charset to GBK.
+		- GBK is a character set for simplified chinese. The fact that database and database driver don't talk the same charset, we can use %BF to escape any character in our payload to bypass the filter.
+
+	- On second thoughts this issue can be resolved by adding the following sql command.
+	- This can turn into a pretty good CTF challenge.
+	- Payload used %bf%27||1#
+
+
+Summary
+=========
+	- TODO the summary.

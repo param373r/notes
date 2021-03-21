@@ -1,0 +1,39 @@
+
+
+Authorization
+==============
+
+01:
+	- As concepts of authorization works... A user can access data of another users... A very basic way of exploiting it... is simply by accessing other users profile with their id.
+		- Broken Access Control can cause IDOR. (The video taught me)
+
+02:	
+	- This was a pretty good challenge, and I totally backed out thinking that I need to code in ruby... But it was nothing like that...
+		- The catch here is, may be there is a check for accessing a file 1 way... But not the other... Check everything!!!
+
+03:
+	- This was another great challenge, had me thing for a while... But to view the json format of a webpage(in case a few bunch of data is hidden in html; can be viewed in json), you can try 2 things:
+		- Append .json at the end of the URLs page. like... index.html.json, xyz/1.json
+			- Alternative you can also curl the URL...
+		- Use the developer console to run this command $.getJSON('http://target.com'). It will return the data in json format.
+
+04:
+	- A really nice challenge. I dived deep into attr_protected function and update_attribute function... Thinking that's the way. And forgot to see the pattern.
+		- The Pattern: user[variable]=value #CRAP
+	- Really nice challenge I liked it a little bit... Got to learn a few things in ruby.
+
+05:
+	- This time challenge was a little twisted... The twist I believed was change in /update_profile thingy, that the user cannot be updated at creation may be can be updated via post request to profile-update... But that was not it... The change also was in validating true as a filter to block this request update so I had to use 1 instead of true.
+	- So, try another variations too...
+
+06:
+	- Ok, this wouldn't be this easy, if I didn't completed the last 2 exercises. So... I did it. It was like a sum of all.
+		- Btw, there can be cases, where urlencoded strings won't work... But the normal would. Hit it up for yourself.
+
+
+
+Summary:
+	
+	- TODO: mass assignment in ruby.
+
+	- To be updated later.

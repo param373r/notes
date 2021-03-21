@@ -1,0 +1,28 @@
+
+
+Command Injection
+==================
+
+Ohh I see how this is different from code execution. Here we inject a command into another command. And there, inject a command within the logic flaw of the code running on the backend.
+
+01:
+	- Following command injection tools:
+		- &&
+		- ||
+		- ;
+		- |
+	- No need to brief the legends.
+
+02:
+	- Same challenge as before... This time, just a friendly reminder that you can execute the command as `id` also.
+	- I REPEAT... IF THERE IS NO OUTPUT RETURNED THAT DOESN'T MEAN THAT IT DIDN'T EXECUTED... CHECK UP PLZZ.
+		- Ohh yea, sleep command does work after all.
+
+03:
+	- Btw, you can also run command as $(command). Easy challenge after all.
+
+
+
+Summary
+========
+	- Check for all 3 cases

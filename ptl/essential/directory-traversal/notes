@@ -1,0 +1,23 @@
+
+
+Directory Traversal
+====================
+
+01:
+	- The good old way of traversing directories through ../../../../
+	- Although in this case... We used the file parameter in file.php to get to our desired file.
+
+	- Note: In this example, based on the header sent by the server, your browser will display the content of the response. Sometimes the server will send the response with a header Content-Disposition: attachment, and your browser will not display the file directly. You can open the file to see the content. This method will take you some time for every test.
+		- Using a Linux/Unix system, you can do this more quickly, by using wget or curl.
+
+02:
+	- This time there was a check... Which can be bypassed by using the current directory in the name and then using... /var/www/../../../../ ... i.e. by keeping /var/www/ constant.
+
+03:
+	- Now there was a challenge that I believe was not told... But I did it... With my previous CTF knowledge
+	- This challenge was based on adding a %00 byte  which is used to bypass the suffix added by the server-side and give us a clear view into the exact file we want to view.
+	- One more thing I missed is... file.php?file=file.php Yeaps... To read the php code... This is a good way to know what's running on the server side... By reading the files on the server. DUMB ME.
+	- Also, if there was a way to strip off the %00 from the payload, this attack wouldn't have worked.
+
+Summary:
+	- TODO the summary

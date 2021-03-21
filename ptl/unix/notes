@@ -1,0 +1,159 @@
+
+
+00:
+
+	- normal cat flag
+
+01:
+	- flag in other user's directory
+
+02:
+	- flag in other user's directory and the contents of the directory cannot be listed
+
+03: 
+	- Check .bash_history
+
+04:
+	- "find" the flag from .bash_history in multiple users directory
+
+05:
+	- Do checkout .bash_profile and .bash_history for all terminal related settings.
+
+06: 
+	- Check environment variables for spicy information in .bashrc
+
+07: 
+	- Do check for shell histories other than bash, like zsh, ksh, sh
+
+08: 
+	- You can checkout real HOME dir in /etc/passwd
+
+09:
+	- grep -A flag returns after context. for eg. If I type -A 1 it will print the line after the pattern was found. at 2 it will print the 2nd line after the pattern match.
+
+10:
+	- The sticky bit to any file/directory allows only the owner of the file to modify that file.
+		- Sticky bit is denoted by 't' at the end of the permissions.
+	- ls -ld will only list directories in the specified directories (-d flag)
+	- /tmp directory gets clean up after reboot
+
+11: 
+	- /var/tmp directory doesn't clean up after reboot
+
+12: 
+	- bzip file extract or strings on the file will reveal the flag.
+	- Nice little challenge of extract a cpio file 
+		Command: cpio -idv --no-absolute-fileformat < ./backup
+		- This wouldn't extract without using the -no-absolute-fileformat, generally it does. That's the nice little challnge.
+
+13:
+	- Revised somethings about asymmetric and symmetric encryption
+	- To decrypt the openssl command we have to use -d flag.
+		Command: openssl enc -d -aes256 -k P3NT35T3RL48 -in /tmp/backup.tgz.enc -out /tmp/decrypted.tgz
+
+14:
+	- Passwords can be found in a backup archives.
+
+15: 
+	- /etc/shadow backup was lying inside /etc directory
+	- Password cracking with john/hashcat
+	- A NEW THING LEARNT: MAKE SURE YOU SPECIFY THE USERNAME WITH PASSWORD WHILE CRACKING WITH JOHN (MAY BE EVEN WITH HASHCAT) John tries variation with the username jic password may be similar to the username.
+
+16: 
+	- if the hash starts by $1$, MD5 is used;
+	- if the hash starts by $2$ or $2a$, Blowfish is used;
+    - if the hash starts by $5$, SHA-256 is used;
+    - if the hash starts by $6$, SHA-512 is used;
+
+17:
+	- Tomcat user creds were found in tomcat-users.xml and password was the key/flag.
+
+18:
+	- mysql login with root can be without any password. Key was in the database.
+	- Make sure to checkout the processes... Sometimes services like mysql works as a local service and not as a open service running on port (may be even internal). So check out the processes as well.
+	- Note that root on mysql is not root on system... 
+
+19:
+	- Same as previous... This time it was with password.
+
+20:
+	- The challenge with mysql this time was:
+		- Hashed password
+		- mysql has a valid shell other than /bin/false (didn't notice the previous times).
+	- Mysql creds were present in /var/lib/mysql/mysql/user.MYD for this exercise (not in general)
+	- This was heck of a challenge, I found out that the version of john found on apt repos are really small... To crack the hash we needed the jumbo version of john from github.
+		- I cracked the password without watching the writeup using crackstation.
+21:
+	- This is another nice challenge, using mysql> shell to read files using load_file() function.
+		- We can read files as mysql(if permitted), with root in mysql.
+	- Tried a bunch of payloads nothing worked, but one did worked and displayed the contents of key.txt.
+		- select LOAD_FILE('/path/key.txt') as key;
+	- In the writeup it showed that select LOAD_FILE('/path/key.txt'); would have worked the same.
+
+22:
+	- Here it is a change in taste... From mysql we shifted to postgresql.
+	- Default credentials for the user postgres (same as password)
+	- \list will list all the databases in postgresql
+	- \c database will select a database to work upon (same as use database; command)
+	- \d will list all the tables in the current database.
+	- Rest viewing the table contents is same as ever... select * from users; 
+
+23: 
+	- Another exercise on postgresql. This exercise highlights 3 issues:
+		-the permissions on /var/www are too weak.
+		-the Postgresql photoblog user has too much privileges.
+		-the Postgresql photoblog user has a trivial password (not that a strong password will have limit the exploitation)
+	- We can read files using postgres shell. To read those files, we follow these steps:
+		- Create a new table and define a column of TEXT type.
+		- Then we are gonna copy the contents of the file we want to read into the column of the table... 
+		- Then we are gonna read the whole table with select * command. You can later choose to DROP demo; if want to clear any sus activities.
+	- To login into psql prompt with a username and password we use -U flag to specify username and -W to ask for password prompt.
+
+24:
+	- Here we come onto reading database files with sqlite3. Shared db sqlite3 files can be viewed on anysystem using sqlite3 program.
+	- .tables will list of all tables.
+
+25:
+	- A short tutorial on sudo -l
+
+26: 
+	- Same as previous... This time sudo privs were given to find command.
+
+27:
+	- Same as previous... This time sudo privs were given to vim command.
+
+28:
+	- Same as previous... This time sudo privs were given to less command (!/bin/bash)
+
+29:
+	- Same as previous... This time sudo privs were given to awk command.
+		- I did this without going to gtfobins(just some googling), as I knew how to work with awk #heckerman. Command used: sudo awk 'system("/bin/bash")' .bashrc(or any file in the current directory)
+
+30:
+	- This was a sweet challenge where, sudo privs were given for cp and chmod and we can impersonate the user by creating a shell.c and copying with sudo and chmod-ing up to suid bit by the user... and execute the program... and get the shell as that user.
+
+	*** FUN fact: A few years ago, you could exploit this configuration issue by copying a shell (bash a long time ago and ksh more recently) and adding the setuid bit to it. [Un]fortunately most shells will now prevent this attack. But we can still do something similar by writing our own program. (Means we won't be needing to create a custom shell.c and compile it... we could just directly copy /bin/bash and give setuid bit to it... and run as high privileged user)
+
+31:
+	- Same as previous... This time sudo privs were given to perl command.
+
+32:
+	- Same as previous... This time sudo privs were given to python command.
+	- I knew this... But if os module is not present on the machine(wt actual ffff) then subprocess module and call function can produce the same result.
+
+33: 
+	- Same as previous... This time sudo privs were given to ruby command.
+	- Ruby commands can be run in shell using -e flag (execute) and I don't get the method given in
+	- We can also run ruby code without system function. just by using these quotes (``). Therefore, puts '`id`' will give us id of the user the command is running as.
+
+34:
+	- Same as previous... This time sudo privs were given to node(js) command.
+	- As you can see last few sudo privs were given to language interpreters... To get a better understanding of these...
+	- Node one was difficult as I have a VERY LITTLE experience in working with js. But I did it.
+
+
+FINISHED WITH THE UNIX BADGE
+
+Summary:
+	- Get the john jumbo version.
+	- WILL UPDATE SOON ENOUGH

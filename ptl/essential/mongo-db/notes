@@ -1,0 +1,20 @@
+
+
+Mongo-DB
+=========
+
+MongoDB is document-oriented database(like sqlite). Classified as a NoSQL database program.
+	- It uses dictionary format to store the data, with optional schemas.
+
+
+01: 
+	- The well-known ' or 1=1 -- is converted into ' || 1==1 //.
+	- Though you can also use a NULL byte to end the query there.
+	- Depending upon the version of mongoDB we may need to use a NULL byte or //. #LatestRequiresNULL
+
+02:
+	- For this I have to code a python script. Check the 02's folder for the code.
+	- The key is the admin's password.
+
+Summary:
+	- TODO the summary

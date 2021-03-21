@@ -1,0 +1,25 @@
+
+
+JSON Web Tokens
+================
+
+Format: base64header.base64payload.base64signature
+
+- They are more like session cookies for user's authentication.
+
+There are a few ways I can think of exploiting through JWT attack.
+
+	- Changing the header to None, and don't use the signature at all
+	- Keeping the header constant as HS256 or RSA and creating the signature for the rest of the modified token(sometimes you need to bruteforce to find the secret key to re-encode the hmac encryption)
+
+- Like SSL (with the NULL Cipher), JWT support a None algorithm for signature. This was probably introduced to debug applications. However, this can have a severe impact on the security of the application.
+
+- The issue was originally discussed in the following blog post: https://auth0.com/blog/2015/03/31/critical-vulnerabilities-in-json-web-token-libraries/
+
+Note: To exploit this vulnerability, you just need to decode the JWT and change the algorithm used for the signature. Then you can submit your new JWT. However, this won't work unless you remove the signature. If you think like a developer, it actually makes a lot of sense. If you had to develop a JWT library, you will start by generating all the signatures you need to support as it allows you to compare your implementation to others.
+
+Note: "iat" in payload stands for "issue at" which tells the date and time the token was issued at.
+
+Extra shots:
+	- Selecting a part in burp's decoder and then decoding/encoding in burp... only decodes/encodes that part of the string.
+

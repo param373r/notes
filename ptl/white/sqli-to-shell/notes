@@ -1,0 +1,50 @@
+
+
+From SQLi to Shell
+====================
+
+Introduction
+--------------
+
+Methodology says, "Gaining access to the admin account will give more privileges, and then we can get code execution by uploading a malicious php web shell".
+
+So the steps for the attack will be following:
+	- Gather Intel on the web-app and technologies in use.
+	- Detection and exploitation of SQL injection
+	- Access the admin pages and code execution.
+
+Fingerprinting
+===============
+
+Inspecting the headers
+-----------------------
+
+	- Can be done via burp... or connecting to the web serving port via telnet or nc.
+		- telnet host 80; and send the following payload to retrieve the header:
+
+			GET / HTTP/1.1
+			Host: <hostname>
+
+	Note: If the server was using HTTPS only, then telnet or netcat won't work... In that case, use openssl.
+
+		- openssl s_client -connect hostname:443
+
+		Here, no need to send that payload request, things will be automated within openssl command.
+
+Directory Busting
+------------------
+	
+	- You know the drill... Following are good tools to use for this:
+		- wfuzz
+		- gobuster
+		- dirsearch
+
+		#github
+
+Introduction to SQL injection
+===============================
+
+    - retrieve information using the SELECT statement;
+    - update information using the UPDATE statement;
+    - add new information using the INSERT statement;
+    - delete information using the DELETE statement.

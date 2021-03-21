@@ -1,0 +1,17 @@
+
+
+Open Redirect
+===============
+
+THE AWESOM-EST-EST SITE OF ALL: https://webhook.site/ Hook any IP here
+
+
+Open Redirect is a vulnerability to redirect a user(or may be server-bot??) to some other site... Where we can hook it. I don't know how to exploiot it after, yet... But sounds good to me.
+01:
+	- An awesome challenge, using webhook.site, to get teh key in the user-agent header.
+
+02:
+	- This was a tricky one but I get it... If we use //webhook.site/blabla instead of https://webhook.site/blabla. It works absolutely same. Remember that.
+
+Summary
+	- TODO the summary.
