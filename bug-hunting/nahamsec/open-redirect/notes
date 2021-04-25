@@ -1,0 +1,36 @@
+
+
+Open Redirect
+==============
+
+Open Redirect is something which may not harm the web-app, but infact may harm the end users.
+	- It is generally marked as low lever bug; unless, you're using this vulnerability to escalate your authorization into the web-app. #ByPutting2and2Together.
+	- This vulnerability can harm users. If the site is in the user's trusted site, and someone sent a malicious link of that site(suffering with open-redirect) can redirect the user to some phishing site or some other site, where that users browser will get hooked (Ring any bells?? BeEF)
+
+- Due to this vulnerability it can affect user-experience on that site, which may not be good for their marketing.
+
+How to try bypassing the filters and achieve open redirect?
+-------------------------------------------------------------
+
+- There can be n number of ways.
+
+- 1 eg. could be, a site filtering every redirection not containing the URL google.com in it. 
+	- http://example.com/login?nextPage=google.com (ACCEPTED)
+	- http://example.com/login?nextPage=evilsite.com (REJECTED)
+	- http://example.com/login?nextPage=evilsite.com/?google.com (ACCEPTED)
+
+LABS
+=====
+
+	- or1.nahamsec.training
+	- or2.nahamsec.training
+
+Note: If you use @ in the url, there is this browser functionality which allows you to redirect to the url specified after the first parameter.
+	- http://vulnsite.com/?redirect=http://google.com@nahamsec.com
+
+	It will redirect you to nahamsec.com ignoring the first url...
+
+	- http://vulnsite.com/?redirect=http://adfhadsuilhfalusifhaiewhfiuahfal.com@nahamsec.com
+
+		- Even if the first site address is invalid and is allowed by filter.(So in practical you can bypass the filter and get an open redirect too.)
+

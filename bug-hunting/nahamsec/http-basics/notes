@@ -1,0 +1,45 @@
+
+
+HTTP Headers ask for the following data when requesting a web-page. Folllowing are few headers that are commonly seen:
+	- What page to fetch (GET)
+	- Which host to fetch that page from (Host: xyz)
+	- What is the user-agent. Version/Info of the browser that is trying to access the webpage. (User-Agent)
+	- What type of content to send/receive (Content-Type; SUPER IMPORTANT WHILE TRYING INJECTIONS).
+
+Other common headers:
+	- Authorization: Bearer XYZ (If you're logged in with a token or somehting then it sends this header to allow you to fetch a particular resource).
+	- Referer: google.com (What page/site sent you to this page?)
+
+
+HTTP Methods:
+	- GET - To fetch some data
+	- HEAD - Does the same thing as GET, but just shows the response headers.
+	- POST - To post some data on to the server
+	- PUT - To replace or modify data
+	- DELETE - To delete data (May require auth tokens)
+	- OPTIONS - To see what are the communication options available to that particular end point (GET,HEAD,POST etc; More like debugging )
+
+HTTP Status Codes:
+	- 2xx - Success Codes
+	- 3xx - Redirection Codes
+	- 4xx - Client side error
+		- 401 - Unauthorized or Unauthenticated
+		- 403 - Forbidden/Not allowed to access
+		- 404 - File doesn't exist
+		- 405 - HTTP Method not allowed
+	- 5xx - Server doesn't know how to handle the request.
+
+
+Video 2:
+	- Chrome Dev Tools
+	- Burpsuite Certificate install
+
+Resources:
+	- HTTP-Headers
+		https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers
+
+	- HTTP-Response-Status-Codes
+		- https://developer.mozilla.org/en-US/docs/Web/HTTP/Status
+
+	- Link to Course Labs:
+		- /jr/nahamsecsudemylabs (uk where it is)

@@ -1,0 +1,11 @@
+
+
+User rate limiting... 
+	- Thus you can bypass the bruteforce attempt... If you could find a way to send multiple credentials in 1 request...
+
+
+For eg. If you could send the request in a JSON format... You could create an array of passwords for that particular username... when the server side tries to check for username and password match... it MAY iterate over a number of passwords attempt to see if anyone of them matches with the username given... Will give you 302 in that request...
+
+	Hence, we can solve this lab, by sending all the passwords in one go... as an array.
+
+		password = [ "hello", "world", "solved the lab"]

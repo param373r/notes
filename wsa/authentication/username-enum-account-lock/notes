@@ -1,0 +1,10 @@
+
+
+There is a logic flaw in the lab that can be used to bypass account locking, after a number of unsuccessful login attempts.
+
+So for this attack... we can try putting a username wordlist... and a few passwords upto 10 max... and then bruteforce... See if we can find a lock out from some user account.	
+	- This is because the web-app may not reveal username registered into the site... But may give a lock out statement that too many unsuccessful attempts have been found for this user.
+
+- On second thoughts we can see if username exists(or not) by creating a new account with the test username.
+
+- Once enumerated the username... Look for the password... For the password... You will definitely get that account locked out after a no of attempts... Tho still run the intruder attack... Why? Because sometimes you may get some odd response... that will tell that you entered the correct password.

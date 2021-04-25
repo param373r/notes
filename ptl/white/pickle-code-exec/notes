@@ -1,0 +1,29 @@
+
+
+Pickle Code Execution
+=======================
+
+What is serialization?
+	- Serialisation of object is used by application to make their storage easier. 
+		- If an application needs to store an instance of a class, it can use serialisation to get a string representation of this object. When the application needs to use the instance again, it will unserialise the string to get it.
+
+- If an attacker could tamper the serialized data and change the string, it can lead to RCE.
+	- For eg. Pickle Object in Python
+
+
+Code Execution with pickle
+===========================
+
+- You do need to use a class for this, functions won't return the same payload so have a look at exploit.py file once.
+
+
+Note: THIS VULNERABILITY WAS EXPLOITED USING REMEMBER ME CHECK. THEREFORE, IT IS CRUCIAL, REMEMBER ME IS IMPORTANT AF.
+
+Extra Notes:
+	- Note that cpickle and pickle gives different results... MIND IT. Even in base64 encoded format its hard to find the difference... Only 1 or 2 chars are different in them... Verified using diff command.
+		- Also, cpickle library is available for python2 only.
+
+	- The results of pickle dumps are different on LINUX and WINDOWS. WARNING: IF A WEB SERVER IS SUFFERING FROM PICKLE CODE EXEC, THEN MAKE SURE YOU CREATE THE SERIALIZED PICKLE STRING ON THE OS MATCHING THE OS THAT VULN SERVER IS RUNNING ON. HIGHLLLYYYY CRUCIAL.
+		- You can bypass this limitation by using `subprocess` with `__import__`.
+
+

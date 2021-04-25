@@ -1,0 +1,45 @@
+
+
+Client Side Request Forgery
+----------------------------
+
+- A CSRF Vulnerability allows an attacker to unknowingly perform state changes on a web app where the victim is authenticated
+	- CSRF does not allow any theft of any data since the attacker has no way to see the response from the webpage. 
+	- This is also the difference between XSS and CSRF, where in XSS you make the user do the stuff with the payload you have crafted... In CSRF YOU get to do the stuff with the web app directly as the victim.
+
+- Sometimes the CSRF token that is used by the web is easily predictable. Like base64 encoded, or jwt.
+
+- There are chances that there is no CSRF token and all the request that are made to the server are just by parameterized GET request.
+	- eg. https://example.com?wallet=1337pro&value=100&type=BTC
+
+	- Therefore, exploiting this is easy, what we can do is create a small webapp and put some html tags that will be loading the website, as that user.
+
+		<img src='https://example.com?wallet=1337pro&value=100&type=BTC' />
+
+		OR
+
+		<a href='https://example.com?wallet=1337pro&value=100&type=BTC'> Click here for FREE BTC </a>
+
+		This way as soon as the user clicks on the link, the action will be performed on his basis.
+
+
+- On the other hand there are chances that the action to be performed needs to be performed through a form's POST request. We could create a small HTML form and trick the user in clicking the submit button.
+	- <form action="https://example.com/" method="POST">
+		<input type="hidden" name="wallet" value="1337pro" />
+		<input type="hidden" name="value" value="100" />
+		<input type="hidden" name="type" value="BTC" />
+		<input type="hidden" name="xsrf_token" value="<some base64 encoded string>" />
+		<input type="submit" value="Click here to win" />
+
+		- And as soon as the user clicks the submit button, the action is performed by the form on user's behalf.
+
+- XSS is great: You can get a user CSRF token using XSS and then exploit it
+
+Note: CSRF tokens can be randomized, can be re-used and are marked as user signature until it doesn't expire... So once you understand the mechanism it's pretty easy to find a way to exploit it.
+	- That mechanism tells the web app that this csrf token belongs to this user... and until that token is there, no other user is allowed to use this token to make that transaction. So it's more like a user signature.
+
+Note: Even after the above statement... Those CSRF tokens can be re-used... This again can trigger a CSRF vuln, because of which you can take the token from user A use it on user B and then B can use it to exploit it.
+
+Note: If in the url, you completely remove the csrf_token parameter, it may still works... Like it is there to show that there is protection... But won't be needed by web-app to process a particular request.
+
+Note: The impact of CSRF is unclear... Sometimes it can do small changes only like changing theme like stuff... But sometimes it can lead to an account take over, which is a high vulnerability.

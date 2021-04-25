@@ -1,0 +1,48 @@
+
+
+Cross Site Scripting
+=====================
+
+- XSS allows an attacker to execute arbitary client-side code on a victim's browser.
+
+- XSS can be used for phishing, account takeovers, exfiltrating data and a lot more.
+	- eg. If a bank is vulnerable to xss, you can transfer money from 1 account to another, do account take overs, and even more severe if executed on a browser having admin privileges to that site.
+
+Note: Every xss is not always triggered due to JS. It can be triggered in Flash, Active X, vbscript, angular as well.
+
+Impact:
+	- Read / Modify / Delete pages content
+	- Steal a user's cookie or session and a session takeover
+	- Server malicious content like phishing.
+
+- Therefore a reflective XSS could be anywhere around medium... And a stored XSS is rated High to Critical.
+
+
+Reflected:
+	- In this type of XSS the payload is usually passed in via a URL and is having the payload attached to one of the parameter.
+
+Stored:
+	- In this type of XSS the malicious code injected by the attacker is stored on the server side.
+
+DOM XSS:
+	- For this type of XSS an attacker must have good hold of javascript programming.
+		- the javascript used in the page is not properly implemented... If an attacker is smart enough to find the logic flaw, he/she will be able find a way to pass in a malicious parameter, and then make that function execute as he wants.
+
+Note: Just because HTML injection like <u>John</u> is possible, doesn't mean that there will be XSS, but in lot of cases there is a way to escalate to XSS.
+
+Labs:
+	- xss.nahamsec.training
+	- xss2.nahamsec.training
+	- xss3.nahamsec.training
+	- xss4.nahamsec.training
+
+Note:
+	- Remember try escaping the HTML tags using "> or '> or any how... And then try injecting the real stuff.
+
+	- Lab 4 demonstrated, escaping the variable using single or double quotes, and then putting in the javascript we want to execute. 
+		- Also, it demonstrated escaping the filters using entities &lt;script&gt;
+
+Resources:
+	- https://www.w3schools.com/jsref/dom_obj_event.asp
+
+	- https://developer.mozilla.org/en-US/docs/Web/Events

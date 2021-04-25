@@ -1,0 +1,39 @@
+
+
+SQLinjections can be complicated... I solved this lab without watching the solution... But again, remember... that to trigger and read through the database... You gotta test every stupid thing that you even missed... EVERYTHING IS USEFUL... IT DOESN'T MATTER IF IT MAKES SENSE OR NOT.. IF IT COMES TO YOUR MIND... YOU JUST DO IT.
+
+	In this lab, I used the following payload...
+		- ' UNION SELECT NULL,NULL,NULL -- 
+
+	Note: NULL is used because while selecting the values... They must be same data type of the column selected before the UNION query. NULL is convertible...
+
+BONUS:
+	- So if you enumerate and OBSERVE carefully, the results... The first 1 is int(serial number)... 2 NULL is varchar(name of the accessory), and 3rd is again int (for the price).
+		- Therefore, this payload will work too...
+			- ' UNION SELECT 1,'a',3 -- 
+
+	Also, urlencode them... Infact 1,2,3 didn't worked here... neither did order by... 
+		- I am not sure whether it was a specific filter to block order by command... or it's just how the web-app was made and was vulnerable to SQL, I so much wish that I could read the backend...
+
+	NOTE: ORDER BY will work... it's just you can't leave the category=' ORDER BY 1 -- (as this won't be able to order anything... hence... result in error; thanks to Rana Khalil's video; Damn a lot to learn about). So if we have given category=Gifts' ORDER BY 2 -- (it would have given us everything ordered in column 2. So when we later try something like)
+
+
+- On oracle... every select statement must use a FROM keyword and specify a value after it. There is a built-in table called DUAL, which can be used for this purpose.
+
+	- So queries must be like ' UNION SELECT NULL,NULL,NULL FROM DUAL-- 
+
+- In MySQL -- must be separated using a space to start the comment. Alternatively a hash symbol... # can be used to counter this space thing.
+
+
+Note: YOU CAN URL ENCODE INSIDE THE BURP-REPEATER USING CTRL+U FUCK YEAAA
+
+POST Exploitation
+------------------
+
+	The database is using PostgreSQL.
+
+
+THE CHEATSHEETTTTT
+--------------------
+
+	- https://portswigger.net/web-security/sql-injection/cheat-sheet

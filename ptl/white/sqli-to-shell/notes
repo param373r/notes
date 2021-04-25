@@ -44,7 +44,127 @@ Directory Busting
 Introduction to SQL injection
 ===============================
 
-    - retrieve information using the SELECT statement;
-    - update information using the UPDATE statement;
-    - add new information using the INSERT statement;
-    - delete information using the DELETE statement.
+	- retrieve information using the SELECT statement;
+	- update information using the UPDATE statement;
+	- add new information using the INSERT statement;
+	- delete information using the DELETE statement.
+
+- The most common command used in web apps is the SELECT statement
+
+SQLi detection based on integers
+---------------------------------
+
+	- If a site takes a URL parameter as number, you can test for sqli using the following payloads.
+		- ?id=2-0 and id=2 item gets showed up... That means there is unsanitized input passed directly onto the database, and is likely to have an SQL injection.
+
+	Note: An sqli is always possible on websites, if PHP does not properly sanitize the parameters.
+
+- Also, even if a value is an integer (for example categorie.php?id=1), it can be used as a string in the SQL query:
+	
+	SELECT * FROM categories where id='1'.
+	
+	- SQL allows both syntax, however using a string in the SQL statement will be slower than using an integer. 
+
+
+Detection based on strings
+----------------------------
+
+- Comments can be used to test for sql.
+	- In some cases the backend query can look like: WHERE ( name='test' and id=3 );
+	- If you try to comment out here, then it will throw an error that there were odd no of paranthesis. So make sure to check with paranthesis in that case.
+
+Note: SQL injection is not an accurate science and a lot of things can impact the result of your testing. If you think something is going on, keep working on the injection and try to figure out what the code is doing with your injection to ensure it's an SQL injection. 
+
+
+Exploitation of SQLis
+======================
+
+The UNION keyword
+-------------------
+
+	- Nothing magical, this is just used to put the 2 requests together(not columns, like AND does).
+
+	- As far as the parameters are concerned, attacker cannot change the start of a query... But they can surely append another command using union to the end of the request.
+
+NOTE: THE MOST IMPORTANT RULE HERE IS THAT, BOTH THE REQUESTS SHOULD RETURN SAME NUMBER OF COLUMNS, OTHERWISE THE EXPLOIT WON'T WORK.
+
+Exploiting SQLi with UNION
+----------------------------	
+
+	- Find the number of columns to perform the UNION
+	- Find what columns are echoed in the page
+	- Retrieve information from the database meta-tables
+	- Retrieve information from other tables/databases
+
+- To find the number of columns there are 2 known methods.
+	- UNION SELECT 1,2,3,.,.,.,n (and see how long can it go)
+	- ORDER BY 1, ORDER BY 2... ORDER BY n (and see how much it can increase; order by ismostly used to sort results from the DB)
+
+NOTE: ORDER BY DOESN'T REQUIRE THE USE OF UNION KEYWORD. DO NOT USE IT. FOR GOD'S SAKE.
+Note: the above methods are for MySQL only/- For different databases the methodology can be different.
+- In Oracle databases, it is compulsory to use a FROM statement with SELECT statement, watch out for that too.
+
+
+Retrieving Information
+-----------------------
+
+- Now that we know the number of columns, we are good to go and exploit the web-app with sqli.
+
+	- current_user() will return the user through which the PHP application is connecting to database.
+	- @@version will return the version of the database
+	- database() will return the current database in use.
+
+Note: Make sure you always keep the right numbe of columns when you try to retrieve information.
+
+To enumerate more through the database we need to find a few things, like:
+	- the name of all tables in the current database
+	- the name of the column for the table we want to retrieve information from
+
+- Since v5 of MySQL, it provides the meta-information about the database in the default built-in database: information_schema
+	- SELECT table_name from information_schema.tables (the list of all tables)
+	- select column_name from information_schema.columns (the list of all columns)
+
+- Now just join the above statements with the sqli payload using UNION.
+
+The problem, is that these requests provide you a raw list of all tables and columns, but to query the database and retrieve interesting information, you will need to know what column belongs to what table. Hopefully, the table information_schema.columns stores table names:
+	
+	SELECT table_name,column_name FROM information_schema.columns
+
+Note: To retrieve this information we can do 2 things:
+	- put the table_name and column_name in different parts of the injection: 1 UNION SELECT 1, table_name, column_name,4 FROM information_schema.columns
+
+	OR
+
+	- concatenate table_name and column_name using CONCAT: concat(table_name,':', column_name)
+		- Complete Payload:
+
+			1 UNION SELECT 1,concat(table_name,':', column_name),3,4 FROM information_schema.columns
+
+Note: ':' is used to split the results of query, easily. Though, you can use any delimeter. The syntax is: 
+	
+	concat(column1,'delimeter_in_quotes',column2)
+
+Note: If you want to easily retrieve information from the resulting page using a regular expression (if you want to write an SQL injection script for example), you can use a marker in the injection: 
+
+
+	``1 UNION SELECT 1,concat('^^^',table_name,':',column_name,'^^^') FROM information_schema.columns`
+
+	It then is really easy to match the result in the page. 
+
+
+NOTE: THE COLUMNS RELATED TO USER CREATED TABLES, ARE AT THE MOST BOTTOM. DON'T GET CONFUSED WHICH COLUMN TO USE FOR WHICH TABLE... THEY WILL BE AT THE BOTTOM OF THE PAGE... ONCE EXTRACTED:
+
+
+Note: The SQL injection provided the same level of access as the user used by the application to connect to the database (current_user())... That is why it is always important to provide the lowest privileges possible to this user when you deploy a web application. 
+
+Accessing the ADMIN pages and RCE
+==================================
+
+	- Once you dumped the database, you can use john/hashcat to crack the password, and then access the admin panel.
+
+	- Once you get to the admin panel, you know the drill, create a new page called shell.php, upload a malicious web-shell and get code-execution.
+
+Note: If there is a prevention on the web application, for not uploading .php files, use the following extensions:
+	- .php3
+	- .php5
+	- .phtml

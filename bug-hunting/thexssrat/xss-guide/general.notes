@@ -1,0 +1,112 @@
+
+
+Cross Site Scripting
+=====================
+
+XSS can happen in lot of ways:
+	- In JS
+	- In HTML tag attributes
+	- Between HTML tags
+	- Within Javascript Template Literals
+	- In context of AngularJS sandbox
+	- In CSS
+	- In Headers
+
+In JS
+-------
+
+Note: WE CAN USE BACK TICKS `(tilde symbol) TO ESCAPE THE CURRENT JAVASCRIPT FUNCTION AND INJECT OUR PAYLOAD(THIS PAYLOAD WILL BE RENDERED SEPARATELY FROM CURRENT EXECUTING JAVASCRIPT CODE)
+
+	Famous JS Injection Payload: `alert(0)/*
+
+In HTML Tag attributes
+-----------------------
+
+	- This is the classic thing we all been doing:
+	
+	Famous Tag Injection Payload: "><script>alert(document.cookie)</script>
+
+
+DOM XSS Extras
+================
+
+	- Arises usually from window.location
+	- Usually in query string (?) or fragment portion of a URL (#)
+
+Testing for XSS
+-----------------
+
+- So if any of these break the page/insert an image check further for xss. Else, start looking for filters that may be in page source.
+	- For JS Injection: '"` (single, double and back tick)
+	- For HTML Injection: <img src=x />
+	- For HTML attribute injection: '>">`>
+
+Note: This was a sort of Passive method for general XSS. For more into passive methods... Try injecting the payloads discussed above in every input field you see i.e. without reading through source of the web app.
+
+	- If luck is good, you will find positives while performing this activity.
+
+Specific Testing: Reflected
+============================
+
+	- Test every entrypoint i.e. every input field
+	- Determine the reflection context (JS/HTML/Attribute)
+	- Test a payload based on the location the value is reflected in
+
+Specific Testing: Stored
+==========================
+
+	- Test every entrypoint i.e. every input field
+	- Investigate context in which the user input is passed on
+	- Craft a payload try webhook.site for document.cookie (if you can; Tbh, these are generally blind xss cannot be seen easily... But once found... They do hell of a job)	
+
+Specific Testing: DOM
+======================
+
+	- Testing HTML Sinks
+	- Place random value into source (i.e. location.search)
+		- Now if your value is found somewhere in the page... Try to look at the context and create a payload out of it, to see if it can trigger XSS.
+
+Note: View source doesn't take DOM into account, so use inspect element.
+
+Getting around filters
+=======================
+	
+- There are 3 main types of filters:
+	- Blacklist based
+	- Whitelist based
+	- Pattern based
+
+Blacklist based
+----------------
+
+- Try fuzzing all possible HTML tags and javascript handlers
+- Try URL encoding XSS attackvector 
+- Try double or triple encodingit
+- Try putting blacklisted word into other blacklisted word as filtering might only happen one time leaving our original blacklisted word intact.
+
+Whitelist based
+-----------------
+
+- Very hard to get around, only allow certain words and block the rest.
+
+Pattern based
+---------------
+
+- Tries to look for things that look like a XSS attack
+- Depends on the configuration
+
+
+RAISING OUR IMPACT
+===================
+
+- Steal cookies
+	- Very hard recently 
+	- Httponly flag is gaining traction
+
+- Execute a keylogger
+	- Getting harder to smuggle out data 
+
+- Steal data from the page
+	- Same as keylogger
+
+- ExecuteJS functions on page

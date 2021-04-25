@@ -1,0 +1,230 @@
+
+
+TESTING FOR REFLECTED XSS
+===========================
+
+- Reflected XSS is the most general type of XSS and marked as the first injection XSS in OWASP Cross-Site Scripting.
+
+Requirements
+-------------
+
+- Attacker  injections browser executeablecode within a single HTTP reponse
+- Requests are not stored within the application 
+- Should be non persistent
+- Only affects user who clicks on malicious link
+- Attack vector belongs to the URI or http  params
+- Not processed properly and returned to victim
+
+
+Objective: Final one
+---------------------
+
+- Design the payload and test it accordingly.
+- Social engineer the victim to click on the link
+- Execution and further access control in victim's browser.
+
+
+Objective: While Attacking
+----------------------------
+
+- We need to find where our values sent in the payload are reflected into the page.
+
+
+Challenges
+-----------
+
+- Make sure to URL encode every character properly in the payload
+
+Testing: Black box
+-------------------
+
+- Detect Input Vectors
+	
+	-Tester must define all user controller variables and parameters
+	- Includes non obviousones such as
+		- HTTP parameters
+		- POST parameters
+		- POST data
+		- Hidden fields
+		- Predefined radio or selection values
+
+- Analysing the response
+
+	- Tester will try specially	crafted input vectors for every parameters.	
+		- Therefore, make sure to keep a check on which context are you attacking?
+			- HTML Tag attriute context
+			- JS Context
+
+- Checking Impact
+
+	- If any change is reflected into the page, the attacker should analyse the impact realistically.
+		- Tester should define special characters to see what are the characters he can use to craft the payload.
+
+- To check the impact, make sure you check the following, that if they are being reflected into the page or not:
+	- HTML context
+		- " (double quote)
+		- ' (single quote)
+		- < and > (angular brackets)
+		- & (ampersand)
+
+	- You can also check the list of character entities for HTML and XML here: https://en.wikipedia.org/wiki/List_of_XML_and_HTML_character_entity_references
+
+	- In case of JS Context, check for the following:
+		- \n (new line)
+		- \r (carriage return)
+		- ' (single quote)
+		- " (double quote)
+		- \ (backslash)
+		- \uXXXX (unicode values)
+
+	Note: The list goes on for the JS context variables, but these are the major ones that you should check... For full list check out: https://developer.mozilla.org/en-US/docs/Web/JavaScript/Guide/Values,_variables,_and_literals#Using_special_characters_in_strings
+
+Testing: Gray box testing
+---------------------------
+
+	- This is similar to blackbox testing... But in this case the attacker has some knowledge of the javascript running in the web app. 
+		- He can view the javascript in the page's source or script includes from different files... It's a good practice to read through the javascript files, if have to.
+
+
+Tools for Testing XSS
+----------------------
+
+	- PHP Charset Encoder(PCE) - It helps you encode arbitrary  texts  to and from 65 KINDS OF CHARACTER SETS that  you can use in your customized payloads.
+
+	- Hackvertoris an online tool which allows many types  of encoding and obfuscation of JavaScript  (or any string input).
+
+	- XSS-Proxy -is an advanced Cross-Site-Scripting (XSS) attack  tool.
+
+	- ratproxy is a semi-automated, largely passive web application security audit tool, optimized for an accurate  and sensitive detection, and automatic annotation, of potential  problems and security-relevant  design patterns  based on the observation  of existing, user-initiated  traffic in complex web 2.0 environments.
+
+	- Others like Burp and zaproxy
+
+
+References
+-----------
+
+	- https://owasp.org/www-community/xss-filter-evasion-cheatsheet
+	- https://github.com/OWASP/wstg/releases/download/v4.2/wstg-v4.2.pdf
+	- https://resources.sei.cmu.edu/asset_files/WhitePaper/2000_019_001_496188.pdf
+	- https://www.cgisecurity.com/xss-faq.html
+	- http://www.technicalinfo.net/papers/CSS.html
+	- https://www.techzoom.net/Publications/Insecurity-Iceberg
+
+
+
+TESTING FOR STORED XSS
+========================
+
+- Stored data within the application 
+- Persistence
+- Affects any user who visits web page
+- Most dangerour attack as it doesn't require user interaction.
+- Marked as second order XSS in OWASP references.
+
+
+Attack Scenario
+----------------
+
+- Attacker stores malicious code into vulnerable page
+- User authenticates in the application
+- User visits vulnerable page
+- Malicious code executes
+
+
+Objective: Final one
+---------------------
+
+- Design step: Creates a payload
+- Waiting step: wait for the user to visit the vulnerable webpage.
+- Then from their attacker can hook the user to BeEF and do further exploitation.
+
+Challenges
+-----------
+
+- Same as Reflected, tho it's a lot more dangerous areas
+- Attack is automatically executed by the browser.
+
+Testing: General
+-----------------
+
+	- Identify the stored input in page.
+	- See if you can find a way to exploit it. For more check the filter evasion techniques.
+
+Testing: Black Box
+-------------------
+
+- Detect Input Vectors
+- Analysing the Input Vectors for any way to create an xss attack.
+	- Here also, keep in mind the CONTEXT of testing.
+		- HTML tag attribute context
+
+			"> <script> alert() </script>
+
+		- HTML Context
+
+			<img src=x onerror=submit()>
+
+Filter Evasion Cheatsheet: https://owasp.org/www-community/xss-filter-evasion-cheatsheet
+
+- Analyze the HTML code: Check for your payload in the response from the page.
+	- Input stored by application is usually used in tags
+	- Can also be found in JS context	
+	- Tester should investigate out of band channels such as customer support for blind XSS
+
+Note: ALL DATA MUST BE TESTED BY INSERTING IN USER AREAS AND VIEWING IN ADMIN AREAS
+
+Exploitation
+-------------
+
+- Blind XSS with BeEF
+	- Input stored by application is usually used in tags
+	- Can also be found in JS context
+	- Tester should investigate out of band channels such as customer support for blind XSS
+
+Note: You can find an XSS in file upload too... Just name the file according to your payload.
+
+Testing: Gray Box Testing
+---------------------------
+	
+	- Same as reflective
+
+Tools
+------
+
+- PCE, Hackvertor, BURP, Zaproxy
+
+- XSS Assistant Greasemonkey script that allow 
+users to easily test any web application for 
+cross-site-scripting flaws.
+
+- BeEF is the browser exploitation framework. A 
+professional tool to demonstrate the real-time 
+impact of browser vulnerabilities.
+
+References
+----------
+	- https://owasp.org/www-community/xss-filter-evasion-cheatsheet
+	- https://github.com/OWASP/wstg/releases/download/v4.2/wstg-v4.2.pdf
+	- https://resources.sei.cmu.edu/library/asset-view.cfm?assetID=496186
+	- https://courses.csail.mit.edu/6.857/2009/handouts/css-explained.pdf
+	- http://www.technicalinfo.net/papers/CSS.html
+	- https://www.cgisecurity.com/xss-faq.htm
+
+
+CSS XSS
+========
+
+Note: This will only work in outdated browsers and this is purely informative, that's why there is soooo low impact on this one... And hence, hardly found by anyone out there... ANYONEEE
+
+- So it starts with a few CSS implementations which allow to run javascript. Following are the ways you can use to insert javascript using CSS:
+	- By using expressions() directive.
+	- By using url('javascript:...') directive
+	- Sometimes by using browser specific features like: -moz-binding in firefox.
+
+NOTE: AGAIN NOTE THAT THIS IS PURELY THEORETICAL, AS THESE VULNERABILITES CAN BE ONLY FOUND IN OLD BROWSERS.
+
+TESTING FOR DOM XSS
+====================
+
+To be continued...
+

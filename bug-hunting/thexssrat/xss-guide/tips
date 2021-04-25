@@ -1,0 +1,32 @@
+
+
+- MAKE SURE TO CHECK GENERAL.NOTES IF STUCK ANYWHERE.
+
+XSS can happen in many languages some are listed below:
+	- Javascript
+	- VBScript
+	- CSS
+	- Angular
+	- Flash (Adobe)
+	- Active X
+
+Note: HTML is where we can inject our XSS payloads. It isn't a scripting language(it is a mark-up language) so HTML XSS is not possible.
+
+Note: `alert()/* 
+	- ` to break out of JS FUNCTION (NOT HTML FUNCTION!! HTML DOESN'T HAVE FUNCTIONS IT HAS TAGS. DO NOT FORGET)
+	- And hence here we are trying JS injection (it would have been HTML injection if and only if we were trying to break out of tags to insert the payload)
+
+Note: Blind XSS is another form of Stored XSS (Remember that, the server side injected code may not be visible and still execute accordiing to what we want)
+
+
+General Point:
+	- Stored XSS is where user input stored into data source, user input is grabbed from data source. User input is not sanitized properly at input and before storing into database and at read from database.
+
+Note: Reflected XSS can get reflected onto page, via POST variable also. and in DOM XSS User input gets turned from a DOM source into a DOM Sink.
+
+- Best General attack vector for XSS: "'<u>Injection<img src=x>'>">
+	
+	- Because this one checks for JS/HTML/HTML tag attribute injection in one go.
+
+
+A General Tip: If you're testing on a target and find an entry point to XSS, try to raise it's impact rather than straightly going towards creating a report.

@@ -1,0 +1,51 @@
+
+
+Insecure Direct Object Reference
+==================================
+
+- Most popular type of vulnerabilities out there...
+
+- IDOR is when a web-app allows a direct access to an object that is not intended for that particular user.
+	- IDOR can help you:
+		- Retrieve Information (Personal Identifiable information(PII), addr, ph no. etc)
+		- Modify or Delete Data (Password, username etc)
+
+
+- A simple example would be a dashboard for a user that is available at:
+	http://example.com/11605/ 
+
+	Can allow you to access: http://example.com/1 (which is probably the admin dashboard)
+
+- Another example, if we are creating a PUT request to the server, to either create a user on that server, we can change the automatically generated id to 1(keeping rest of the details like username and password constant). So that we get admin level access to that particular web-app.
+	- And hence if we get a success in the web-app's response the user has been successfully changed(probably).
+
+
+Looking for IDORs
+------------------
+
+- Understand how the application works:
+	- How doe it fetch data.
+	- How does it create new data
+	- How does it delete or modify data
+
+- Look for any numerical IDs in the requests
+- Create 2 users in order to have accurate data(userID, objectID etc like just to relate these things)
+- Sometimes application use "encryption" to obfuscate information such as the userID (such as base64)
+- Automate using burp
+
+Note: Sometimes applicaiton use UUID's instead of numeric id's. UUID's are unpredictable long strings. 
+	- They look like this: xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx. 
+	- They don't protect against IDORs but they do make it harder to exploit. Sometimes applications leak the UUID, on purpose or by accident. So if you could get the UUID of A user somehow, you can try replacing it with B to see if you get access to A's account settings through B. That's an IDOR.
+
+	- For example, when you visit another user's profile, they may have a profile photo that's stored on the website in a folder the same as their UUID:
+	
+	<html>
+		....
+	<img src="/assets/profile_picture/UUID"
+		....
+	</html>
+
+Labs
+-----
+
+	idor.nahamsec.training

@@ -1,0 +1,30 @@
+
+
+Filter Evasion in XSS
+======================
+
+- Encode Tabs/Newlines/CR(character returns)
+	- You can also try randomizing cases in the words to see if any of those bypass the filter.
+
+- You can add nullbytes to bypass the filters... But as they are NULL they won't be having any value of their own and thus won't be interpreted, making the rest of the payload untouched.
+
+- Try all the different even handlers: onload(), onclick(), onhover() etc etc.
+
+Portswigger XSS Cheatsheet:
+	- https://portswigger.net/web-security/cross-site-scripting/cheat-sheet/
+	
+Owasp XSS Cheatsheet:
+	- https://owasp.org/www-community/xss-filter-evasion-cheatsheet
+
+- Single quotes, double quotes (Try url encoding them) and then backticks for javascript functions.
+
+- You can use double delimeters like <<script>>alert(1)<</script>> (in case there is filter on only one)
+
+- CAN USE UNKNOWN DELIMITERS, WATCH FILTER EVASION TECHNIQUES (SECTION 2) VIDEO AT 3:00
+
+- You can use eval() to bypass, some common examples are:
+	- eval('al'+ 'ert(1)')
+	- eval('a\u006ert(1)') (Here, l is unicode encoded)
+	- eval(String.fromCharCode(97,108,101,114,116,40,49,41))
+
+- You can put in <scr<script>ipt>, so when the filter tries to remove the <script> tag, it ends up forming another script tag. which will eventually execute thecode.
