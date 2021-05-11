@@ -1,0 +1,26 @@
+IP : 10.10.188.181
+
+
+Key 1 in robots.txt
+
+	- 073403c8a58a1f80d943455fb30724b9
+
+wp-login found 
+
+Key 2 hint, white coloured font...
+
+822c73956184f694993bede3eb39f959
+
+Found in /home/robot
+
+(How is it white coloured font?)
+
+robot password md5 file found in his directory...
+	abcdefghijklmnopqrstuvwxyz
+
+
+Lmao, hint for key3 was given nmap... I thought it was something inner port service... Tried to find how to connect to those for a while... It was nmap with SUID privs.
+
+
+Key 3:
+	04787ddef27c3dee1ee161b21670b4e4

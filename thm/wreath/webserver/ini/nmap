@@ -1,0 +1,73 @@
+# Nmap 7.80 scan initiated Fri May  7 20:47:01 2021 as: nmap -A -vv -oN ini/nmap 10.200.90.200
+Nmap scan report for 10.200.90.200
+Host is up, received syn-ack (0.59s latency).
+Scanned at 2021-05-07 20:47:02 IST for 124s
+Not shown: 995 filtered ports
+Reason: 913 no-responses and 82 host-unreaches
+PORT      STATE  SERVICE    REASON       VERSION
+22/tcp    open   ssh        syn-ack      OpenSSH 8.0 (protocol 2.0)
+| ssh-hostkey: 
+|   3072 9c:1b:d4:b4:05:4d:88:99:ce:09:1f:c1:15:6a:d4:7e (RSA)
+| ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABgQDfKbbFLiRV9dqsrYQifAghp85qmXpYEHf2g4JJqDKUL316TcAoGj62aamfhx5isIJHtQsA0hVmzD+4pVH4r8ANkuIIRs6j9cnBrLGpjk8xz9+BE1Vvd8lmORGxCqTv+9LgrpB7tcfoEkIOSG7zeY182kOR72igUERpy0JkzxJm2gIGb7Caz1s5/ScHEOhGX8VhNT4clOhDc9dLePRQvRooicIsENqQsLckE0eJB7rTSxemWduL+twySqtwN80a7pRzS7dzR4f6fkhVBAhYflJBW3iZ46zOItZcwT2u0wReCrFzxvDxEOewH7YHFpvOvb+Exuf3W6OuSjCHF64S7iU6z92aINNf+dSROACXbmGnBhTlGaV57brOXzujsWDylivWZ7CVVj1gB6mrNfEpBNE983qZskyVk4eTNT5cUD+3I/IPOz1bOtOWiraZCevFYaQR5AxNmx8sDIgo1z4VcxOMhrczc7RC/s3KWcoIkI2cI5+KUnDtaOfUClXPBCgYE50=
+|   256 93:55:b4:d9:8b:70:ae:8e:95:0d:c2:b6:d2:03:89:a4 (ECDSA)
+| ecdsa-sha2-nistp256 AAAAE2VjZHNhLXNoYTItbmlzdHAyNTYAAAAIbmlzdHAyNTYAAABBBFccvYHwpGWYUsw9mTk/mEvzyrY4ghhX2D6o3n/upTLFXbhJPV6ls4C8O0wH6TyGq7ClV3XpVa7zevngNoqlwzM=
+|   256 f0:61:5a:55:34:9b:b7:b8:3a:46:ca:7d:9f:dc:fa:12 (ED25519)
+|_ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAINLfVtZHSGvCy3JP5GX0Dgzcxz+Y9In0TcQc3vhvMXCP
+80/tcp    open   http       syn-ack      Apache httpd 2.4.37 ((centos) OpenSSL/1.1.1c)
+| http-methods: 
+|_  Supported Methods: GET HEAD POST OPTIONS
+|_http-server-header: Apache/2.4.37 (centos) OpenSSL/1.1.1c
+|_http-title: Did not follow redirect to https://thomaswreath.thm
+443/tcp   open   ssl/http   syn-ack      Apache httpd 2.4.37 ((centos) OpenSSL/1.1.1c)
+| http-methods: 
+|   Supported Methods: POST OPTIONS HEAD GET TRACE
+|_  Potentially risky methods: TRACE
+|_http-server-header: Apache/2.4.37 (centos) OpenSSL/1.1.1c
+|_http-title: Thomas Wreath | Developer
+| ssl-cert: Subject: commonName=thomaswreath.thm/organizationName=Thomas Wreath Development/stateOrProvinceName=East Riding Yorkshire/countryName=GB/localityName=Easingwold/emailAddress=me@thomaswreath.thm
+| Issuer: commonName=thomaswreath.thm/organizationName=Thomas Wreath Development/stateOrProvinceName=East Riding Yorkshire/countryName=GB/localityName=Easingwold/emailAddress=me@thomaswreath.thm
+| Public Key type: rsa
+| Public Key bits: 2048
+| Signature Algorithm: sha256WithRSAEncryption
+| Not valid before: 2021-05-07T14:25:14
+| Not valid after:  2022-05-07T14:25:14
+| MD5:   8112 3dfd 3a76 dbf1 ebc2 ad3f c07b 9dcd
+| SHA-1: 45d2 d771 aba4 c6cc f48c 08f7 51e5 e848 3cdd f9b4
+| -----BEGIN CERTIFICATE-----
+| MIIELTCCAxWgAwIBAgIUJBPqtHdoIvQbCcOJlLWZPToljfkwDQYJKoZIhvcNAQEL
+| BQAwgaUxCzAJBgNVBAYTAkdCMR4wHAYDVQQIDBVFYXN0IFJpZGluZyBZb3Jrc2hp
+| cmUxEzARBgNVBAcMCkVhc2luZ3dvbGQxIjAgBgNVBAoMGVRob21hcyBXcmVhdGgg
+| RGV2ZWxvcG1lbnQxGTAXBgNVBAMMEHRob21hc3dyZWF0aC50aG0xIjAgBgkqhkiG
+| 9w0BCQEWE21lQHRob21hc3dyZWF0aC50aG0wHhcNMjEwNTA3MTQyNTE0WhcNMjIw
+| NTA3MTQyNTE0WjCBpTELMAkGA1UEBhMCR0IxHjAcBgNVBAgMFUVhc3QgUmlkaW5n
+| IFlvcmtzaGlyZTETMBEGA1UEBwwKRWFzaW5nd29sZDEiMCAGA1UECgwZVGhvbWFz
+| IFdyZWF0aCBEZXZlbG9wbWVudDEZMBcGA1UEAwwQdGhvbWFzd3JlYXRoLnRobTEi
+| MCAGCSqGSIb3DQEJARYTbWVAdGhvbWFzd3JlYXRoLnRobTCCASIwDQYJKoZIhvcN
+| AQEBBQADggEPADCCAQoCggEBAMeK6mm4IAFKarks/s0IQpab1sQ4aSelSq5tL5bp
+| aHzCBhKpu0umeUOKuQNs2L1ab3jGWI9yPYhYkPkj1OIxnkoHTdplwLRFZ7pnbeMi
+| UTnSYTvZO3GZtATopnbf3c1nJlGOakHZK6T7lwAf7YhRDKbspaFE5aQaT0aInjCB
+| srfbsmj0oPfAA9fb5ASLC4QafWatL5/G0iTrm0iPFjAj+y0S9cx7Zf5E7koHht20
+| 2kE04mP0YPHOx4aCr9bletJRr7utl3QzeHW9uwrNKaO+PsHD36ncxQzyQ3bfHYSQ
+| okntJaj/9jft+m0sbzLOEA3DBSWocBhhHK7b4zjUcw8NsIcCAwEAAaNTMFEwHQYD
+| VR0OBBYEFBj2xqsyIzwu2hCTURs7/PnxdW3QMB8GA1UdIwQYMBaAFBj2xqsyIzwu
+| 2hCTURs7/PnxdW3QMA8GA1UdEwEB/wQFMAMBAf8wDQYJKoZIhvcNAQELBQADggEB
+| ADDWBfch/8IQ3Yw8QMJFE4jtiNIEh2T+4cCWcyJMI4nkEn9M5Q5jjIF7mJQv38V5
+| il1KlVuY2Bi2/rPvZ1t4rpdkIvQnfDTQBfF24KnGaU6wcZL4eqPo9ECTvI9I+gSe
+| r/M6CwmiXODG4DPXBiSaZbc1PCBSlY1oMduqTpHdugIy7YPE8m9OvyTcKZPAMHxl
+| Cc8auQdtrEiCEf5Q2r7Rk8GBiNk6EpW4CuyO9R3kTmVnyiMyjOUOVpYRrHrgyYuL
+| aUi6aOVDvI5he64JWbSEhPlL66KFQP25LDlOxi1hScYC6Jvulhudf2sw7tPnl2cf
+| 79mWE0qqKFe1uAWE9MNu3+U=
+|_-----END CERTIFICATE-----
+|_ssl-date: TLS randomness does not represent time
+| tls-alpn: 
+|_  http/1.1
+9090/tcp  closed zeus-admin conn-refused
+10000/tcp open   http       syn-ack      MiniServ 1.890 (Webmin httpd)
+|_http-favicon: Unknown favicon MD5: 9E498C7D873B155E0F9D25C5B1C7CFEC
+| http-methods: 
+|_  Supported Methods: GET HEAD POST OPTIONS
+|_http-title: Site doesn't have a title (text/html; Charset=iso-8859-1).
+
+Read data files from: /usr/bin/../share/nmap
+Service detection performed. Please report any incorrect results at https://nmap.org/submit/ .
+# Nmap done at Fri May  7 20:49:06 2021 -- 1 IP address (1 host up) scanned in 125.33 seconds

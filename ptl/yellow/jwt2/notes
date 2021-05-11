@@ -1,0 +1,8 @@
+
+
+JWT 2
+------
+
+This vulnerability demonstrates that what if JWT allows the token to sign with a sig other than the one shipped from the so-called token generator, AND there is no check implemented to see if the sig is the format provided by the web-app or not.
+
+So I created an account, copied the jwt token, decoded/changed/encoded in base64, and then created a sig for it(from RS256 -> HS256; using public.pem that was provided with the site)... which eventually lead me to the key.

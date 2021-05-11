@@ -1,0 +1,65 @@
+
+
+
+Enumeration
+=============
+
+
+IP = 10.200.90.200
+
+Scanning the IP with nmap
+---------------------------
+
+	- 22 ssh
+	- 80 http
+	- 443 https
+
+	- 10000 MiniServ 1.890 (Webmin httpd) (Exploitable: CVE-2019-15107)
+
+Directory Busting
+==================
+
+
+Notes
+======
+
+About Thomas Wreath
+---------------------
+
+Another link to the site found (5xx error) : https://themehippo.com
+443 contains a portfolio site to thomas wreath
+
+	- Email: me@thomaswreath.thm
+	- Phone: 01347 822945
+	- Mobile: +447821548812
+
+	- Country: England
+
+Note: The site redirects from http -> https: (Good implementation for a test network (felt like real life))
+
+
+
+Exploiting the WebMin
+=======================
+
+Note: There is a python script implementation of the metasploit exploit module by muiri: https://github.com/MuirlandOracle/CVE-2019-15107
+
+	- Exploit checks for a consistent shell and a psuedo shell.
+
+Post Exploitation Enumeration
+-------------------------------
+
+root's shadow entry: root:$6$i9vT8tk3SoXXxK2P$HDIAwho9FOdd4QCecIJKwAwwh8Hwl.BdsbMOUAd3X/chSCvrmpfy.5lrLgnRVNq6/6g0PxK9VqSdy47/qKXad1::0:99999:7:::
+
+
+twreath's shadow entry: twreath:$6$0my5n311RD7EiK3J$zVFV3WAPCm/dBxzz0a7uDwbQenLohKiunjlDonkqx1huhjmFYZe0RmCPsHmW3OnWYwf8RWPdXAdbtYpkJCReg.::0:99999:7:::
+
+
+
+- Got the root ssh key and is now allowed to login as root via ssh (yeaps... without password root login allowed in ssh)
+
+
+With this we are finish with the web server enumeration.
+
+Resources:
+	- More on webmin exploit: https://www.webmin.com/exploit.html

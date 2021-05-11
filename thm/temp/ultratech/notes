@@ -1,0 +1,28 @@
+
+
+UltraTech
+-----------
+
+
+There are 2 directories on port 8080 (rest api)
+	- ping
+	- auth
+
+Ports Opened:
+	31331
+	21
+	22
+	8080
+	8081
+auth?login=admin&password=password
+
+Command injection found using backticks:
+	in /ping?ip=localhost`{command}`
+
+	Users in the web-app:
+		r00t:f357a0c52799563c7c7b76c1e7543a32 (Password: n100906(crackstation))
+		admin:0d0ea5111e3c1def594c1684e3b9be84 (Password: mrsheafy(crackstation))
+
+	With r00t's credentials logged in via ssh... And privesc through docker(r00t was in docker's group)
+
+

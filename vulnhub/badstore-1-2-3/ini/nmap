@@ -1,0 +1,49 @@
+# Nmap 7.80 scan initiated Thu May  6 20:17:35 2021 as: nmap -A -vv -oN ini/nmap 192.168.1.7
+Nmap scan report for 192.168.1.7
+Host is up, received syn-ack (0.00060s latency).
+Scanned at 2021-05-06 20:17:36 IST for 104s
+Not shown: 997 closed ports
+Reason: 997 conn-refused
+PORT     STATE SERVICE   REASON  VERSION
+80/tcp   open  http      syn-ack Apache httpd 1.3.28 ((Unix) mod_ssl/2.8.15 OpenSSL/0.9.7c)
+|_http-favicon: Unknown favicon MD5: A9CBB6E162F76BE464E6BC308B3266B9
+| http-methods: 
+|   Supported Methods: GET HEAD OPTIONS TRACE
+|_  Potentially risky methods: TRACE
+| http-robots.txt: 5 disallowed entries 
+|_/cgi-bin /scanbot /backup /supplier /upload
+|_http-server-header: Apache/1.3.28 (Unix) mod_ssl/2.8.15 OpenSSL/0.9.7c
+|_http-title: Welcome to BadStore.net v1.2.3s
+443/tcp  open  ssl/https syn-ack Apache/1.3.28 (Unix) mod_ssl/2.8.15 OpenSSL/0.9.7c
+| http-methods: 
+|_  Supported Methods: GET HEAD POST
+|_http-server-header: Apache/1.3.28 (Unix) mod_ssl/2.8.15 OpenSSL/0.9.7c
+|_http-title: 400 Bad Request
+|_ssl-date: 2021-05-06T14:48:19+00:00; -2s from scanner time.
+| sslv2: 
+|   SSLv2 supported
+|   ciphers: 
+|     SSL2_RC4_128_EXPORT40_WITH_MD5
+|     SSL2_DES_192_EDE3_CBC_WITH_MD5
+|     SSL2_RC2_128_CBC_EXPORT40_WITH_MD5
+|     SSL2_RC2_128_CBC_WITH_MD5
+|     SSL2_RC4_64_WITH_MD5
+|     SSL2_IDEA_128_CBC_WITH_MD5
+|     SSL2_DES_64_CBC_WITH_MD5
+|_    SSL2_RC4_128_WITH_MD5
+3306/tcp open  mysql     syn-ack MySQL 4.1.7-standard
+| mysql-info: 
+|   Protocol: 10
+|   Version: 4.1.7-standard
+|   Thread ID: 6
+|   Capabilities flags: 33324
+|   Some Capabilities: ConnectWithDatabase, SupportsCompression, LongColumnFlag, Support41Auth, Speaks41ProtocolNew
+|   Status: Autocommit
+|_  Salt: 5pT4GFi`'=>_Dt<n6__?
+
+Host script results:
+|_clock-skew: -2s
+
+Read data files from: /usr/bin/../share/nmap
+Service detection performed. Please report any incorrect results at https://nmap.org/submit/ .
+# Nmap done at Thu May  6 20:19:20 2021 -- 1 IP address (1 host up) scanned in 105.36 seconds

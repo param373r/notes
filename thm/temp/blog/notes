@@ -1,0 +1,46 @@
+
+
+
+Blog
+------
+
+
+Bruteforce the password for kwheel user(enumerated from the blog post)
+
+
+Credentials for wordpress
+	kwheel:cutiepie1
+
+
+Unknown string found in drafts
+
+	jiXvfuIpdw (May be wpnonce??)
+
+Wordpress running 2020 theme
+
+	Wordpress 5.0 vulnerable to image rce...
+		- https://www.exploit-db.com/exploits/49512
+
+
+Extra Notes:
+	- Look  into chgrp command (something sounds not right)
+
+
+
+
+Final Thoughts:
+	- This was an easy room to enumerate and gain access, it's just I was stupid enough to not see it earlier...
+
+	Hehe, maybe first time streaming nervous-ness? May be??
+
+	Huh!!
+
+	Strange... Now, I see why my payload doesn't seem to work... It's not in normal strings format... Exiftool is interpreting it actually. So to interrpret on the server side... We have to upload it there  in clear text
+
+
+	F... What is this... The image didn't changed at all... Umm, shall I restart the machine?
+
+	Umm, may be because the image got corrupted when I edited it??
+
+
+	How the fuck is my payload be still valid after being cropped?? HUHHH!!

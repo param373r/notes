@@ -1,0 +1,70 @@
+
+
+Introduction
+=============
+
+This network is designed to focus on 
+	- Pivoting
+	- Working with Empire C2 (command and control) framework
+	- Simple AV Evasion Techniques
+
+Other topics to be covered:
+	- Code Analysis (Python and PHP)
+	- Locating and modifying public exploits
+	- Simple webapp enumeration and exploitation
+	- Git Repository Analysis
+	- Simple Windows Post-Exploitation techniques
+	- CLI Firewall Administration (CentOS and Windows)
+	- Cross-Compilation techniques
+	- Coding wrapper programs
+	- Simple exfiltration techniques
+	- Formatting a pentest report (important)
+
+Note:
+	- Tools in the tools directory are going to be outdated, make sure to keep it's updated version.
+
+Note:
+	- Darksec Youtube Wreath Walkthrough
+
+Note:
+	- While uploading tools to the network make sure to use the following format + Make no password changes.
+
+		<toolname>-<username> eg. Reverseshell-j4x0n
+
+Note:
+	- To access the network a special VPN pack is required... FInd it in the networks section.
+
+
+
+About the Story
+================
+
+Out of the blue, an old friend from university: Thomas Wreath, calls you after several years of no contact. You spend a few minutes catching up before he reveals the real reason he called:
+
+    "So I heard you got into hacking? That's awesome! I have a few servers set up on my home network for my projects, I was wondering if you might like to assess them?"
+
+You take a moment to think about it, before deciding to accept the job -- it's for a friend after all.
+
+Turning down his offer of payment, you tell him: I'll do it.
+
+
+
+The Brief about the Target
+===========================
+
+The Info given by client:
+	
+	"There are two machines on my home network that host projects and stuff I'm working on in my own time -- one of them has a webserver that's port forwarded, so that's your way in if you can find a vulnerability! It's serving a website that's pushed to my git server from my own PC for version control, then cloned to the public facing server. See if you can get into these! My own PC is also on that network, but I doubt you'll be able to get into that as it has protections turned on, doesn't run anything vulnerable, and can't be accessed by the public-facing section of the network. Well, I say PC -- it's technically a repurposed server because I had a spare license lying around, but same difference."
+
+Points to be noted:
+	- There are three machines on the network
+    - There is at least one public facing webserver
+    - There is a self-hosted git server somewhere on the network
+    - The git server is internal, so Thomas may have pushed sensitive - information into it
+    - There is a PC running on the network that has antivirus installed, - meaning we can hazard a guess that this is likely to be Windows
+    - By the sounds of it this is likely to be the server variant of Windows, - which might work in our favour
+    - The (assumed) Windows PC cannot be accessed directly from the webserver
+
+Note:
+	- There is a very good section at the end of this room... But I am going to try my own report writing... and then compare my reports.
+

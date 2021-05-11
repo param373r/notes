@@ -1,0 +1,13 @@
+
+
+Scope
+======
+
+The following targets are defined in-scope for this section:
+	- hackycorp.com
+	- *.hackycorp.com
+	- 0x[%02x].a.hackycorp.com (find the red key)
+	- balancer.hackycorp.com
+	- z.hackycorp.com (DNS related challenges)
+
+	- Github account for hackycorp.

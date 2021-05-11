@@ -1,0 +1,129 @@
+
+
+Biohazard
+===========
+
+3 ports found; 21,22,80
+
+Possible Usernames from the site:
+	
+	- chris
+	- jill
+	- barry
+	- weasker
+	- joseph
+
+
+Story points may come handy:
+
+	- Joseph was eaten alive before entering the mansion
+	- Chris went missing in the mansion
+	- Jill and barry went to the dining hall
+		- In the dining hall there was an emblem found:
+			emblem{fec832623ea498e20bf4fe1821d58727}
+
+		After putting the emblem nothing happened.
+
+		- Found a link to /teaRoom/
+
+	- The teaRoom
+		- Found a zombie, the body was lying of kenneth from the bravo team
+		- Found a referral to the artRoom/
+		- A lock pick flag: lock_pick{037b35e2ff90916a9abf99129c8e1837}
+	- Found a lot of paintings in the art room
+		- Found a paper stick on the wall? Got the mansion map!! BOOM!!
+
+			/diningRoom/
+			/teaRoom/
+			/artRoom/
+			/barRoom/
+			/diningRoom2F/
+			/tigerStatusRoom/
+			/galleryRoom/
+			/studyRoom/
+			/armorRoom/
+			/attic/
+
+	- In the bar room, it can be opened using the lock-pick flag
+		- Then found the music sheet flag by base32 decoding the note.
+
+			music_sheet{362d72deaf65f5bdc63daece6a1f676e}
+
+		- Reached a secret bar room, found a gold emblem
+
+			gold_emblem{58a8c41a9d08b8a4e38d02a4d7ff4843}
+
+			By inputing the gold emblem flag, happened nothing.
+
+	- Visted the 2F dinning room. Found a blue-gem in dinningRoom/sapphire.html 
+
+		blue_jewel{e1d457e96cac640f863ec7bc475d48aa}
+
+	- Went into tigerStatusRoom, found a tiger slot(saying you can put a gem on tiger's eye, inputted the blue_jewel flag)
+
+
+		Note: Found crest1 (crest2 crest3 crest4 to be found) crest1 base32 > base64 encoded (Another path will be revealed when all the crest will get combined)
+
+			Crest 1: RlRQIHVzZXI6IG
+
+	- Found crest2 in the gallery room (encoded with base32 > base58)
+			Crest 2: h1bnRlciwgRlRQIHBh 
+
+
+	- `rebecca` found in barRoom(it was the key to vigenere cipher in diningRoom)
+		- After decoding the string with vigenere cipher. Found a secret room in the diningRoom (the_great_shield_key.html)
+
+			shield_key{48a7a9227cd7eb89f0a062590798cbac}
+
+	- Found crest 3 in armor room(base64 decode > binary decode > hex decode)
+
+		Crest 3: c3M6IHlvdV9jYW50X2h
+
+	- crest 4 found in the attic (base58 > hex)
+
+		Crest 4: pZGVfZm9yZXZlcg==
+
+
+	Adding all the crests together:
+		- RlRQIHVzZXI6IGh1bnRlciwgRlRQIHBhc3M6IHlvdV9jYW50X2hpZGVfZm9yZXZlcg==
+
+		After base64 decoding them, we got the ftp username and password:
+
+			FTP Username: hunter
+			FTP Password: you_cant_hide_forever
+
+
+Found 3 images in ftp:
+	- Image 1: Steghide: cGxhbnQ0Ml9jYW
+	- Image 2: Comment: 5fYmVfZGVzdHJveV9
+	- Image 3: binwalk: 3aXRoX3Zqb2x0
+
+	Final key for gpg:
+		- plant42_can_be_destroy_with_vjolt (base64 decoded string)
+
+	Extracted the gpg file and found the helmet key:
+
+		helmet_key{458493193501d2b94bbab2e727f8db4b}
+
+
+	Note: There is an imposter among the alpha stars team.
+
+	In the study room: found the ssh user(eagle medal): umbrella_guest
+
+	In the hidden closet: found ssh password(wolf medal): T_virus_rules 
+		
+		And MO disk 1: wpbwbxr wpkzg pltwnhro, txrks_xfqsxrd_bvv_fy_rvmexa_ajk
+
+			This was a vigenere cipher... On decoding, found: weasker login password, stars_members_are_my_guinea_pig
+
+
+Credentials found yet:
+	
+	weasker:stars_members_are_my_guinea_pig
+	umbrella_guest:T_virus_rules
+
+
+Extra Notes:
+	- You can allow only particular users to login into the ssh by using "AllowUsers" in sshd_config
+
+

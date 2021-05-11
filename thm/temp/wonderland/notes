@@ -1,0 +1,23 @@
+
+
+Found credentials I guess?
+	alice:HowDothTheLittleCrocodileImproveHisShiningTail
+
+
+
+sudo -u rabbit /usr/bin/python3.6 /home/alice/walrus_and_the_carpenter.py 
+
+From alice -> rabbit:
+
+	Ok, so in this privesc we were suppose to create a random.py (with +x) and then we could just run that command shown with sudo -l  (it would be like python module manipulation) and then that random.py in our directory would execute. 
+		It's just how import works...
+
+
+From rabbit -> hatter:
+	- Tricky one... I thought that this could be the one containing a bof problem, but instead it was just another similar challenge to the prev one... Create a date executable with the contents of /bin/bash -p and another path manipulation attack would give us hatter's shell.
+
+	I found hatter's password in password.txt got a good-er shell with ssh
+
+
+From hatter -> root
+	- It was cap_setuid not a normal setuid... F. F. F. This was such a good challenge. I didn't expected this... But I loved it, just with a few hints from the discord server I could pull the whole box off myself.

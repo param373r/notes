@@ -1,0 +1,54 @@
+
+
+The progress map in pentesterlab is as follows:
+	
+	- Introduction
+	- Unix
+	- Essential
+	- PCAP
+	- White
+	- Serialize
+	- Yellow
+	- Blue
+	- Green
+	- Orange
+	- Intercept
+	- Auth
+	- Android
+	- CTF
+	- Brown
+	- Recon
+	- API
+	- Code Review
+	- JSerialize
+	- HTTP
+
+Note: After white badge... Only the ones that could contain generic vulnerabilities have been noted down... But literally, all seem to be important to me!!
+
+Completed:
+	- Introduction
+	- Unix
+	- Essential
+	- PCAP
+	- White
+	- Serialize
+	- Yellow
+	- Recon
+	- Code Review
+	- HTTP
+
+
+Wishlist:
+	- Intercept
+	- Auth
+	- Android
+	- CTF
+	- API
+	- JSerialize
+
+Pending:
+	- Blue
+	- Green
+	- Orange
+	- Brown
+	+ All in wishlist

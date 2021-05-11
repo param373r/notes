@@ -1,0 +1,141 @@
+
+
+Recon
+======
+
+00:
+	- In robots.txt
+	
+	Key: af9c328a-02b4-439d-91c6-f46ab4a0835b
+
+01:
+	- On 404 page.
+
+	Key: aeaee57f-2a82-41da-bc4c-d081c8cddfc8
+
+02:
+	- In security.txt (NOTE: security.txt FILES IS UNDER THE DIRECTORY ".well-known". Also, not the hyphen... it's not underscore -_-)
+	
+	Key: 99685e30-7061-4ac0-83bf-4ccc0409faac
+
+03:
+	- Directory listing may be allowed in some places if by default index.html is not found.
+		- This can be countered by using -Indexes option in the apache.conf to disable the directory listing.
+
+	Some valuable files/directories could be revealed, if that is turned on.
+
+	Key: 93790afa-6985-47fd-b564-aa7ba59ed6a9
+
+04:
+	- Always try to look for some common directories, like admin/wp-admin/login etc.
+
+	For this ex the flag was in /admin/ directory.
+
+	Key: ad1d44d6-ab73-4640-8291-c5bf2343e2a5
+
+05:
+	- Simple directory bruteforce ffuf.
+	- Found the directory: /startpage/
+
+	Key: 498621b0-17fe-4ebb-8324-3de7743fea51 
+
+06:
+	- This exercise was about finding the default vhost. To find a default vhost we can make a request using the public IP and the response we are going to get is it's default vhost(which in our case was z.hackycorp.com)
+
+	Key: 5cf83b5d-eb6c-4eee-af6c-945f9aed8dfd
+
+07:
+	- This exercise was focused onto finding the default vhost WITH TLS CONNECTION. So nothing different than the previous step, except this time we are going to view the TLS version of the site.
+
+	Key: 23eafa56-6d55-4b78-8307-24e7dc2ce5e6
+
+08:
+	- This exercise focuses on enumerating SANs (subject alt names; much more like aliases).
+	- The catch here was to find a link to the site that would lead us to the 6th key, but by viewing the TLS version of the site it will reveal the recon 8th key.
+
+	Key: 1763ec4f-8467-47f7-9a80-6de93a1a2253
+
+09:
+	- Key was in the headers of response
+
+	Key: 99d0738b-1e52-4a00-8885-b15894b2c79e
+
+10:
+	- Visual Content Discovery is the theme of this exercise... So to find this, we need find a key string in red... in a bunch of blue and black fake key strings... 
+	- Best tool to use here is aquatone...
+
+	Key: 483f8b15-e4a8-4387-b052-4b2204c7eb69
+
+11: 
+	- This was a little tricky challenge, day 1 couldn't solve it... Day 2 I had to re-think about the Host header bruteforce attack, and found the key in less than 5 mins. Bwahaha
+	- What I did was to put the request in burp intruder... and add the host parameter (sniper) and bruteforce with the wordlist... I found the recon_11 key on admin.hackycorp.com domain... when the host header was manipulated to admin.hackycorp.com with the request to hackycorp.com it revealed another side of the web-page. 
+
+	Key: e4599fa9-1cc4-4916-a394-ce455a954d86
+
+
+12:
+	- Load balancing, it is really a nice recon... This exercise meant to taught about load balancer.
+	- When same requests are served multiple times to a server, the load is balanced by distributing the requests over to different resources: One of the serving resources on the backend will serve the key... 
+		- Ps: This was not much of challenge, all I had to do is continuously refresh the page.
+
+	Key: 29e5c97c-7230-46ae-937c-6c56ff33b84f
+
+13:
+	- Finding TXT records of a domain. In our case it was key.z.hackycorp.com
+	- You can also do this in terminal using ```dig key.z.hackycorp.com TXT```
+
+	Key: 9f883f22-6ea5-4631-bbe8-95841ad63f56
+
+14:
+	- This was a really nice challenge, which I solved but had a little clue, how I did it... Hah. so... This was based on a zone transfer attack. To do this, I had to do a zone transfer... And I did this using dig.
+	- To do a zone transfer, we need to find the dns servers hosting the domin first... 
+		- We can do this by using the following command:
+
+			dig +short ns z.hackycorp.com
+
+	- Then we are going to inititate an AXFR request to get a copy of the zone from the primary server.
+		- Finally this can be done using...
+
+			dig axfr z.hackycorp.com @<dns server>
+	- Key was on recon_14.z.hackycorp.com
+
+	Key: e5fce970-6d94-43c1-bdd5-a06c2b235f9c
+
+15:
+	- Fuckkk, this was such an easy challenge and I wasted about 30 mins on this...
+	- This was actually based on previous challenge, the only difference was, in this we need to zone transfer an internal zone.
+		- The proper goal was to do a zone transfer of an internal zone named "int" using z.hackycorp.com (nameserver)
+
+	- PS: I was trying for axfr int.hackycorp.com @z.hackycorp.com for ages... All I had to do is just use int... instead of the whole int.hackycorp.com
+
+		dig axfr int @z.hackycorp.com
+
+	Key: b55b45a8-63b1-42f7-bd12-a36219ff883d
+
+16:
+	- Gladly found an article on how to determine bind version. Pasted the following command:
+
+		dig chaos txt version.bind @z.hackycorp.com
+
+		which gave me the key for this challenge.
+
+	- FYI, bind is one of the most commondns server used. 
+
+	Key: 4e5e76e1-728a-49be-aea8-4591ba11e588
+
+17:
+	- Name of the developer in the repository test1
+
+	Key: d0fad5ef-ebb2-467c-8868-34e3cf4878b4
+
+18:
+	- Needed to look into the public repository of hackycorpdev user's to find the key for this challenge.
+
+	Key: 80cb2045-c8bf-4357-8931-a28dd0f3fbb9
+
+19:
+	- This was also another real nice challenge, reveals the email address used to commit on github.
+	- First click on commits > then click on commit you wanna see. Now, to see the details of the commit... add ".patch" at the end of the URL. It will return you a page that can reveal stuff like email address, diff information on files and other elements.
+		- In our case the key was the username in email of 2nd commit.
+
+	Key: 9590c69b-f9d0-469d-9475-827bf0e1126e
