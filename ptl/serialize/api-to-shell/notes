@@ -1,0 +1,68 @@
+
+
+API to Shell
+--------------
+
+There are a lot of parameters to get this exercise done... Starting with the basics:
+	
+Introduction
+--------------
+
+- In this exercise the index page of the website contains a documentation of the webapp's API.
+
+PHP comparisons
+-----------------
+
+- I already knew that strict comparisons in php doesn't typecast the strings to integer, where as a loose comparison does(==).
+
+- The strange thing I found out that... 
+	- With loose comparisons
+
+		1 == 'adsf1aasdfag' // anything following 1
+			returns True
+
+	and also,
+
+		0 == 'asdfa' //any string here
+			evaluates to true.
+
+- This is because of type casting... With loose comparisons, all the characters that cannot be interpreted as integers, cannot be typecasted and hence are discarded.
+
+	- Note: This would have returned false if the characters are before the number 1 (0 is self explanatory).
+
+
+Signature bypass
+------------------
+
+- With respect to the previous section we saw that due to loose comparisons, we can make a value = to another value for a wide range of values...
+	- This in our knowledge can be used to bypass long signatures... For which file retrieval is only possible if file signature matches with the file you want to retrieve on the server. This makes sure that yuo're the authorized person to retrieve the file. But this can be vulnerable if used against loose comparison.
+
+- Therefore, in this way we can have LFI to any file inside the system which have read permissions to the current user that web server is running as.
+
+- To bypass signature we can change the file path. So if
+
+	../../../../../../../../etc/passwd is not working... We can try removing ./ so that we can change the file path to match the start of the signature to 0 (i.e. any letter from a-f; which when cast into integer will give NULL and thus signature will validate automatically).
+	../../../../../../../../././././etc/passwd may bypass the signature 0. if not we can add more ./
+
+		- Adding ./ will still give you the same file but the application will generate a different signature that may be loosely equal to 0. 
+
+
+Recovering the source code
+----------------------------
+
+- Now that we have a LFI, why not try retreiving the application's full source code.
+
+	- Using the above method we can retreive file data for the whole application (if we know what file to retreive)
+
+Doing the code review
+----------------------
+
+- Understanding the code to see how can we find further vulnerabilities into the web-app.
+
+- Or find a way to upload reverse shell/get codeexec remotely.
+
+
+Exploiting the web app
+------------------------
+
+- Once got a php one liner for codeexec/reverse shell up that server we can run the given command to mark this exercise as complete.

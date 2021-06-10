@@ -1,0 +1,227 @@
+
+
+Command and Controlll
+-----------------------
+
+Aight, we are 1 day behind our schedule... Let's see if we can cover this whole section in today's time.
+
+
+
+Recap
+-------
+
+We got a stable shell at git server yesterday... Where we hacked and got the administrative hash
+
+Note: I am do pending an automatic script to establish the connection of sshuttle and then my evil-winrm connection in chain... But let's see what we can do right now.
+
+
+About Command and control
+===========================
+
+- Once we get our foothold in the target network... we can start looking to bring what is known as C2 (Command and control) framework into play.
+	- I have never used one before, but it feels like it is metasploit... After gaining access to a network for post enumeration exploitation
+
+- There are many C2 frameworks available. Cobalt Strike being one of the most famous.
+	- There are other C2 frameworks including that are built with .NET Covenant, Merlin, Shadow, PoshC2 and many others.
+
+- How to find these frameworks?
+	- The C2 Matrix (https://www.thec2matrix.com/): This site keeps a list of C2 frameworks that are available on the web.
+
+- Powershell Empire as the name suggests is a C2 framework for especially windows environment.
+
+Note: The Empire project was originally abandoned in early 2019; however, it was soon picked up by a company called BC-Security, who have maintained and improved it ever since. As such, there are actually two public versions of Empire -- one very outdated (Empire 2.x), and one current (Empire 3.x). Be careful to get the right one!
+
+- Empire has it's new GUI extension: Starkiller.
+
+- Room on Powershell Empire: https://tryhackme.com/room/rppsempire
+
+
+
+POWERSHELL EMPIRE
+===================
+
+Installation: Empire and Starkiller
+------------------------------------
+
+- Powershell empire can be installed from kali's apt repositories(gives less control over the installation). So instead try cloning from git.
+
+	git clone https://github.com/BC-SECURITY/Empire/
+	cd Empire && sudo ./setup/install.sh
+
+
+Note: Older versions of Empire may ask you to enter a server negotiation password towards the end of the installation process; however, this is no longer the case with recent versions.
+
+- Also there can be error sometimes while running empire after installation... If that occurs... 
+	
+	sudo setup/reset.sh
+
+Starkiller
+-----------
+
+- This is the GUI version of Empire
+	- Regardless of using kali, we can always install it from git cloning.
+
+- Also note that starkiller is an Electron app which works by connecting to the REST API exposed by Empire when started with the --rest or --headless options set. In other words, Empire must be running with one of these options set if we want to use Starkiller.
+
+	sudo ./empire --headless &
+
+- From here we need to sign into the REST API we deployed previously. By default this runs on https://localhost:1337, with a username of empireadmin and a password of password123
+
+
+Overview
+---------
+
+- Like metasploit, empire also consists of some modules...
+	- Listeners - Listen for connections
+	- Stagers - Essential stager payloads packed with empire.
+	- Agents are the equivalent of a Metasploit "Session". They are connections to compromised targets, and allow an attacker to further interact with the system
+	- Modules are used to in conjunction with agents to perform further exploitation. For example, they can work through an existing agent to dump the password hashes from the server 
+
+- There are other plugins which extend the functionality of an empire session (oos of command and control section given in this room)
+
+- In addition to these practical applications of the framework, it also has a nifty credential storage facility, automatically storing any found creds in a local database, plus many other neat features!
+
+Note: Our git server is on the internal network... And thus empire cannot be directly deployed on it, which is why we have to set a few things up(coming up after few more details on empire).
+
+
+Commands of PE
+----------------
+
+- help COMMAND - will give help and usage of that command in brief.
+- uselistener  - (Notice the sace after uselistener) and tab twice to view the list of available listeners.
+- uselistener LISTENER - will use the listener specified.
+
+info - tells the available options with a listener in empire.
+
+- To set an option for the listener it is similar to msf:
+
+	set OPTION VALUE
+
+- execute - This command in going to start the listener
+
+- listeners - prints avaiable listening listeners
+
+- kill LISTENER_NAME - kills a listener
+
+- back - back can be use to exit the main menu console.
+
+Stager commands
+----------------
+
+- usestager  - (Notice the space) and press tab twice to get a list of available stagers.
+
+- set option value - same as in listener
+
+- execute - to create the stager.
+
+Agent commands
+----------------
+
+- agents - will list available agents that we can use to execute command and modules.
+
+- interact AGENT_NAME - Self explanatory.
+
+- kill AGENT_NAME - kills the agent running
+
+- rename AGENT_NAME NEW_NAME - renames the agent for easy read and rememberance.
+
+- remove AGENT_NAME - This can be used to remove non-responding agents for good.
+
+
+Module commands
+----------------
+
+usemodule  - (note the space) and tab twice... to view a huge list of modules available to use with empire.
+
+searchmodule - let's you search for module and tells you it's path... For eg. 
+	- searchmodule winpeas (will return the location for winpeas module)
+
+
+Listeners and Stagers
+-----------------------
+
+- By default empire uses the HTTP listener.
+	- It's worth noting that a single listener can be used more than once -- they do not die after their first usage.
+
+- Starting a listener is starkiller is somewhat similar in starkiller. It is GUI, you can find your way in.
+
+- About those stagers, they are nothing but payload that are used to connect back to waiting listeners.
+
+Note: We can generate stagers in either Empire CLI or Starkiller. In most cases these will be given as script files to be uploaded to the target and executed. Empire gives us a huge range of options for creating and obfuscating stagers for AV evasion; however, we will not be going into a lot of detail about these here.
+	- Isn't that cool???!!!
+	
+Note: There are vareity of stagers... multi/launcher is often a good bet if not sure what it is you want to run.
+
+- Also, it is easy to find your way creating through stagers in starkiller.
+
+Agents
+-------
+
+- These are sessions opened after getting a running shell on the listeners...
+
+Note: They are called agents as in the agents that are active to exploit the environment. Ironic.
+
+- Find your way through GUI.
+
+Testing the empire on prod-serv
+---------------------------------
+
+- It works fantastic, time to proxy empire agents to get into internal network.
+
+Traversing the Network with Empire
+-----------------------------------
+
+- This is where hop listeners hop in.
+
+- http-hops work in a very similar way to socat relays... 
+	- The methodology behind is that we use a redirect listener that listens for stager from a machine somewhere in the network.
+
+- The start:
+	- Hop Listeners create what looks like a regular listener in our list of listeners (like the http listener we used before); however, rather than opening a port to receive a connection, hop listeners create files to be copied across to the compromised "jump" server and served from there. These files contain instructions to connect back to a normal (usually HTTP) listener on our attacking machine.
+
+	- Hop listener creates a listener for the compromised server... which when receives connection (after invoking the stager to the target machine) relays it to the default that we created on our attacker machine and assigned the name to RedirectListener in hop listener
+		- So the chart is like the following:
+
+			http Listener (attacker machine) <===> hop listener (compromised; thomaswreath.thm) <===> stager (target; gitserver.thm)
+
+- Setup
+
+
+NOTE: PLEASE!!PLEASE!!PLEASE!! USEEE -r flag WHILE ZIPPING TO RECURSE THE DIRECTORIES
+	- Setup a listener that will take relay back from the gitserver.
+	- Then setup a hop listener that will give-in some files to be transfered to thomas wreath server(like a relay outpost). Set the RedirectListener to the listener we set in step 1.
+		- Then create a zip of the files created by hop listener and 	transfer it to the relay outpost(compromised machine) and extract the files
+			- Then start a php web server as python web server cannot execute php scripts...
+			- Also make sure that you unblock the outbound traffic on the particular port in centOS.
+	- Then create a staged payload with listener set to hop listener... In order to invoke the relay listener which will pass the connection to listener we created in step 1. That is the listener we will be interacting with our attacker machine to gitserver.
+	- Invoke the payload on gitserver machine:
+		- We can use the evil-winrm with the admin passsword... or the exploit we previously deployed on gitstack which will give us nt authority\system privs. (curl it in the later case)
+
+	- Now when the stager payload executes on the gitserver we will receive a listener on our machine
+
+
+Modules
+--------
+
+- Modules are like post exploitation thingy used in empire on agents that have been running in empire...
+
+- To view the results of the modules in GUI we have to switch to reporting tab.
+
+The overarching take-aways from this section are:
+
+	- C2 Frameworks are used to consolidate access to a compromised machine, as well as streamline post-exploitation attempts
+	- There are many C2 Frameworks available, so look into which ones work best for your use case
+	- Empire is a good choice as a relatively well-rounded, open source C2 framework
+	- Empire is still in active development, with upgrades and new features being released frequently	
+	- Starkiller is a GUI front-end for Empire which makes collaboration using the framework very easy
+
+
+
+
+
+
+
+Extra Notes
+------------
+
+- Empire uses case-sensitivity in setting options.

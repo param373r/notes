@@ -1,0 +1,50 @@
+
+
+Electronic Code Book
+---------------------
+
+This is an interesting exercise tbh.
+
+- Electronic code book (ECB) is an encryption mode in which the message is split into blocks of X bytes(generally X=8) length and each block is encrypted separately using a common key.
+	- This hack is so impressive that we don't need to decrypt the cookie we can just edit the cookie while encoded and then base64 encode the value
+
+
+Note:
+	- First the creds of the user are stored in admin:password format... And then using a secret key the string is encoded using ECB encryption.
+
+- If we create mutliple accounts with just a little variation and compare the base64 decoded values of the cookies allocated, we can identify that there is a pattern that is followed.
+	- For this exercise we know the that there is an ECB used encryption in used, and the password is not validated in the ECB cookie(because the developer thought that it is hard to guess the key used to encryt the cookie in the first place), which means if we don't know the admin's password we can leave that part of the cookie un-edited and just find a way to edit the cookie to read only username from it.
+
+
+Vulnerability
+--------------
+
+- The problem with ECB is that you can detect patterns, and you can move blocks, you can remove blocks and stick make it a valid ecb encryption (as the data chunks are individually encrypted).
+
+
+Exploitation
+-------------
+
+- Once you find chunks of data (total bytes used in chunk and then encrypted with the key) used to encrypt with the key... You can craft a fake account with the payload pre-pending the string of random letters (X * bytes) to the string of username admin:password...
+	- Then remove the extra added random letters from the cookie leaving you the string of admin:password; as the web-app only validates username and not the password... The username admin encrypted with the key used for ECB. Is enough validation to do an account takeover.
+
+
+Practical
+-----------
+
+- Signing up with username bbbbbbbbbbbbbbbbbbbbbbbbbbbbadmin and password test to see the offset and then signing up with bbbbbbbbadmin and password test (8 b's preppended to admin; as the key is used to encrypt 8 bytes together for this exercise).
+
+
+- n number of b's used:
+
+	Cookie created: 48U8o59zFznjxTyjn3MXOePFPKOfcxc5xEUQK8RCfNHl0FFS8nL16g==	
+	Hex available of base64 decoded cookie string: \xe3\xc5\x3c\xa3\x9f\x73\x17\x39\xe3\xc5\x3c\xa3\x9f\x73\x17\x39\xe3\xc5\x3c\xa3\x9f\x73\x17\x39\xc4\x45\x10\x2b\xc4\x42\x7c\xd1\xe5\xd0\x51\x52\xf2\x72\xf5\xea
+
+- 8 b's used preppended to admin string
+	Cookie created: 48U8o59zFzmjBkP2xbwkahvRJFLoEQG5
+	Hex available of base64 decoded string: \xe3\xc5\x3c\xa3\x9f\x73\x17\x39\xa3\x06\x43\xf6\xc5\xbc\x24\x6a\x1b\xd1\x24\x52\xe8\x11\x01\xb9
+
+- Note the starting of both hex strings... We can see something common in it...
+	- Let's try to remove that common string and encode the cookie again in base64 and see if we can login with it.
+
+	Final cookie: owZD9sW8JGob0SRS6BEBuQ==

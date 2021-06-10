@@ -1,0 +1,48 @@
+
+
+Reporting
+==========
+
+Following is a link to a sample pentest report: https://www.offensive-security.com/reports/penetration-testing-sample-report-2013.pdf
+
+Penetration test reports are generally split into several sections. There is not a particular standard for a pentest report.
+
+	- Executive Summary. This should be essentially non-technical, summarizing the scope of the engagement. 
+		- This section is meant for higher-ups in a company that may not have a technical background. 
+		- It should catch the eye, and will set the tone for the rest of the report.
+
+	- Timeline: This will be showing an overview of what you did and when you did it. 
+		- This allows whoever is assigned to fix the vulnerabilities to check any logs from the compromised system and see what successful attack looks from their end.
+	
+	- Findings and Remediations: This should be a more technical section.
+		- It should provide a detailed explanation of the vulnerabilities you found as well as your suggested fixes for these.
+		- Additionally, it should include the severity of each vulnerability, and the risk to the company should the vulnerability be exploited by a bad actor
+
+		NOTE: You can use the following CVSS calculator to mark the score of the vulnerability found: https://www.first.org/cvss/calculator/3.1
+
+		- No need to start with the writeup, Just debrief what the problem is, and what the solutions might be.
+
+	- Attack Narrative: This should be a step-by-step writeup of the actions you took against the targets.
+		- This is similar to a detailed write-up for a CTF.
+
+	- Cleanup section: This should include the steps you took to eradicate your presence on the target.
+
+	- Conclusion: This just summarises the report, rounding off the results and stressing the importance of patching as required.
+
+	- References then Appendices 
+		- The references section includes full references to any works cited throughout the report. It should also be used to link to relevant CVEs,CWEs, CAPECs for the found vulnerabilities.
+		- Your appendices should include any large pieces of information that would have cluttered up the main text.
+			- Like if you have to edit an exploit, put the whole edited code in the appendices section.
+
+- So, the sections should be:
+
+    Executive Summary
+    Timeline
+    Findings and Remediations
+    Attack Narrative
+    Cleanup
+    Conclusion
+    References
+    Appendices
+
+- In the real-world, a section of the pre-engagement meetings between the client and the pentesting company would set out expectations for report handling procedures.

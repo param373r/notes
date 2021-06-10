@@ -1,0 +1,82 @@
+
+
+Personal PC
+-------------
+
+- The proxy layer has extended upto gitserver and now we need access to personal pc
+
+	webserver -> gitserver -> Thomas pc
+
+		proxy/relay - proxy/relay -> hop-listen
+
+
+- Scanning through one proxy is bad, but at this point we'd be scanning through two proxies, which would be unbearable.
+
+Note: Empire modules are just powershell scripts that when invoked through the attacker machine... (creates a local copy on the target machine) and then runs the script.
+
+- We can upload and download files in evil-winrm using the respective keywords like in meterpreter.
+
+	upload LOCAL_DIR REMOTE_DIR - uploads a file.
+	download REMOTE_DIR LOCAL_DIR - downloads a file.
+
+	If while downloading if the path is not valid or not found... Evil-winrm will copy the file in currently opened directory on local machine.
+
+- Evil-winrm allows us to mount powershell scripts in the machine using the -s flag.
+	- All the items in the directory specified by -s flag... will be imported directly into powershell when the session is created.
+
+- -s flag couldn't seem to work while testing... Anyhow... `upload`ed the Invoke-Portscan.ps1 file...
+	- . .\Invoke-Portscan.ps1
+
+	- Invoke-Portscan -Hosts 10.200.90.100 -TopPorts 50
+
+Ports Opened:
+	- 80
+	- 3389
+
+
+
+Pivoting
+----------
+
+Allow a port in windows firewall:
+	netsh advfirewall firewall add rule name="NAME" dir=in action=allow protocol=tcp localport=PORT
+
+
+- To further pivot on windows... We can use either proxy-ing with chisel or another port forward using plink.exe.
+
+	- Plink(putty) would be stabler but will take longer time...
+	- chisel is easy to setup and way to go thingy.. 
+
+	- Using RDP in gitserver...
+
+- Downloading the git repository containing the source code of site running on .100 80... Plan is to recreate the repository to find the latest commit of that webserver
+
+- Got the git directory... Extracted the files from .git folder... and the latest commit... 
+
+	- resouces/index.php directory contained the an image file upload with a filter implemented and is vulnerable(bypass with php reverse shell)
+		- This can get us a shell on thomas's personal PC.
+
+	Also, there was a login feature implemented on the /resources directory...
+		- We can guess on a personal PC the username must be thomas or twreath and recently cracked password hash from git server(mimikatz)
+
+
+	Login:
+		- thomas:i<3ruby
+
+- Onto filter bypass and uploading the reverse shell.
+
+Note: We don't know what antivirus is running on that PC, we don't know if it could detect a reverse shell payload.
+
+	Thus, let's upload a test payload via image.
+
+	exiftool -Comment="<?php echo \"<pre>Test Payload</pre>\"; die(); ?>" index.png.php 
+
+	This is just a simple payload... It can easily execute as it's nothing malicious... And yes, it did print the Test Payload statement on the web page.
+
+We did got access to the Personal PC and got a little code execution.
+
+TODO
+------
+
+	- Setup a stable session using chisel from git-server to the attacker machine.
+		- For easy access of site running on .100 (thomas' personal PC) in our browser.

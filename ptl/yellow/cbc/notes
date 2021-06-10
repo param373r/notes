@@ -1,0 +1,65 @@
+
+
+Cipher Block Chaining
+----------------------
+
+- There were limitations (can move/remove chunks of bytes) with ECB that caused the vulnerability. So another encryption standard was introduced: CBC.
+
+
+The encryption is same like ECB chunks of data is to be encrypted. The difference is, in ECB the chunks of data could be encrypted individually using a single key... 
+	- However, in CBC the chunks of data are encrypted using single key too... But before encrypting them with that key... The chunks of data are XORed with their previously created interemediate cipher.
+
+	chunk1 --xor--> intermed cipher --secret key--> block cipher encryption(also, xor partner for chunk 2)
+
+	For decrypting:
+
+	block cipher encryption --secret key--> intermed cihper --xor with previous chunk's cipher(or IV; in this case chunk0)--> chunk1
+
+	For the very first chunk that is to be xor'd is xor'd with a IV (initializing vector), which is a random string of size of a chunk of data (in this exercise; 8 bytes).
+
+- This technique is what covers the vulnerability of ecb.
+
+The vulnerability
+------------------
+
+- However, there are cases where IV is sent with the cookie and can cause an attacker to re-create the whole xor operation for the authentication. This way an account takeover is possible without knowing the secret key in the process.
+
+The Exploitation
+------------------
+
+- If we sign up, a random IV is going to be generated for the user. So if we want to get 'admin', we can create an account something like 'pdmin' or 'zdmin'
+	- This is because when the IV is generated for the cookie, it is generated in such a way, that it is going to return p after xoring with the intermed cipher.
+
+		- At very this stage, we can change the IV and edit the IV part of the cookie in such a way, that after xoring with the intermed cipher... It is going to return 'a'... and then for the following ciphers... chain will take it's place and form the username 'admin' on the server side giving us admin access.
+
+	- We took pdmin or zdmin like strings, as it will only get us to change first byte of IV, (making the entire chain come into it's place automatically), or else we have to change other bytes in IV, which is just going to take a little longer. #SuitYourself
+
+Note: The chunk of data is 8bytes here... so remember that pdmin is going to be interpreted as 'pdmin\00\00\00... to make it perfect 8 bytes. That's not gonna make a difference for this exercise... But just a heads up.
+
+The attack
+------------
+
+Login as pdmin and get the cookie:
+	Np5P1/xKt2LX09PXiA3as5SaBcXou0LF
+
+Hex-decode the cookie and identify the IV and chunks:
+	369e4fd7fc4ab762d7d3d3d7880ddab3949a05c5e8bb42c5
+
+IniVec: 36 9e 4f d7 fc 4a b7 62
+Chunk1: d7 d3 d3 d7 88 0d da b3 
+Chunk2: 94 9a 05 c5 e8 bb 42 c5
+
+- Now we know that IniVec is going to give 'pdmin\00\00\00' string after xoring the respective bytes of intermed cipher.
+	- If we change the IV's first byte in a way that it gives us 'a' after xoring(which would eventually be calculated using hex('a')^ 0x36), we can change that one byte and re-encode the cookie, to get admin account.
+
+	That first byte should be: 87
+
+- Replacing that first byte:
+	879e4fd7fc4ab762d7d3d3d7880ddab3949a05c5e8bb42c5
+
+- Hex-decoding and base64 encoding it will give us the final cookie:
+	h55P1/xKt2LX09PXiA3as5SaBcXou0LF
+
+BAMM!! Admin account
+
+Note: Strange thing, the IV changing method demonstrated by me is completing different(yet simpler) than the one shown in CBC exploitation video. 

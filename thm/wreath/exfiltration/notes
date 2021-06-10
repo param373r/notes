@@ -1,0 +1,38 @@
+
+
+Exfiltration
+=============
+
+Data exfiltration is something that should never be considered without explicit prior consent. So take that consent chief.
+
+A common method for exfiltrating data is to smuggle it out within a harmless protocol, usually encoded.
+	- DNS is often used to (relatively) quietly exfiltrate data. 
+	- HTTPS tends to be a good option as the data will outright be encrypted before egress takes place. 
+	- ICMP can be used to (very slowly) get the data out of the network. 
+	- DNS-over-HTTPS is superb for data exfiltration, and even email is often used.
+
+In a real world situation, Intrusion Detection System active on the compromised network could alert the network administrators if found anything suspicious.
+	
+	- THIS IS THE REASON WHY ATTACKERS DON'T USE SIMPLE PROTOCOLS LIKE FTP, TFTP, SMB OR HTTP.
+
+- C2 frameworks comes with options to quietly exfiltrate data.
+	- Just a hint to thinking that STEGANOGRAPHY can be used to exfiltrate the data quietly.
+
+- Once you get the SYSTEM access to the system... You can disable the defender so that exfiltration can be easy.
+
+- Local user hashes are stored in the Windows Registry in the HKEY_LOCAL_MACHINE\SAM hive
+	- To dump the hashes locally, we first need to save the SAM hive:
+		
+		reg.exe save HKLM\SAM sam.bak
+		reg.exe save HKLM\SYSTEM sam.bak
+
+- You may encounter an error when reconnecting using SMB. This is due to the way that Windows handles cached credentials.
+	- System error 1312 can usually be solved by connecting using an arbitrary domain i.e. using /USER:domain\user rather than just specifying username.
+
+- There are a variety of tools that could do this job, a script from the Impacket library: secretsdump.py.
+
+	python3 /opt/impacket/examples/secretsdump.py -sam PATH/TO/SAM_FILE -system PATH/TO/SYSTEM_FILE LOCAL
+
+- Each local account on the target is shown here, in a format of Username, RID, LM hash, NT hash.
+
+- As a side note: 31d6cfe0d16ae931b73c59d7e0c089c0 is an empty hash, and means that it is not activated.

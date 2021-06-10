@@ -36,7 +36,7 @@ Video 2:
 
 Resources:
 	- HTTP-Headers
-		https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers
+		- https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers
 
 	- HTTP-Response-Status-Codes
 		- https://developer.mozilla.org/en-US/docs/Web/HTTP/Status

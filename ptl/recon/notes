@@ -139,3 +139,46 @@ Recon
 		- In our case the key was the username in email of 2nd commit.
 
 	Key: 9590c69b-f9d0-469d-9475-827bf0e1126e
+
+20:
+	- Key was the name of one of the branches
+
+	Key: 08be82ba-e5fd-4fae-b2c2-272a18d31f80
+
+21:
+	- Key was in a file named KEY with a commit saved in test branch.
+
+	Key: a60b4aee-642a-483b-9262-ccfc2ed46f0d
+
+22:
+	- git log -p showed a list of all changes made in git previously... In my case it showed that a file named KEY.txt was deleted containing the the key for RECON_22
+
+	Key: 3ee505c2-8aa9-4d5e-810e-921778dce1e6
+
+23:
+	- Same as recon 22... With the command git log -p I got all the commits and the key was in commit a35a9174f3a6238a8ad70c549287d09e258f087b in file TEST31.txt
+
+	Key: 5c75cfe9-52dd-475b-8cfa-7ffc492abeca
+
+24:
+	- Found the key in assets.hackycorp.com/key.txt
+
+	Key: e94ab8a5-b0c1-4559-8bc7-cae2e53b10e0
+
+25:
+	- This was one hell of a challenge... I don't know how I solved it... I just did...
+	- I get to knew about a few things
+		- aws cli
+		- s3 storage buckets
+		- ec2 instances
+		- and other amazon services...
+	- So I did nothing but initialized a new ec2 instance(or I could install aws cli so that I could locally run the following commands; or connect to ec2 instance I spawned) after ```aws configure```. Then I ran s3api command to access the bucket...
+		aws s3api get-object --bucket assets.hackycorp.com --key key2.txt output.txt
+	- When I view the contents of output.txt it gave me key for recon 25.
+
+	Key: ff360948-c048-4f0c-a302-e806c50192d9
+
+26:
+	- This key was in /js/script.js, scrolled a bit for reading js... Easy find.
+
+	Key: d6b75269-97a3-44de-be32-fff0dd55e7ef
