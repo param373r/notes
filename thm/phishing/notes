@@ -1,0 +1,102 @@
+Phishing
+=========
+
+Theory
+--------
+
+Social engineering is the psychological manipulation of people into performing or divulging information by exploiting weaknesses in human nature. These "weaknesses" can be curiosity, jealously, greed and even kindness and the willingness to help someone.
+
+In spear-phishing, you're targeting an individual, business or organisation rather than just anybody as mass.
+Some other methods of phishing through other mediums are smishing which is phishing through SMS messages, and vishing which is performed through phone calls.
+
+Writing Phishing Emails
+-------------------------
+
+3 main things to focus on:
+	- The Sender's Address
+	- The Subject
+	- The Content
+
+The Sender's Address:
+
+	- To find what brands or people a victim interacts with, you can employ OSINT:
+		- Observe their social media account for any brands or friends they talk to.
+		- Searching Google for the victim's name and rough location for any reviews the victim may have left about local businesses or brands.
+		- Looking at the victim's business website to find suppliers.
+		- Looking at LinkedIn to find coworkers of the victim.
+
+The Subject:
+	- You should set the subject to something quite appealing:
+		- Your account has been compromised
+		- Your package has been dispatchd/shipped.
+		- Staff payroll information (do not forward!)
+		- Your photos have been published.
+
+
+The Content:
+	- If impersonating a brand or supplier, it would be pertinent to research their standard email templates and branding (style, logo's images, signoffs etc.)
+	- It's good if you get in touch with the person/company that YOU'RE TRYING TO IMPERSONATE. The way they sign their emails, "Best Regards, Dot".
+	- If you've set up a spoof website to harvest data or distribute malware, set the "anchor text" to something else.
+
+		Before: <a href="http:/spoofsite.thm">Click Here</a>
+		After: <a href="http:/spoofsite.thm">https://onlinebank.thm</a>
+
+
+Phishing Infrastructure
+------------------------
+
+Things to setup before launching a phishing attack:
+
+- Domain Name
+- SSL/TLS Certificates
+- Email Server/Account
+- DNS Records
+- Web Server
+- Analytics
+- Automation
+
+- Automating Phishing
+	- GoPhish (getgophish.com)
+	- SET (Social Engineering Toolkit; trustedsec.com)
+
+Droppers
+---------
+
+Droppers are software that victim can download on their system. They are not tend to be malicious so AVs won't stop them.
+
+- The main purpose of these droppers is to download(from the server), or unpack the malware on the system.
+
+Choosing a Phishing Domain
+---------------------------
+
+- Expired Domains: Spam filters have a tendency to not trust brand new domain names compared to ones with some history.
+
+- Typosquatting
+	- Misspelling: goggle.com / google.com
+	- Additional Period: go.ogle.com / google.com
+	- 1337 code: g00gle.com / google.com
+	- Phrasing: googles.com / google.com
+	- Additional Word: googleresults.com / google.com
+
+- TLD Alternatives - google.net, .co.uk, .org etc
+
+- IDN Homograph Attack/Script Spoofing
+	- IDN (internationalized domain name) was implemented to support language-specific script or alphabet from other languages such as Arabic.
+		- An issue that arises from the IDN implementation is that different letters from different languages can actually appear identical.
+		- U+0430  (Cyrillic small letter a) looks identical to unicode character U+0061(latin small letter a) used in english.
+
+	THAT'S AMAZINGGG!!!
+
+
+Using MS Office in Phishing
+----------------------------
+
+Say a word/excel file is sent via attachment. WITH A MALICIOUS MACRO. All user has to do is enable the macro in that document and he/she is hacked
+
+
+Browser Exploits
+------------------
+
+Consider this out of the box... Create a malicious site, and let the user click on it. The script is going to misinterpret by the BROWSER to give you RCE, not that you used your psychic abilities to get the user's info. The MAIN phish lies in exploiting the BROWSERRR!!!
+
+	- This is hard, given that these exploits are very rewarding, and thus someone would be so harsh to not report it.
